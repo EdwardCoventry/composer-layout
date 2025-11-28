@@ -1,6 +1,7 @@
 [build]
-command = "npm run build"
+command = "npm install --no-save --include=optional @rollup/rollup-linux-x64-gnu@$(node -p \"require('rollup/package.json').version\") && npm run build"
 publish = "apps/composer-layout-example/dist"
 
 [build.environment]
 NODE_VERSION = "22.18.0"
+NPM_FLAGS = "--include=optional"
