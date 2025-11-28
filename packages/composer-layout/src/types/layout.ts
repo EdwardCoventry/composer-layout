@@ -17,9 +17,8 @@ export interface LayoutFrameProps {
   overlayPadContentPanel?: boolean;
   keyboardThreshold?: number;
   /**
-   * If true, the footer inside the composer region will be hidden whenever the composer content would overflow
-   * its available space (e.g. when min-heights force a scrollbar). This frees up extra room for the composer.
+   * If true, the footer inside the composer region is hidden (e.g. on mobile when an options grid is open).
    */
-  hideFooterOnComposerOverflow?: boolean;
+  hideComposerFooter?: boolean;
 }
 

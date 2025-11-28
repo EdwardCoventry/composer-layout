@@ -47,7 +47,7 @@ export const QuizScreenLayout: React.FC = () => {
     return { type: 'fraction', fraction: 0.5, minPx: 200 };
   }, [effectivePreset]);
 
-  const gridMaxHeight = isMobile ? null : 'min(40vh, 320px)';
+  const gridMaxHeight = isMobile ? 'none' : 'min(70vh, 420px)';
 
   const handleToggleGrid = React.useCallback(() => {
     setIsGridOpen((open) => {
@@ -79,7 +79,7 @@ export const QuizScreenLayout: React.FC = () => {
       footer={<FooterWidget />}
       overlayPadContentPanel
       keyboardThreshold={keyboardThreshold}
-      hideFooterOnComposerOverflow
+      hideComposerFooter={isMobile && isGridOpen}
     />
   );
 };
