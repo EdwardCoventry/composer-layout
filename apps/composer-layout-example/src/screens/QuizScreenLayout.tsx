@@ -12,45 +12,36 @@ import { FooterWidget } from '../components/FooterWidget';
 
 export const QuizScreenLayout: React.FC = () => {
   const { isMobile } = useViewportCategory();
-  const [hasUserChosenPreset, setHasUserChosenPreset] = React.useState(false);
-  const [sizingPreset, setSizingPreset] = React.useState<ComposerSizingPreset>(() => (isMobile ? 'auto' : 'vhFraction'));
   const [showComposerPanel, setShowComposerPanel] = React.useState(true);
   const keyboardThreshold = 150;
 
-  React.useEffect(() => {
-    if (!hasUserChosenPreset) {
-      setSizingPreset(isMobile ? 'auto' : 'vhFraction');
-    }
-  }, [isMobile, hasUserChosenPreset]);
+  const sizingPreset: ComposerSizingPreset = React.useMemo(() => (isMobile ? 'auto' : 'vhFraction'), [isMobile]);
 
-  const handleChangeSizingPreset = React.useCallback((p: ComposerSizingPreset) => {
-    setHasUserChosenPreset(true);
-    setSizingPreset(p);
-  }, []);
-
-  const [isGridOpen, setIsGridOpen] = React.useState(false);
-  const closeGrid = React.useCallback(() => setIsGridOpen(false), []);
+  const [isOptionsOpen, setIsOptionsOpen] = React.useState(false);
+  const closeOptions = React.useCallback(() => setIsOptionsOpen(false), []);
 
   const { prepareToOpenOptions, handleInputFocus } = useKeyboardOptionsSync({
-    isOptionsOpen: isGridOpen,
-    onRequestCloseOptions: closeGrid,
+    isOptionsOpen,
+    onRequestCloseOptions: closeOptions,
     keyboardThreshold
   });
 
   const effectivePreset: ComposerSizingPreset = React.useMemo(() => {
-    if (isMobile && isGridOpen) return 'vhFraction';
+    if (isMobile && isOptionsOpen) return 'vhFraction';
     return sizingPreset;
-  }, [isMobile, isGridOpen, sizingPreset]);
+  }, [isMobile, isOptionsOpen, sizingPreset]);
 
   const composerHeightMode: ComposerHeightMode | undefined = React.useMemo(() => {
     if (effectivePreset === 'auto') return { type: 'content', maxFraction: 0.6 };
     return { type: 'fraction', fraction: 0.5, minPx: 200 };
   }, [effectivePreset]);
 
-  const gridMaxHeight = isMobile ? 'none' : 'min(70vh, 420px)';
+  const sizingLabel = effectivePreset === 'auto' ? 'Sizing: Auto (content)' : 'Sizing: Viewport fraction';
 
-  const handleToggleGrid = React.useCallback(() => {
-    setIsGridOpen((open) => {
+  const optionsMaxHeight = isMobile ? 'none' : 'min(70vh, 420px)';
+
+  const handleToggleOptions = React.useCallback(() => {
+    setIsOptionsOpen((open) => {
       const next = !open;
       if (next) {
         prepareToOpenOptions();
@@ -67,19 +58,18 @@ export const QuizScreenLayout: React.FC = () => {
         <ComposerWidget
           isMobile={isMobile}
           sizingPreset={sizingPreset}
-          onChangeSizingPreset={handleChangeSizingPreset}
-          isGridOpen={isGridOpen}
-          onToggleGrid={handleToggleGrid}
-          gridMaxHeight={gridMaxHeight}
+          isOptionsOpen={isOptionsOpen}
+          onToggleOptions={handleToggleOptions}
+          optionsMaxHeight={optionsMaxHeight}
           onInputFocus={handleInputFocus}
         />
       }
       showComposerPanel={showComposerPanel}
       composerHeightMode={composerHeightMode}
-      footer={<FooterWidget />}
+      footer={<FooterWidget sizingLabel={sizingLabel} />}
       overlayPadContentPanel
       keyboardThreshold={keyboardThreshold}
-      hideComposerFooter={isMobile && isGridOpen}
+      hideComposerFooter={isMobile && isOptionsOpen}
     />
   );
 };

@@ -5,26 +5,51 @@ export type ComposerSizingPreset = 'auto' | 'vhFraction';
 type ComposerWidgetProps = {
   isMobile: boolean;
   sizingPreset: ComposerSizingPreset;
-  onChangeSizingPreset: (preset: ComposerSizingPreset) => void;
-  isGridOpen: boolean;
-  onToggleGrid: () => void;
-  gridMaxHeight?: number | string | null;
+  isOptionsOpen: boolean;
+  onToggleOptions: () => void;
+  optionsMaxHeight?: number | string | null;
   onInputFocus?: () => void;
 };
 
 type SendState = 'idle' | 'sending' | 'sent';
 
-const PlusIcon = () => (
-  <svg viewBox="0 0 24 24" role="img" aria-hidden focusable="false">
-    <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-  </svg>
-);
+const OptionsIcon: React.FC<{ isMobile: boolean }> = ({ isMobile }) => {
+  const viewBoxSize = isMobile ? 28 : 24;
+  const cols = isMobile ? 1 : 2;
+  const rows = isMobile ? 3 : 2;
+  const gap = isMobile ? 2: 3.5;
+  const desiredWidth = isMobile ? 18 : 24;
+  const desiredHeight = isMobile ? 24 : 16;
+  const strokeWidth = 2;
+  const maxSize = viewBoxSize - strokeWidth;
+  const targetWidth = Math.min(desiredWidth, maxSize);
+  const targetHeight = Math.min(desiredHeight, maxSize);
+  const cellWidth = (targetWidth - gap * (cols - 1)) / cols;
+  const cellHeight = (targetHeight - gap * (rows - 1)) / rows;
+  const x = (viewBoxSize - targetWidth) / 2;
+  const y = (viewBoxSize - targetHeight) / 2;
 
-const MinusIcon = () => (
-  <svg viewBox="0 0 24 24" role="img" aria-hidden focusable="false">
-    <path d="M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-  </svg>
-);
+  const strokeProps = {
+    stroke: 'currentColor',
+    strokeWidth,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+  };
+
+  const cells = Array.from({ length: rows * cols }, (_, idx) => {
+    const col = idx % cols;
+    const row = Math.floor(idx / cols);
+    const cellX = x + col * (cellWidth + gap);
+    const cellY = y + row * (cellHeight + gap);
+    return <rect key={idx} x={cellX} y={cellY} width={cellWidth} height={cellHeight} rx={1.5} fill="none" {...strokeProps} />;
+  });
+
+  return (
+    <svg viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`} role="img" aria-hidden focusable="false">
+      {cells}
+    </svg>
+  );
+};
 
 const SendIcon = () => (
   <svg viewBox="0 0 24 24" role="img" aria-hidden focusable="false">
@@ -48,26 +73,20 @@ const CheckIcon = () => (
 export const ComposerWidget: React.FC<ComposerWidgetProps> = ({
   isMobile,
   sizingPreset,
-  onChangeSizingPreset,
-  isGridOpen,
-  onToggleGrid,
-  gridMaxHeight,
+  isOptionsOpen,
+  onToggleOptions,
+  optionsMaxHeight,
   onInputFocus,
 }) => {
-  const handleToggleGrid = () => {
-    onToggleGrid();
-  };
-
-  const gridMaxHeightValue =
-    gridMaxHeight == null
+  const optionsMaxHeightValue =
+    optionsMaxHeight == null
       ? undefined
-      : typeof gridMaxHeight === 'number'
-        ? `${gridMaxHeight}px`
-        : gridMaxHeight;
+      : typeof optionsMaxHeight === 'number'
+        ? `${optionsMaxHeight}px`
+        : optionsMaxHeight;
 
   const [sendState, setSendState] = React.useState<SendState>('idle');
   const sendTimerRef = React.useRef<number | null>(null);
-  const [showMoreInput, setShowMoreInput] = React.useState(false);
 
   React.useEffect(() => {
     return () => {
@@ -104,50 +123,37 @@ export const ComposerWidget: React.FC<ComposerWidgetProps> = ({
   };
 
   const sendLabel = sendState === 'sending' ? 'Sending...' : sendState === 'sent' ? 'Sent' : 'Send';
-  const moreInputLabel = showMoreInput ? 'Hide more input' : 'Add more input';
+  const optionsToggleLabel = isOptionsOpen ? 'Hide options' : 'Show options';
+  const handleOptionsToggle = () => onToggleOptions();
 
   return (
-    <div className="composer-widget" data-mobile={isMobile} data-grid-open={isGridOpen}>
-      <div className="composer-widget__controls">
-        <button type="button" onClick={handleToggleGrid} data-testid="toggle-grid" className="control-chip" data-active={isGridOpen}>
-          <span className="control-chip__dot" aria-hidden />
-          {isGridOpen ? 'Hide options' : 'Show options'}
-        </button>
-        <button
-          type="button"
-          onClick={() => onChangeSizingPreset(sizingPreset === 'auto' ? 'vhFraction' : 'auto')}
-          data-testid="toggle-sizing"
-          className="control-chip"
-          data-active={sizingPreset === 'vhFraction'}
-        >
-          Sizing: {sizingPreset === 'auto' ? 'Auto (content)' : 'Viewport fraction'}
-        </button>
-      </div>
+    <div className="composer-widget" data-mobile={isMobile} data-options-open={isOptionsOpen}>
+      <div className="composer-widget__controls" />
 
       <div className="composer-widget__middle">
         <div
-          className={`composer-widget__grid${isGridOpen ? ' is-open' : ''}`}
-          data-testid="grid"
-          style={gridMaxHeightValue ? ({ '--grid-max-height': gridMaxHeightValue } as React.CSSProperties) : undefined}
+          className={`composer-widget__options-grid${isOptionsOpen ? ' is-open' : ''}`}
+          data-testid="options-grid"
+          style={optionsMaxHeightValue ? ({ '--options-max-height': optionsMaxHeightValue } as React.CSSProperties) : undefined}
         >
-          <div className="composer-widget__tile">Tile 1</div>
-          <div className="composer-widget__tile">Tile 2</div>
-          <div className="composer-widget__tile">Tile 3</div>
-          <div className="composer-widget__tile">Tile 4</div>
+          <div className="composer-widget__option">Option One</div>
+          <div className="composer-widget__option">Option Two</div>
+          <div className="composer-widget__option">Option Three</div>
+          <div className="composer-widget__option">Option Four</div>
         </div>
 
         <div className="composer-widget__inputs">
           <div className="composer-widget__input-row">
-            <input type="text" placeholder="Type here..." className="field composer-widget__input" onFocus={onInputFocus} />
             <button
               type="button"
               className="composer-widget__icon-btn"
-              onClick={() => setShowMoreInput((open) => !open)}
-              aria-label={moreInputLabel}
-              aria-pressed={showMoreInput}
+              onClick={handleOptionsToggle}
+              aria-label={optionsToggleLabel}
+              aria-pressed={isOptionsOpen}
             >
-              {showMoreInput ? <MinusIcon /> : <PlusIcon />}
+              <OptionsIcon isMobile={isMobile} />
             </button>
+            <input type="text" placeholder="Type here..." className="field composer-widget__input" onFocus={onInputFocus} />
             <button
               type="button"
               className="composer-widget__send-btn"
@@ -161,17 +167,8 @@ export const ComposerWidget: React.FC<ComposerWidgetProps> = ({
               <span className="composer-widget__send-label">{sendLabel}</span>
             </button>
           </div>
-          {showMoreInput && (
-            <textarea
-              placeholder="More input..."
-              rows={3}
-              className="field field--textarea"
-              onFocus={onInputFocus}
-            />
-          )}
         </div>
       </div>
     </div>
   );
 };
-
