@@ -176,6 +176,37 @@ textarea::selection {
   color: var(--selection-fg);
 }
 
+/* Scrollbar styling */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) var(--surface-muted);
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--surface-muted);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--surface-muted);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+*::-webkit-scrollbar-corner {
+  background: var(--surface-muted);
+}
+
 /* -------------------------------------------------------
    Utility Classes
 ------------------------------------------------------- */
@@ -617,16 +648,27 @@ textarea::selection {
 
 .composer-widget__input-row {
   display: flex;
-  align-items: stretch;
+  align-items: flex-end;
   gap: var(--space-md);
   min-width: 0;
 }
 
 .composer-widget__input {
+  font-size: 1.2rem;
   flex: 1 1 auto;
   width: auto;
+  height: auto;
   min-height: 44px;
+  max-height: 160px;
   min-width: 0;
+  padding-block: 10px;
+  line-height: 1.1;
+  overflow-y: hidden;
+  resize: none;
+}
+
+.composer-widget__input::placeholder {
+  font-size: 1.2rem;
 }
 
 .composer-widget__input:hover:not([disabled]) {
@@ -675,6 +717,7 @@ textarea::selection {
 
 .composer-widget__send-btn {
   padding: 0 var(--space-md);
+  height: 44px;
   min-height: 44px;
   gap: var(--space-xs);
 }

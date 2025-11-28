@@ -26,15 +26,15 @@ export const QuizScreenLayout: React.FC = () => {
     keyboardThreshold
   });
 
-  const effectivePreset: ComposerSizingPreset = React.useMemo(() => {
-    if (isMobile && isOptionsOpen) return 'vhFraction';
-    return sizingPreset;
-  }, [isMobile, isOptionsOpen, sizingPreset]);
+  const effectivePreset: ComposerSizingPreset = React.useMemo(() => sizingPreset, [sizingPreset]);
+
+  // Give the options-open state more vertical headroom on mobile to avoid an inner scrollbar.
+  const mobileComposerMaxFraction = isMobile && isOptionsOpen ? 0.75 : 0.6;
 
   const composerHeightMode: ComposerHeightMode | undefined = React.useMemo(() => {
-    if (effectivePreset === 'auto') return { type: 'content', maxFraction: 0.6 };
+    if (effectivePreset === 'auto') return { type: 'content', maxFraction: mobileComposerMaxFraction };
     return { type: 'fraction', fraction: 0.5, minPx: 200 };
-  }, [effectivePreset]);
+  }, [effectivePreset, mobileComposerMaxFraction]);
 
   const sizingLabel = effectivePreset === 'auto' ? 'Sizing: Auto (content)' : 'Sizing: Viewport fraction';
 

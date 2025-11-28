@@ -91,6 +91,9 @@ export const ComposerWidget: React.FC<ComposerWidgetProps> = ({
   const [selectedOption, setSelectedOption] = React.useState<string | null>(null);
   const [inputValue, setInputValue] = React.useState('');
   const sendTimerRef = React.useRef<number | null>(null);
+  const inputRef = React.useRef<HTMLTextAreaElement | null>(null);
+  const MIN_INPUT_HEIGHT = 44;
+  const MAX_INPUT_HEIGHT = 160;
 
   React.useEffect(() => {
     return () => {
@@ -130,6 +133,15 @@ export const ComposerWidget: React.FC<ComposerWidgetProps> = ({
     setSelectedOption(option);
     beginSend('card');
   };
+
+  React.useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    const nextHeight = Math.min(Math.max(el.scrollHeight, MIN_INPUT_HEIGHT), MAX_INPUT_HEIGHT);
+    el.style.height = `${nextHeight}px`;
+    el.style.overflowY = el.scrollHeight > MAX_INPUT_HEIGHT ? 'auto' : 'hidden';
+  }, [inputValue]);
 
   const renderSendIcon = () => {
     const visualState = answeredBy === 'card' ? 'idle' : sendState;
@@ -207,8 +219,9 @@ export const ComposerWidget: React.FC<ComposerWidgetProps> = ({
             >
               <OptionsIcon isMobile={isMobile} />
             </button>
-            <input
-              type="text"
+            <textarea
+              ref={inputRef}
+              rows={1}
               placeholder={inputPlaceholder}
               className="field composer-widget__input"
               onFocus={onInputFocus}
