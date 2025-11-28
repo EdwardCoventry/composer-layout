@@ -2,6 +2,9 @@
   "name": "composer-layout-root",
   "private": true,
   "version": "1.0.0",
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "workspaces": [
     "packages/*",
     "apps/*"
