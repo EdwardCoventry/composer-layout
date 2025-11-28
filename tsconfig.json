@@ -1,12 +1,8 @@
 {
-  "compilerOptions": {
-    "target": "es2016",
-    "module": "commonjs",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "skipLibCheck": true,
-    "outDir": "dist"
-  },
-  "include": ["src"]
+  "extends": "./tsconfig.base.json",
+  "files": [],
+  "references": [
+    { "path": "./packages/composer-layout" },
+    { "path": "./apps/composer-layout-example" }
+  ]
 }
