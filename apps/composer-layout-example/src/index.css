@@ -126,11 +126,17 @@ button {
   border: none;
   padding: 0;
   cursor: pointer;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    box-shadow 0.12s ease,
+    transform 0.12s ease;
 }
 
 button:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent);
+  border-radius: inherit;
 }
 
 input,
@@ -140,6 +146,10 @@ textarea {
   background: transparent;
   border: none;
   padding: 0;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    box-shadow 0.12s ease;
 }
 
 input::placeholder,
@@ -150,8 +160,9 @@ textarea::placeholder {
 
 input:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent);
+  border-radius: inherit;
 }
 
 ::selection {
@@ -291,8 +302,16 @@ textarea::selection {
   transition: background 0.1s ease, border-color 0.1s ease;
 }
 
+.header-widget__toggle:hover {
+  background: var(--surface-muted);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 0 var(--border-strong);
+}
+
 .header-widget__toggle:active {
   background: var(--surface-muted);
+  transform: translateY(0);
+  box-shadow: none;
 }
 
 /* -------------------------------------------------------
@@ -425,7 +444,7 @@ textarea::selection {
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
-  gap: var(--space-md);
+  gap: 0;
   padding-block: var(--shell-block);
   padding-inline: var(--shell-gutter);
   border-top: var(--border-width) solid var(--border-strong);
@@ -461,11 +480,24 @@ textarea::selection {
   cursor: pointer;
   transition:
     background 0.1s ease,
-    border-color 0.1s ease;
+    border-color 0.1s ease,
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
 }
 
 .control-chip[data-active="true"] {
   background: var(--surface-muted);
+}
+
+.control-chip:hover {
+  background: var(--surface-muted);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 0 0 var(--border-strong);
+}
+
+.control-chip:active {
+  transform: translateY(0);
+  box-shadow: none;
 }
 
 .control-chip__dot {
@@ -528,7 +560,9 @@ textarea::selection {
     border-color 0.14s ease,
     border-width 0.1s ease,
     background 0.14s ease,
-    color 0.14s ease;
+    color 0.14s ease,
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
 }
 
 .composer-widget__option:disabled {
@@ -539,6 +573,8 @@ textarea::selection {
 
 .composer-widget__option:hover:not(:disabled) {
   background: var(--surface-muted);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 0 var(--border-strong);
 }
 
 .composer-widget__option-label {
@@ -583,12 +619,18 @@ textarea::selection {
   display: flex;
   align-items: stretch;
   gap: var(--space-md);
+  min-width: 0;
 }
 
 .composer-widget__input {
   flex: 1 1 auto;
   width: auto;
   min-height: 44px;
+  min-width: 0;
+}
+
+.composer-widget__input:hover:not([disabled]) {
+  background: var(--surface-muted);
 }
 
 .composer-widget__input[disabled] {
@@ -637,16 +679,19 @@ textarea::selection {
   gap: var(--space-xs);
 }
 
+.composer-widget__icon-btn:hover,
+.composer-widget__send-btn:hover {
+  background: var(--surface-muted);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 0 0 var(--border-strong);
+}
+
 .composer-widget__send-btn[disabled] {
   cursor: not-allowed;
   background: var(--surface-muted);
   border-color: var(--border-subtle);
   color: var(--text-muted);
   box-shadow: none;
-}
-
-.composer-widget__send-btn[disabled]:hover {
-  background: var(--surface-muted);
 }
 
 .composer-widget__send-btn[data-state="sending"] {

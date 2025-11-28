@@ -161,8 +161,6 @@ export const ComposerWidget: React.FC<ComposerWidgetProps> = ({
       data-options-open={isOptionsOpen}
       data-answered-by={answeredBy ?? 'none'}
     >
-      <div className="composer-widget__controls" />
-
       <div className="composer-widget__middle">
         <div
           className={`composer-widget__options-grid${isOptionsOpen ? ' is-open' : ''}`}
