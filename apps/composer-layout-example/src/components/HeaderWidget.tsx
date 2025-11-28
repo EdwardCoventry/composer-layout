@@ -13,8 +13,8 @@ export const HeaderWidget: React.FC<HeaderWidgetProps> = ({
     <div className="widget-surface widget-surface--header">
       <div className="header-widget__inner">
         <div className="header-widget__text">
-          <span className="header-widget__title">Composer Layout Demo</span>
-          <span className="header-widget__subtitle">Responsive content + composer example</span>
+          <span className="header-widget__title">Composer Layout</span>
+          <span className="header-widget__subtitle">Responsive content + composer demo</span>
         </div>
         <div className="header-widget__actions">
           <button type="button" className="header-widget__toggle" onClick={onToggleComposer}>
