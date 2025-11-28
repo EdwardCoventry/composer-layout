@@ -79,6 +79,7 @@ export const QuizScreenLayout: React.FC = () => {
       footer={<FooterWidget />}
       overlayPadContentPanel
       keyboardThreshold={keyboardThreshold}
+      hideFooterOnComposerOverflow
     />
   );
 };
