@@ -1,0 +1,28 @@
+{
+  "name": "composer-layout",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest"
+  },
+  "browserslist": [
+    "defaults",
+    "maintained node versions"
+  ],
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "typescript": "^5.5.3",
+    "vite": "^7.2.4",
+    "vitest": "^4.0.14",
+    "browserslist": "^4.24.0",
+    "caniuse-lite": "^1.0.30001500"
+  }
+}
