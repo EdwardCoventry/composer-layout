@@ -37,6 +37,7 @@ Hooks:
 - `useViewportCategory`: responsive helpers (`isMobile`, `isDesktop`)
 - `useKeyboardOpen`: detects on-screen keyboard opening by measuring viewport height
 - `useIsMobile`: simple media-query backed boolean
+- `useKeyboardOptionsSync`: keep an options tray in sync with keyboard state (auto-close options on keyboard open and blur fields when opening options)
 
 ## Development (in monorepo)
 - Build: `npm run build --workspace composer-layout`

@@ -3,6 +3,7 @@ import {
   LayoutFrame,
   type ComposerHeightMode,
   useViewportCategory,
+  useKeyboardOptionsSync,
 } from 'composer-layout';
 import { ComposerWidget, ComposerSizingPreset } from '../components/ComposerWidget';
 import { ContentWidget } from '../components/ContentWidget';
@@ -14,6 +15,7 @@ export const QuizScreenLayout: React.FC = () => {
   const [hasUserChosenPreset, setHasUserChosenPreset] = React.useState(false);
   const [sizingPreset, setSizingPreset] = React.useState<ComposerSizingPreset>(() => (isMobile ? 'auto' : 'vhFraction'));
   const [showComposerPanel, setShowComposerPanel] = React.useState(true);
+  const keyboardThreshold = 150;
 
   React.useEffect(() => {
     if (!hasUserChosenPreset) {
@@ -27,6 +29,13 @@ export const QuizScreenLayout: React.FC = () => {
   }, []);
 
   const [isGridOpen, setIsGridOpen] = React.useState(false);
+  const closeGrid = React.useCallback(() => setIsGridOpen(false), []);
+
+  const { prepareToOpenOptions } = useKeyboardOptionsSync({
+    isOptionsOpen: isGridOpen,
+    onRequestCloseOptions: closeGrid,
+    keyboardThreshold
+  });
 
   const effectivePreset: ComposerSizingPreset = React.useMemo(() => {
     if (isMobile && isGridOpen) return 'vhFraction';
@@ -40,6 +49,16 @@ export const QuizScreenLayout: React.FC = () => {
 
   const gridMaxHeight = isMobile ? null : 'min(40vh, 320px)';
 
+  const handleToggleGrid = React.useCallback(() => {
+    setIsGridOpen((open) => {
+      const next = !open;
+      if (next) {
+        prepareToOpenOptions();
+      }
+      return next;
+    });
+  }, [prepareToOpenOptions]);
+
   return (
     <LayoutFrame
       header={<HeaderWidget showComposerPanel={showComposerPanel} onToggleComposer={() => setShowComposerPanel((v) => !v)} />}
@@ -50,7 +69,7 @@ export const QuizScreenLayout: React.FC = () => {
           sizingPreset={sizingPreset}
           onChangeSizingPreset={handleChangeSizingPreset}
           isGridOpen={isGridOpen}
-          onToggleGrid={() => setIsGridOpen((v) => !v)}
+          onToggleGrid={handleToggleGrid}
           gridMaxHeight={gridMaxHeight}
         />
       }
@@ -58,6 +77,7 @@ export const QuizScreenLayout: React.FC = () => {
       composerHeightMode={composerHeightMode}
       footer={<FooterWidget />}
       overlayPadContentPanel
+      keyboardThreshold={keyboardThreshold}
     />
   );
 };
