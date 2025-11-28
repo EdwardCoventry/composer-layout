@@ -31,7 +31,7 @@ export const QuizScreenLayout: React.FC = () => {
   const [isGridOpen, setIsGridOpen] = React.useState(false);
   const closeGrid = React.useCallback(() => setIsGridOpen(false), []);
 
-  const { prepareToOpenOptions } = useKeyboardOptionsSync({
+  const { prepareToOpenOptions, handleInputFocus } = useKeyboardOptionsSync({
     isOptionsOpen: isGridOpen,
     onRequestCloseOptions: closeGrid,
     keyboardThreshold
@@ -71,6 +71,7 @@ export const QuizScreenLayout: React.FC = () => {
           isGridOpen={isGridOpen}
           onToggleGrid={handleToggleGrid}
           gridMaxHeight={gridMaxHeight}
+          onInputFocus={handleInputFocus}
         />
       }
       showComposerPanel={showComposerPanel}

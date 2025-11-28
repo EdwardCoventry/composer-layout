@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useKeyboardOpen } from './useKeyboardOpen';
+import { useIsMobile } from './useIsMobile';
 
 export interface KeyboardOptionsSyncConfig {
   /**
@@ -18,6 +19,14 @@ export interface KeyboardOptionsSyncConfig {
    * If true (default), blur the active element when the user tries to open options while the keyboard is up.
    */
   blurOnOptionsOpen?: boolean;
+  /**
+   * If true (default), focusing an input while on mobile will close options for more room.
+   */
+  closeOptionsOnInputFocus?: boolean;
+  /**
+   * Optional override for the mobile breakpoint (px) when applying focus-close behavior.
+   */
+  mobileMaxWidth?: number;
 }
 
 function blurActiveElement() {
@@ -39,10 +48,13 @@ export function useKeyboardOptionsSync(config: KeyboardOptionsSyncConfig) {
     isOptionsOpen,
     onRequestCloseOptions,
     keyboardThreshold,
-    blurOnOptionsOpen = true
+    blurOnOptionsOpen = true,
+    closeOptionsOnInputFocus = true,
+    mobileMaxWidth
   } = config;
 
   const keyboardOpen = useKeyboardOpen(keyboardThreshold);
+  const isMobile = useIsMobile(mobileMaxWidth);
   const prevKeyboardOpen = useRef<boolean>(false);
 
   useEffect(() => {
@@ -64,5 +76,12 @@ export function useKeyboardOptionsSync(config: KeyboardOptionsSyncConfig) {
     }
   }, [blurOnOptionsOpen, dismissKeyboard, keyboardOpen]);
 
-  return { keyboardOpen, dismissKeyboard, prepareToOpenOptions };
+  const handleInputFocus = useCallback(() => {
+    if (!closeOptionsOnInputFocus) return;
+    if (isMobile && isOptionsOpen) {
+      onRequestCloseOptions();
+    }
+  }, [closeOptionsOnInputFocus, isMobile, isOptionsOpen, onRequestCloseOptions]);
+
+  return { keyboardOpen, dismissKeyboard, prepareToOpenOptions, handleInputFocus };
 }

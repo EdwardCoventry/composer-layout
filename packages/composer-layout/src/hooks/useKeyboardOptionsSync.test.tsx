@@ -6,9 +6,14 @@ import { useKeyboardOptionsSync } from './useKeyboardOptionsSync';
 
 const originalVisualViewport = (window as any).visualViewport;
 const originalInnerHeightDescriptor = Object.getOwnPropertyDescriptor(window, 'innerHeight');
+const originalInnerWidthDescriptor = Object.getOwnPropertyDescriptor(window, 'innerWidth');
 
 function setInnerHeight(value: number) {
   Object.defineProperty(window, 'innerHeight', { value, configurable: true, writable: true });
+}
+
+function setInnerWidth(value: number) {
+  Object.defineProperty(window, 'innerWidth', { value, configurable: true, writable: true });
 }
 
 function mockVisualViewport(height: number) {
@@ -36,6 +41,11 @@ afterEach(() => {
     Object.defineProperty(window, 'innerHeight', originalInnerHeightDescriptor);
   } else {
     delete (window as any).innerHeight;
+  }
+  if (originalInnerWidthDescriptor) {
+    Object.defineProperty(window, 'innerWidth', originalInnerWidthDescriptor);
+  } else {
+    delete (window as any).innerWidth;
   }
   (window as any).visualViewport = originalVisualViewport;
 });
@@ -106,5 +116,61 @@ describe('useKeyboardOptionsSync', () => {
     fireEvent.click(getByTestId('toggle'));
 
     expect(document.activeElement).not.toBe(field);
+  });
+
+  test('closes options on input focus when mobile', () => {
+    setInnerWidth(600);
+    const closeSpy = vi.fn();
+
+    const TestComponent = () => {
+      const [open, setOpen] = React.useState(true);
+      const { handleInputFocus } = useKeyboardOptionsSync({
+        isOptionsOpen: open,
+        onRequestCloseOptions: () => {
+          closeSpy();
+          setOpen(false);
+        }
+      });
+      return (
+        <button data-testid="focus" data-open={open ? 'true' : 'false'} onClick={handleInputFocus}>
+          Focus
+        </button>
+      );
+    };
+
+    const { getByTestId } = render(<TestComponent />);
+    expect(getByTestId('focus').getAttribute('data-open')).toBe('true');
+
+    fireEvent.click(getByTestId('focus'));
+
+    expect(closeSpy).toHaveBeenCalledTimes(1);
+    expect(getByTestId('focus').getAttribute('data-open')).toBe('false');
+  });
+
+  test('does not close options on input focus when desktop', () => {
+    setInnerWidth(1200);
+    const closeSpy = vi.fn();
+
+    const TestComponent = () => {
+      const [open, setOpen] = React.useState(true);
+      const { handleInputFocus } = useKeyboardOptionsSync({
+        isOptionsOpen: open,
+        onRequestCloseOptions: () => {
+          closeSpy();
+          setOpen(false);
+        }
+      });
+      return (
+        <button data-testid="focus" data-open={open ? 'true' : 'false'} onClick={handleInputFocus}>
+          Focus
+        </button>
+      );
+    };
+
+    const { getByTestId } = render(<TestComponent />);
+    fireEvent.click(getByTestId('focus'));
+
+    expect(closeSpy).not.toHaveBeenCalled();
+    expect(getByTestId('focus').getAttribute('data-open')).toBe('true');
   });
 });

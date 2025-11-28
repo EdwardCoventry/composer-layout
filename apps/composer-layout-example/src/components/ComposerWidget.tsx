@@ -9,6 +9,7 @@ type ComposerWidgetProps = {
   isGridOpen: boolean;
   onToggleGrid: () => void;
   gridMaxHeight?: number | string | null;
+  onInputFocus?: () => void;
 };
 
 type SendState = 'idle' | 'sending' | 'sent';
@@ -45,6 +46,7 @@ export const ComposerWidget: React.FC<ComposerWidgetProps> = ({
   isGridOpen,
   onToggleGrid,
   gridMaxHeight,
+  onInputFocus,
 }) => {
   const handleToggleGrid = () => {
     onToggleGrid();
@@ -126,12 +128,12 @@ export const ComposerWidget: React.FC<ComposerWidgetProps> = ({
           <div className="composer-widget__tile">Tile 4</div>
         </div>
 
-        <div className="composer-widget__inputs">
-          <div className="composer-widget__input-row">
-            <input type="text" placeholder="Type here..." className="field composer-widget__input" />
-            <button type="button" className="composer-widget__icon-btn" aria-label="Add item">
-              <PlusIcon />
-            </button>
+      <div className="composer-widget__inputs">
+        <div className="composer-widget__input-row">
+          <input type="text" placeholder="Type here..." className="field composer-widget__input" onFocus={onInputFocus} />
+          <button type="button" className="composer-widget__icon-btn" aria-label="Add item">
+            <PlusIcon />
+          </button>
             <button
               type="button"
               className="composer-widget__send-btn"
@@ -149,6 +151,7 @@ export const ComposerWidget: React.FC<ComposerWidgetProps> = ({
             placeholder="More input..."
             rows={3}
             className="field field--textarea"
+            onFocus={onInputFocus}
           />
         </div>
       </div>
