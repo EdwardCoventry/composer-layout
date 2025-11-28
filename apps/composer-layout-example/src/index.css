@@ -665,10 +665,12 @@ textarea::selection {
   line-height: 1.1;
   overflow-y: hidden;
   resize: none;
+  caret-color: var(--border-strong);
 }
 
 .composer-widget__input::placeholder {
-  font-size: 1.2rem;
+  font-size: 1.05rem;
+  font-weight: 500;
 }
 
 .composer-widget__input:hover:not([disabled]) {

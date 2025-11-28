@@ -225,6 +225,7 @@ export const ComposerWidget: React.FC<ComposerWidgetProps> = ({
               placeholder={inputPlaceholder}
               className="field composer-widget__input"
               onFocus={onInputFocus}
+              autoFocus={!isMobile}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               disabled={inputDisabled}
