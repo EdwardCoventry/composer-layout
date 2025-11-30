@@ -1,17 +1,21 @@
 # Build outputs
 /dist
+/build
 /out-tsc
 /dist-ssr
 **/dist
+**/build
 
 # Dependencies
 node_modules/
+npm-packages-offline-cache/
 
 # Vite cache
 .vite/
 
 # Test coverage
 coverage/
+.nyc_output/
 
 # Logs
 npm-debug.log*
@@ -19,6 +23,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 *.log
+*.tgz
 
 # PnP
 /.pnp
@@ -28,6 +33,7 @@ pnpm-debug.log*
 .env
 .env.local
 .env.*.local
+.npmrc
 
 # IDE
 .vscode/

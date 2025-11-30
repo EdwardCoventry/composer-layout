@@ -1,6 +1,6 @@
 {
   "name": "composer-layout-example",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "private": true,
   "scripts": {
     "dev": "vite",
@@ -9,7 +9,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "composer-layout": "0.1.0",
+    "composer-layout": "0.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },

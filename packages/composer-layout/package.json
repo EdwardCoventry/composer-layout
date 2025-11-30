@@ -1,13 +1,16 @@
 {
   "name": "composer-layout",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "private": false,
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && vite build",
+    "build": "vite build && tsc -p tsconfig.build.json",
     "test": "vitest run"
   },
   "peerDependencies": {
