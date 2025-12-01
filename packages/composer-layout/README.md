@@ -6,7 +6,7 @@ Reusable chat layout frame and utility hooks for chat-style experiences.
 ```
 npm install composer-layout
 ```
-Peer deps: `react` and `react-dom` (React 18+).
+Peer deps: `react` and `react-dom` (React 19).
 
 ## Quick usage
 ```tsx

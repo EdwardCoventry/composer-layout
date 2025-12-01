@@ -89,6 +89,10 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
   const composerPanelRef = useRef<HTMLDivElement | null>(null);
   const composerContentRef = useRef<HTMLDivElement | null>(null);
   const footerRef = useRef<HTMLDivElement | null>(null);
+  const setBottomRef: React.RefCallback<HTMLElement> = (el) => { bottomRef.current = el; };
+  const setComposerPanelRef: React.RefCallback<HTMLDivElement> = (el) => { composerPanelRef.current = el; };
+  const setComposerContentRef: React.RefCallback<HTMLDivElement> = (el) => { composerContentRef.current = el; };
+  const setFooterRef: React.RefCallback<HTMLDivElement> = (el) => { footerRef.current = el; };
   const viewportHeight = typeof window !== 'undefined' ? (window.visualViewport?.height || window.innerHeight) : 0;
 
   // Single effect for measurement / resize observer (overlay padding)
@@ -126,7 +130,7 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
 
       {hasComposerPanel && !isOverlay && (
         <section
-          ref={(el) => (bottomRef.current = el)}
+          ref={setBottomRef}
           style={{
             ...inlineComposerStyle,
             boxSizing: 'border-box'
@@ -137,17 +141,17 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
         >
           <div style={bottomRegionInnerStyle} data-role="bottom-region-inner">
             <div
-              ref={(el) => (composerPanelRef.current = el)}
+              ref={setComposerPanelRef}
               style={composerScrollAreaStyle}
               data-role="composer-panel"
               aria-label="Composer Panel"
             >
-              <div ref={(el) => (composerContentRef.current = el)} style={composerContentWrapperStyle} data-role="composer-panel-content">
+              <div ref={setComposerContentRef} style={composerContentWrapperStyle} data-role="composer-panel-content">
                 {composerPanel}
               </div>
             </div>
             {hasFooter && !footerHidden && (
-              <div ref={(el) => (footerRef.current = el)} style={bottomFooterStyle} data-role="footer">{footer}</div>
+              <div ref={setFooterRef} style={bottomFooterStyle} data-role="footer">{footer}</div>
             )}
           </div>
         </section>
@@ -155,7 +159,7 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
 
       {hasComposerPanel && isOverlay && (
         <section
-          ref={(el) => (bottomRef.current = el)}
+          ref={setBottomRef}
           style={{
             position: 'fixed',
             left: 0,
@@ -171,17 +175,17 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
         >
           <div style={bottomRegionInnerStyle} data-role="bottom-region-inner">
             <div
-              ref={(el) => (composerPanelRef.current = el)}
+              ref={setComposerPanelRef}
               style={composerScrollAreaStyle}
               data-role="composer-panel"
               aria-label="Composer Panel"
             >
-              <div ref={(el) => (composerContentRef.current = el)} style={composerContentWrapperStyle} data-role="composer-panel-content">
+              <div ref={setComposerContentRef} style={composerContentWrapperStyle} data-role="composer-panel-content">
                 {composerPanel}
               </div>
             </div>
             {hasFooter && !footerHidden && (
-              <div ref={(el) => (footerRef.current = el)} style={bottomFooterStyle} data-role="footer">{footer}</div>
+              <div ref={setFooterRef} style={bottomFooterStyle} data-role="footer">{footer}</div>
             )}
           </div>
         </section>
