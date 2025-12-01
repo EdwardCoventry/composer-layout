@@ -13,7 +13,7 @@ export const HeaderWidget: React.FC<HeaderWidgetProps> = ({
     <div className="widget-surface widget-surface--header">
       <div className="header-widget__inner">
         <div className="header-widget__text">
-          <span className="header-widget__title">Composer Layout</span>
+          <span className="header-widget__title">Quiz App Layout</span>
           <span className="header-widget__subtitle">Responsive content + composer demo</span>
         </div>
         <div className="header-widget__actions">

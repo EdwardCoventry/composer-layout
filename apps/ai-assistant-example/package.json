@@ -1,6 +1,6 @@
 {
-  "name": "composer-layout-example",
-  "version": "0.0.1",
+  "name": "ai-assistant-example",
+  "version": "0.0.2",
   "private": true,
   "scripts": {
     "dev": "vite",
@@ -9,7 +9,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "composer-layout": "0.0.1",
+    "composer-layout": "0.0.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

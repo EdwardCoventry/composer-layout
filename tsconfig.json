@@ -3,6 +3,7 @@
   "files": [],
   "references": [
     { "path": "./packages/composer-layout" },
-    { "path": "./apps/composer-layout-example" }
+    { "path": "./apps/quiz-app-example" },
+    { "path": "./apps/ai-assistant-example" }
   ]
 }

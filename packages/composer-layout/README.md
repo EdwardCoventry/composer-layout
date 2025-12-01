@@ -1,6 +1,6 @@
 # composer-layout
 
-Reusable chat layout frame and utility hooks for chat-style experiences.
+Reusable chat layout frame and utility hooks for chat-style experiences, with two monorepo example apps (quiz + AI assistant) that exercise the layout.
 
 ## Install
 ```
@@ -38,6 +38,10 @@ Hooks:
 - `useKeyboardOpen`: detects on-screen keyboard opening by measuring viewport height
 - `useIsMobile`: simple media-query backed boolean
 - `useKeyboardOptionsSync`: keep an options tray in sync with keyboard and mobile input focus (auto-close options on keyboard open or mobile input focus, and blur fields when opening options)
+
+## Example apps (in this repo)
+- `apps/quiz-app-example`: baseline chat layout showing header/content/composer/footer interactions on desktop vs mobile. Dev: `npm run dev:quiz`. Tests: `npm run test --workspace quiz-app-example`.
+- `apps/ai-assistant-example`: assistant-style layout with hero + quick-start chips, composer preferences/upload, hamburger/share controls, and a mocked 3s response delay. Dev: `npm run dev:assistant`. Tests: `npm run test --workspace ai-assistant-example`.
 
 ## Development (in monorepo)
 - Build: `npm run build --workspace composer-layout`

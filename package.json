@@ -1,7 +1,7 @@
 {
   "name": "composer-layout-root",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "node": ">=20.19.0"
   },
@@ -12,7 +12,9 @@
   "scripts": {
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces",
-    "dev": "npm run dev --workspace composer-layout-example"
+    "dev": "npm run dev --workspace quiz-app-example",
+    "dev:quiz": "npm run dev --workspace quiz-app-example",
+    "dev:assistant": "npm run dev --workspace ai-assistant-example"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",

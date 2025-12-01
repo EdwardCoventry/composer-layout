@@ -1,6 +1,6 @@
 # Composer Layout
 
-React layout primitives for chat-style UIs plus an example app that exercises them.
+React layout primitives for chat-style UIs plus two example apps that exercise them (quiz + AI assistant).
 
 ## Install
 ```
@@ -12,13 +12,17 @@ Peer deps: `react` and `react-dom` (React 19).
 - Layout frame that keeps header/content/composer/footer aligned on desktop and mobile
 - Composer height modes (`fraction`, `content`, `calculated`) with overlay padding support
 - Hooks for viewport sizing (`useViewportCategory`, `useIsMobile`) and keyboard detection (`useKeyboardOpen`)
-- Example app in `apps/composer-layout-example` to demo responsive behavior (shipped in repo, not in the published package)
+- Quiz demo in `apps/quiz-app-example` and an AI assistant demo in `apps/ai-assistant-example` (shipped in repo, not in the published package)
 
 ## Entry points (published package)
 - `main`: `dist/index.cjs`
 - `module`: `dist/index.mjs`
 - `types`: `dist/index.d.ts`
 - Published files: `dist/**` only (example app excluded from the tarball)
+
+## Example apps (monorepo only)
+- Quiz app (`apps/quiz-app-example`): desktop/mobile layout demonstration with header/content/composer/footer widgets. Dev: `npm run dev:quiz`. Tests: `npm run test --workspace quiz-app-example`.
+- AI assistant (`apps/ai-assistant-example`): landing hero with quick-start chips, composer-level preferences + upload, hamburger/share controls, and a mocked 3s “thinking” delay. Dev: `npm run dev:assistant`. Tests: `npm run test --workspace ai-assistant-example`.
 
 ## Usage
 ```tsx
@@ -54,7 +58,8 @@ Helpful hooks:
 - Install deps: `npm install`
 - Build everything: `npm run build`
 - Test all workspaces: `npm test`
-- Dev example app: `npm run dev --workspace composer-layout-example` (runs on http://localhost:5173)
+- Dev (quiz) app: `npm run dev` or `npm run dev:quiz` (http://localhost:5173)
+- Dev (assistant) app: `npm run dev:assistant` (also http://localhost:5173)
 
 ## Publish and releases
 - Manual publish (from `packages/composer-layout`): `npm publish --access public` (requires login and `npm run build` first).

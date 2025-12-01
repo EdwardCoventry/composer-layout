@@ -11,7 +11,7 @@ node_modules/
 npm-packages-offline-cache/
 
 # Vite cache
-.vite/
+**/.vite/
 
 # Test coverage
 coverage/
@@ -36,12 +36,20 @@ pnpm-debug.log*
 .npmrc
 
 # IDE
-.vscode/
-.idea/
+**/.vscode/
+**/.idea/
 
 # OS files
-.DS_Store
+**/.DS_Store
 Thumbs.db
+
+# Hosting/preview tooling
+.netlify/
+.vercel/
+
+# Editor temp files
+*.swp
+*.swo
 
 # TypeScript build info
 *.tsbuildinfo

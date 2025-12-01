@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "composer-layout": ["../../packages/composer-layout/src"],
+      "composer-layout/*": ["../../packages/composer-layout/src/*"]
+    }
+  },
+  "include": ["src"]
+}
+
