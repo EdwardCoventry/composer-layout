@@ -3,20 +3,26 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
-  base: '/ai-assistant-example/',
   plugins: [react()],
   server: {
-    port: 3002,
+    port: 3000,
     strictPort: true,
+    proxy: {
+      '/quiz-app-example': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/ai-assistant-example': {
+        target: 'http://localhost:3002',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
   },
   resolve: {
     alias: {
-      // Point the example app at the source of composer-layout for live edits
       'composer-layout': path.resolve(__dirname, '../../packages/composer-layout/src'),
     },
   },
-  test: {
-    environment: 'jsdom',
-    globals: true
-  }
 });

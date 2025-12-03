@@ -75,7 +75,7 @@ export const AssistantScreenLayout: React.FC<AssistantScreenLayoutProps> = ({ on
     if (isMobile) {
       return { type: 'content', maxFraction: 0.72 };
     }
-    return { type: 'fraction', fraction: 0.48, minPx: 260 };
+    return { type: 'fraction', fraction: 0.48, minPx: 260, allowAutoHeight: true };
   }, [isMobile]);
 
   const handleCloseHistory = React.useCallback(() => {

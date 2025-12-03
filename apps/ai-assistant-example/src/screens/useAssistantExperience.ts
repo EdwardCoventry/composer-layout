@@ -86,9 +86,6 @@ export function useAssistantExperience(): UseAssistantExperienceResult {
       const next = ASSISTANT_MODES.find((mode) => mode.key === modeKey);
       const willSelect = selectedModeKey === modeKey ? '' : modeKey;
       setSelectedModeKey(willSelect);
-      if (next && !next.allowsImages) {
-        setImages([]);
-      }
       setError('');
       setSendState('idle');
       setStage('compose');

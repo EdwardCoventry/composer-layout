@@ -290,7 +290,6 @@ export const AssistantEmbedLayout: React.FC<AssistantEmbedLayoutProps> = () => {
 
   const requiresText = selectedMode?.requiresText ?? false;
   const requiresImages = selectedMode?.requiresImages ?? false;
-  const allowsImages = selectedMode?.allowsImages ?? true;
   const photosActive = requiresImages || images.length > 0;
   const placeholder = selectedMode?.placeholder || 'Tell the assistant what you need.';
   const trimmedText = text.trim();
@@ -300,14 +299,12 @@ export const AssistantEmbedLayout: React.FC<AssistantEmbedLayoutProps> = () => {
   const cameraInputRef = React.useRef<HTMLInputElement | null>(null);
 
   const openUpload = React.useCallback(() => {
-    if (!allowsImages) return;
     fileInputRef.current?.click();
-  }, [allowsImages]);
+  }, []);
 
   const openCamera = React.useCallback(() => {
-    if (!allowsImages) return;
     cameraInputRef.current?.click();
-  }, [allowsImages]);
+  }, []);
 
   const longestTagLabel = React.useMemo(
     () => modes.reduce((max, mode) => Math.max(max, mode.tagLine.length), 0),
@@ -384,7 +381,6 @@ export const AssistantEmbedLayout: React.FC<AssistantEmbedLayoutProps> = () => {
         {photosActive && !collapsePlan.hidePhotos && (
           <PhotoPicker
             requiresImages={requiresImages}
-            allowsImages={allowsImages}
             images={images}
             openCamera={openCamera}
             openUpload={openUpload}
@@ -399,7 +395,6 @@ export const AssistantEmbedLayout: React.FC<AssistantEmbedLayoutProps> = () => {
           error={error}
           disableStart={disableStart}
           isMobile={isMobile}
-          allowsImages={allowsImages}
           showInlinePhotos={isSingleStackItem && photosActive}
           photosCount={images.length}
           photosRequired={requiresImages}

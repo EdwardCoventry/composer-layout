@@ -3,7 +3,12 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
+  base: '/quiz-app-example/',
   plugins: [react()],
+  server: {
+    port: 3001,
+    strictPort: true,
+  },
   resolve: {
     alias: {
       // Point the example app at the source of composer-layout for live edits
@@ -16,4 +21,3 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts']
   }
 });
-

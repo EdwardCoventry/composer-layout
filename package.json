@@ -10,15 +10,17 @@
     "apps/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces",
+    "build": "npm run build --workspaces && node scripts/assemble-showcase.js",
     "test": "npm run test --workspaces",
-    "dev": "npm run dev --workspace quiz-app-example",
+    "dev": "concurrently \"npm run dev:showcase\" \"npm run dev:quiz\" \"npm run dev:assistant\"",
+    "dev:showcase": "npm run dev --workspace showcase-app",
     "dev:quiz": "npm run dev --workspace quiz-app-example",
     "dev:assistant": "npm run dev --workspace ai-assistant-example"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
+    "concurrently": "^9.2.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "vitest": "^4.0.14"

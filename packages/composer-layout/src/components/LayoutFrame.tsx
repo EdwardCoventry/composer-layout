@@ -16,6 +16,14 @@ function getComposerRegionStyle(mode: ComposerHeightMode, variant: 'inline' | 'o
     const fraction = clampFraction(mode.fraction) ?? 0;
     const vh = `${fraction * 100}vh`;
     if (variant === 'inline') {
+      if (mode.allowAutoHeight) {
+        return {
+          flex: '0 0 auto',
+          height: 'auto',
+          minHeight: mode.minPx ? `max(${vh}, ${mode.minPx}px)` : vh,
+          boxSizing: 'border-box'
+        };
+      }
       return { flex: '0 0 auto', height: vh, minHeight: mode.minPx ? `${mode.minPx}px` : undefined, maxHeight: vh, boxSizing: 'border-box' };
     }
     return { height: vh, maxHeight: vh, boxSizing: 'border-box' };

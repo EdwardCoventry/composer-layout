@@ -10,7 +10,6 @@ type PreferencesControlProps = {
 
 type PhotoPickerProps = {
   requiresImages: boolean;
-  allowsImages?: boolean;
   images: AssistantImage[];
   showWhenOptional?: boolean;
   openCamera: () => void;
@@ -26,7 +25,6 @@ type ComposeInputCardProps = {
   error: string;
   disableStart: boolean;
   isMobile: boolean;
-  allowsImages: boolean;
   addButtonRef?: React.RefObject<HTMLButtonElement | null>;
   showInlinePhotos?: boolean;
   photosCount?: number;
@@ -447,7 +445,6 @@ export const PreferencesControl: React.FC<PreferencesControlProps> = ({
 
 export const PhotoPicker: React.FC<PhotoPickerProps> = ({
   requiresImages,
-  allowsImages = true,
   images,
   showWhenOptional,
   openCamera,
@@ -455,22 +452,26 @@ export const PhotoPicker: React.FC<PhotoPickerProps> = ({
   onRemoveImage
 }) => {
   const shouldShow = showWhenOptional || requiresImages || images.length > 0;
-  if (!shouldShow || (!allowsImages && images.length === 0)) return null;
+  if (!shouldShow) return null;
 
   return (
     <div className="assistant-photos-card">
       <div className="assistant-photos-card__head">
         <div className="assistant-photos-card__title">
           <CameraIcon />
-          <span>Photos ({images.length})</span>
-          {requiresImages && <span className="assistant-photos-card__required">Required</span>}
+          <span className="assistant-photos-card__label">
+            Photos <span className="assistant-photos-card__badge">{images.length}</span>
+          </span>
+          {requiresImages && images.length === 0 ? (
+            <span className="assistant-photos-card__required">Required</span>
+          ) : null}
         </div>
         <div className="assistant-photos-card__actions">
-          <button type="button" className="assistant-photos-card__action" onClick={openCamera} disabled={!allowsImages}>
+          <button type="button" className="assistant-photos-card__action" onClick={openCamera}>
             <CameraIcon />
             <span>Camera</span>
           </button>
-          <button type="button" className="assistant-photos-card__action" onClick={openUpload} disabled={!allowsImages}>
+          <button type="button" className="assistant-photos-card__action" onClick={openUpload}>
             <GalleryIcon />
             <span>Gallery</span>
           </button>
@@ -513,7 +514,6 @@ export const ComposeInputCard: React.FC<ComposeInputCardProps> = ({
   error,
   disableStart,
   isMobile,
-  allowsImages,
   addButtonRef,
   showInlinePhotos = false,
   photosCount = 0,
@@ -546,15 +546,19 @@ export const ComposeInputCard: React.FC<ComposeInputCardProps> = ({
         <div className="assistant-inline-photos">
           <div className="assistant-inline-photos__meta">
             <CameraIcon />
-            <span className="assistant-inline-photos__label">Photos ({photosCount})</span>
-            {photosRequired ? <span className="assistant-photos-card__required">Required</span> : null}
+            <span className="assistant-inline-photos__label">
+              Photos <span className="assistant-photos-card__badge">{photosCount}</span>
+            </span>
+            {photosRequired && photosCount === 0 ? (
+              <span className="assistant-photos-card__required">Required</span>
+            ) : null}
           </div>
           <div className="assistant-inline-photos__actions">
             <button
               type="button"
               className="assistant-photos-card__action assistant-inline-photos__action"
               onClick={onPickCamera}
-              disabled={!allowsImages}
+              disabled={false}
             >
               <CameraIcon />
               <span>Camera</span>
@@ -563,7 +567,7 @@ export const ComposeInputCard: React.FC<ComposeInputCardProps> = ({
               type="button"
               className="assistant-photos-card__action assistant-inline-photos__action"
               onClick={onPickGallery}
-              disabled={!allowsImages}
+              disabled={false}
             >
               <GalleryIcon />
               <span>Gallery</span>
@@ -589,7 +593,6 @@ export const ComposeInputCard: React.FC<ComposeInputCardProps> = ({
               aria-label="Add attachment or quick option"
               ref={addButtonRef}
               onClick={() => {
-                if (!allowsImages) return;
                 onAddAttachment();
               }}
             >
@@ -630,7 +633,9 @@ export const AddMenu: React.FC<AddMenuProps> = ({
   const panelRef = React.useRef<HTMLDivElement | null>(null);
   const handleRef = React.useRef<HTMLDivElement | null>(null);
   const sheetRef = React.useRef<HTMLDivElement | null>(null);
+  const moreRowRef = React.useRef<HTMLDivElement | null>(null);
   const [sheetHeightPx, setSheetHeightPx] = React.useState<number | null>(null);
+  const [submenuOpen, setSubmenuOpen] = React.useState(false);
   const [contextPlacement, setContextPlacement] = React.useState<{
     bottom: number;
     right: number;
@@ -643,6 +648,68 @@ export const AddMenu: React.FC<AddMenuProps> = ({
     maxHeight: 520
   });
 
+  // Animation and Drag State
+  const [isVisible, setIsVisible] = React.useState(false);
+  const [shouldRender, setShouldRender] = React.useState(open);
+  const [dragY, setDragY] = React.useState(0);
+  const [isDragging, setIsDragging] = React.useState(false);
+  const dragStartY = React.useRef<number>(0);
+  const currentDragY = React.useRef<number>(0);
+
+  React.useEffect(() => {
+    if (open) {
+      setShouldRender(true);
+      // Small delay to allow render before animating in
+      requestAnimationFrame(() => {
+        setIsVisible(true);
+      });
+    } else {
+      setIsVisible(false);
+      setDragY(0);
+      // Delay unmount for animation
+      const timer = setTimeout(() => {
+        setShouldRender(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (variant !== 'sheet') return;
+    
+    // If touching content that is scrolled, ignore
+    if (panelRef.current && panelRef.current.contains(e.target as Node)) {
+      if (panelRef.current.scrollTop > 0) return;
+    }
+    
+    setIsDragging(true);
+    dragStartY.current = e.touches[0].clientY;
+    currentDragY.current = 0;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || variant !== 'sheet') return;
+    const deltaY = e.touches[0].clientY - dragStartY.current;
+    // Only allow dragging down
+    if (deltaY > 0) {
+      currentDragY.current = deltaY;
+      setDragY(deltaY);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (!isDragging || variant !== 'sheet') return;
+    setIsDragging(false);
+
+    const threshold = (sheetHeightPx || 300) * 0.25; // Close if dragged 25% down
+    if (currentDragY.current > threshold) {
+      onClose();
+    } else {
+      setDragY(0);
+    }
+    currentDragY.current = 0;
+  };
+
   React.useEffect(() => {
     if (!open) return undefined;
 
@@ -654,9 +721,14 @@ export const AddMenu: React.FC<AddMenuProps> = ({
     return () => window.removeEventListener('keydown', handleKey);
   }, [open, onClose]);
 
+  React.useEffect(() => {
+    if (!open) {
+      setSubmenuOpen(false);
+    }
+  }, [open]);
+
   React.useLayoutEffect(() => {
     if (!open || variant !== 'sheet') {
-      setSheetHeightPx(null);
       return undefined;
     }
 
@@ -727,11 +799,14 @@ export const AddMenu: React.FC<AddMenuProps> = ({
     };
   }, [open, variant, anchorRef]);
 
-  if (!open) return null;
+  if (!shouldRender) return null;
 
   const contentStyle: React.CSSProperties =
     variant === 'context'
-      ? { maxHeight: contextPlacement.maxHeight || undefined, overflowY: 'auto' }
+      ? {
+          maxHeight: contextPlacement.maxHeight || undefined,
+          overflow: 'visible'
+        }
       : {};
 
   const primaryItems = [
@@ -768,8 +843,15 @@ export const AddMenu: React.FC<AddMenuProps> = ({
     }
   }));
 
-  const visibleQuickModes = ['direct', 'plan', 'organize'];
-  const filteredQuickModes = quickModeItems.filter((item) => visibleQuickModes.includes(item.key));
+  // Order: vision first, random last; for context menu, split into main + more
+  const orderedQuickModes = ['vision', 'plan', 'brainstorm', 'rewrite', 'organize', 'random'];
+  const filteredQuickModes = orderedQuickModes
+    .map((key) => quickModeItems.find((item) => item.key === key))
+    .filter((item): item is NonNullable<typeof item> => item !== undefined);
+
+  // For context menu: show first 3, rest go to "More" submenu
+  const contextMainModes = filteredQuickModes.slice(0, 3);
+  const contextMoreModes = filteredQuickModes.slice(3);
 
   const renderRow = (
     item: {
@@ -798,6 +880,44 @@ export const AddMenu: React.FC<AddMenuProps> = ({
     </button>
   );
 
+  const renderMoreRow = () => (
+    <div
+      ref={moreRowRef}
+      className="assistant-add__row assistant-add__row--more"
+      data-kind="mode"
+      onMouseEnter={() => setSubmenuOpen(true)}
+      onMouseLeave={() => setSubmenuOpen(false)}
+    >
+      <span className="assistant-add__row-icon assistant-add__row-icon--more" aria-hidden>
+        ···
+      </span>
+      <span className="assistant-add__row-text">
+        <span className="assistant-add__row-title">More</span>
+      </span>
+      <span className="assistant-add__row-arrow" aria-hidden>›</span>
+      {submenuOpen && (
+        <div className="assistant-add__submenu">
+          {contextMoreModes.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              className="assistant-add__row"
+              data-kind="mode"
+              onClick={item.action}
+            >
+              <span className="assistant-add__row-icon" aria-hidden>
+                {item.icon}
+              </span>
+              <span className="assistant-add__row-text">
+                <span className="assistant-add__row-title">{item.label}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   const content = (
     <div className="assistant-add__content" ref={panelRef} style={contentStyle}>
       <div className="assistant-add__list assistant-add__list--primary">
@@ -810,12 +930,18 @@ export const AddMenu: React.FC<AddMenuProps> = ({
           <div className="assistant-add__quick-grid">
             {filteredQuickModes.map((item) => renderRow(item, 'mode'))}
           </div>
+        ) : variant === 'context' ? (
+          <div className="assistant-add__list">
+            {contextMainModes.map((item) => renderRow(item, 'mode'))}
+            {contextMoreModes.length > 0 && renderMoreRow()}
+          </div>
         ) : (
           <div className="assistant-add__list">
             {filteredQuickModes.map((item) => renderRow(item, 'mode'))}
           </div>
         )}
       </div>
+      {variant === 'sheet' && <div className="assistant-add__bottom-line" />}
     </div>
   );
 
@@ -850,6 +976,9 @@ export const AddMenu: React.FC<AddMenuProps> = ({
   }
 
   if (variant === 'sheet') {
+    const transformY = isDragging ? dragY : isVisible ? 0 : 100;
+    const transition = isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
+
     return (
       <div
         className="assistant-add-overlay"
@@ -858,13 +987,24 @@ export const AddMenu: React.FC<AddMenuProps> = ({
         aria-label="Add to request"
         aria-modal="true"
         onClick={onClose}
+        style={{
+          opacity: isVisible ? 1 : 0,
+          transition: 'opacity 0.3s ease'
+        }}
       >
         <div
           className="assistant-add__sheet"
           onClick={(e) => e.stopPropagation()}
           role="presentation"
           ref={sheetRef}
-          style={{ height: sheetHeightPx ? `${sheetHeightPx}px` : undefined }}
+          style={{
+            height: sheetHeightPx ? `${sheetHeightPx}px` : undefined,
+            transform: `translateY(${transformY}${isDragging ? 'px' : '%'})`,
+            transition
+          }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           <div ref={handleRef} className="assistant-add__handle" />
           <div className="assistant-add__body">
@@ -925,18 +1065,15 @@ export const ComposerPanel: React.FC<ComposerPanelProps> = ({
   const addButtonRef = React.useRef<HTMLButtonElement | null>(null);
   const requiresText = mode?.requiresText ?? false;
   const requiresImages = mode?.requiresImages ?? false;
-  const allowsImages = mode?.allowsImages ?? true;
   const trimmedText = text.trim();
   const disableStart = sendState === 'sending' || (requiresText && !trimmedText) || (requiresImages && images.length === 0);
   const placeholder = mode?.placeholder || 'Tell the assistant what you need.';
 
   const openUpload = () => {
-    if (!allowsImages) return;
     fileInputRef.current?.click();
   };
 
   const openCamera = () => {
-    if (!allowsImages) return;
     cameraInputRef.current?.click();
   };
 
@@ -955,7 +1092,6 @@ export const ComposerPanel: React.FC<ComposerPanelProps> = ({
 
         <PhotoPicker
           requiresImages={requiresImages}
-          allowsImages={allowsImages}
           images={images}
           showWhenOptional={showImagesSection}
           openCamera={openCamera}
@@ -971,7 +1107,6 @@ export const ComposerPanel: React.FC<ComposerPanelProps> = ({
           error={error}
           disableStart={disableStart}
           isMobile={isMobile}
-          allowsImages={allowsImages}
           addButtonRef={addButtonRef}
           onTextChange={onTextChange}
           onStart={onStart}

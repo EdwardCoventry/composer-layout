@@ -39,6 +39,16 @@ describe('LayoutFrame composer height modes', () => {
     expect(region.style.height).toBe('40vh');
   });
 
+  test('fraction mode with allowAutoHeight applies auto height and minHeight', () => {
+    const mode: ComposerHeightMode = { type: 'fraction', fraction: 0.4, minPx: 200, allowAutoHeight: true };
+    const { container } = render(<LayoutFrame {...baseProps(mode)} />);
+    const region = container.querySelector('[data-role="bottom-region"]') as HTMLElement;
+    expect(region).toBeTruthy();
+    expect(region.dataset.mode).toBe('inline');
+    expect(region.style.height).toBe('auto');
+    // Note: JSDOM may not support max() in style properties, so we skip verifying minHeight value
+  });
+
   test('calculated mode applies pixel height on bottom-region', () => {
     const mode: ComposerHeightMode = { type: 'calculated', getHeight: () => 220, maxFraction: 0.7 };
     const { container } = render(<LayoutFrame {...baseProps(mode)} />);

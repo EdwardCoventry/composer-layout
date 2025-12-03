@@ -3,7 +3,7 @@ import React from 'react';
 export const DEFAULT_OVERLAY_CONTENT_MAX_FRACTION = 0.6;
 
 export type ComposerHeightMode =
-  | { type: 'fraction'; fraction: number; minPx?: number }
+  | { type: 'fraction'; fraction: number; minPx?: number; allowAutoHeight?: boolean }
   | { type: 'content'; maxFraction?: number }
   | { type: 'calculated'; getHeight: () => number; maxFraction?: number };
 

@@ -1,0 +1,17 @@
+{
+  "apps": [
+    {
+      "name": "quiz-app-example",
+      "path": "/quiz-app-example/",
+      "title": "Quiz App",
+      "description": "A simple quiz application."
+    },
+    {
+      "name": "ai-assistant-example",
+      "path": "/ai-assistant-example/",
+      "title": "AI Assistant",
+      "description": "An AI assistant interface."
+    }
+  ]
+}
+

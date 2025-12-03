@@ -22,7 +22,6 @@ export const ASSISTANT_MODES: AssistantMode[] = [
     placeholder: 'Draft an email asking for a deadline extension...',
     requiresText: true,
     requiresImages: false,
-    allowsImages: true,
     description: 'Fast text-first question or task.'
   },
   {
@@ -35,7 +34,6 @@ export const ASSISTANT_MODES: AssistantMode[] = [
     placeholder: 'Plan a 30 minute workshop about accessibility...',
     requiresText: true,
     requiresImages: false,
-    allowsImages: false,
     description: 'Creates a short plan or outline from your notes.'
   },
   {
@@ -48,7 +46,6 @@ export const ASSISTANT_MODES: AssistantMode[] = [
     placeholder: 'Brainstorm 5 taglines for a spring launch...',
     requiresText: false,
     requiresImages: false,
-    allowsImages: true,
     description: 'Rapid-fire idea starter.'
   },
   {
@@ -61,7 +58,6 @@ export const ASSISTANT_MODES: AssistantMode[] = [
     placeholder: 'Rewrite this paragraph to be concise...',
     requiresText: true,
     requiresImages: false,
-    allowsImages: true,
     description: 'Rephrase or tighten copy.'
   },
   {
@@ -74,7 +70,6 @@ export const ASSISTANT_MODES: AssistantMode[] = [
     placeholder: 'Organize these meeting notes into action items...',
     requiresText: true,
     requiresImages: false,
-    allowsImages: true,
     description: 'Organizes pasted snippets into a clearer shape.'
   },
   {
@@ -87,7 +82,6 @@ export const ASSISTANT_MODES: AssistantMode[] = [
     placeholder: 'Check this whiteboard sketch for missing steps...',
     requiresText: false,
     requiresImages: true,
-    allowsImages: true,
     description: 'Requires an image; pairs it with optional guidance.'
   },
   {
@@ -100,7 +94,6 @@ export const ASSISTANT_MODES: AssistantMode[] = [
     placeholder: 'Invent a creative writing challenge for the weekend...',
     requiresText: false,
     requiresImages: false,
-    allowsImages: false,
     description: 'No required input; sends a playful starter.'
   }
 ];

@@ -10,7 +10,6 @@ export type AssistantMode = {
   placeholder: string;
   requiresText: boolean;
   requiresImages: boolean;
-  allowsImages: boolean;
   description: string;
 };
 
