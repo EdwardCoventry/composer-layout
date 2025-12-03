@@ -14,74 +14,49 @@ const App = () => {
   const [apps, setApps] = useState<AppEntry[]>([]);
 
   useEffect(() => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const applyTheme = () => {
+      document.documentElement.dataset.theme = mediaQuery.matches ? 'dark' : 'light';
+    };
+
+    applyTheme();
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', applyTheme);
+      return () => mediaQuery.removeEventListener('change', applyTheme);
+    }
+
+    mediaQuery.addListener(applyTheme);
+    return () => mediaQuery.removeListener(applyTheme);
+  }, []);
+
+  useEffect(() => {
     // In a real scenario, we might fetch this, but here we import it.
     // Use type assertion if the JSON import structure isn't strictly typed in TS yet.
     setApps((registryData as unknown as { apps: AppEntry[] }).apps || []);
   }, []);
 
   return (
-    <div style={{
-      fontFamily: '"Inter", sans-serif',
-      padding: '40px',
-      maxWidth: '1200px',
-      margin: '0 auto',
-      height: '100%',
-      boxSizing: 'border-box',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '40px'
-    }}>
-      <header style={{ borderBottom: '1px solid var(--border-color, #ddd)', paddingBottom: '20px' }}>
-        <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: 600 }}>Examples Showcase</h1>
-        <p style={{ margin: '10px 0 0', opacity: 0.7 }}>Select an example application to launch.</p>
+    <div className="showcase-shell">
+      <header className="showcase-header">
+        <h1 className="showcase-header__title">Examples Showcase</h1>
+        <p className="showcase-header__subtitle">Select an example application to launch.</p>
       </header>
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-        gap: '24px'
-      }}>
+      <div className="showcase-grid">
         {apps.map((app) => (
           <a 
             key={app.name} 
             href={`${app.path}?from=showcase`}
-            style={{
-              display: 'block',
-              textDecoration: 'none',
-              color: 'inherit',
-              border: '1px solid var(--border-color, #ddd)',
-              borderRadius: '12px',
-              padding: '24px',
-              transition: 'transform 0.2s, box-shadow 0.2s',
-              backgroundColor: 'var(--card-bg, rgba(255,255,255,0.05))',
-              cursor: 'pointer'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = '0 12px 24px rgba(0,0,0,0.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'none';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
+            className="showcase-card"
           >
-            <div style={{
-              aspectRatio: '16/9',
-              backgroundColor: '#eee',
-              marginBottom: '16px',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '3rem',
-              fontWeight: 'bold',
-              color: '#ccc',
-              textTransform: 'uppercase'
-            }}>
+            <div className="showcase-card__preview">
               {app.name.slice(0, 2)}
             </div>
-            <h2 style={{ margin: '0 0 8px', fontSize: '1.25rem' }}>{app.title}</h2>
-            <p style={{ margin: 0, fontSize: '0.9rem', opacity: 0.7 }}>
+            <h2 className="showcase-card__title">{app.title}</h2>
+            <p className="showcase-card__desc">
               {app.description || `Launch the ${app.title} application.`}
             </p>
           </a>
