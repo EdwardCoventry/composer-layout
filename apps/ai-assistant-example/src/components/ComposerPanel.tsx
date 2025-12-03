@@ -772,13 +772,31 @@ export const AddMenu: React.FC<AddMenuProps> = ({
 
   // Sheet variant using react-modal-sheet for seamless drag-to-scroll handoff
   if (variant === 'sheet') {
+    // 0 = closed, 0.35 = peek, 1 = fully open
+    const snapPoints = [0, 0.35, 1];
+
     return (
-      <Sheet isOpen={open} onClose={onClose} snapPoints={[0.5, 0.9, 1]} initialSnap={0}>
+      <Sheet
+        isOpen={open}
+        onClose={onClose}
+        snapPoints={snapPoints}
+        initialSnap={1}
+        // @ts-expect-error detent prop is available in newer versions; ignored if unsupported
+        detent="full"
+        // @ts-expect-error avoidKeyboard prop is available in newer versions; ignored if unsupported
+        avoidKeyboard
+      >
         <Sheet.Container>
           <Sheet.Header />
-          <Sheet.Content>
-            {/* inner content will scroll automatically at full snap */}
-            <div className="assistant-add__body">
+          <Sheet.Content
+            // Only allow scrolling when at top snap; ignored if unsupported
+            // @ts-expect-error disableScroll callback is available in newer versions
+            disableScroll={(state: { currentSnap: number }) => state.currentSnap !== snapPoints.length - 1}
+            // Only allow drag when scrolled to top; ignored if unsupported
+            // @ts-expect-error disableDrag callback is available in newer versions
+            disableDrag={(state: { scrollPosition: 'top' | 'middle' | 'bottom' }) => state.scrollPosition !== 'top'}
+          >
+            <div className="assistant-add__body assistant-add__body--sheet">
               {content}
             </div>
           </Sheet.Content>
