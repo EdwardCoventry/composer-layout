@@ -1,6 +1,6 @@
 import React from 'react';
 import { AssistantImage, AssistantMode, AssistantPreferences, SendState } from './types';
-import { Sheet } from 'react-modal-sheet';
+import Sheet from 'react-modal-sheet';
 
 type PreferencesControlProps = {
   preferences: AssistantPreferences;
