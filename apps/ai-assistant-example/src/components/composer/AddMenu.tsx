@@ -1,7 +1,9 @@
 import React from 'react';
 import type { AssistantMode } from '../types';
-import Sheet from 'react-modal-sheet';
 import { CameraIcon, GalleryIcon } from './icons';
+import { FullscreenAddMenu } from './add-menu/Fullscreen';
+import { SheetAddMenu } from './add-menu/Sheet';
+import { ContextAddMenu } from './add-menu/Context';
 
 export type AddMenuVariant = 'context' | 'sheet' | 'fullscreen';
 
@@ -21,14 +23,9 @@ export const AddMenu: React.FC<AddMenuProps> = ({ open, variant, anchorRef, mode
   const moreRowRef = React.useRef<HTMLDivElement | null>(null);
   const [submenuOpen, setSubmenuOpen] = React.useState(false);
   const [contextPlacement, setContextPlacement] = React.useState<{ bottom: number; right: number; width: number; maxHeight: number; }>({ bottom: 24, right: 16, width: 380, maxHeight: 520 });
-  const [isVisible, setIsVisible] = React.useState(false);
   const [shouldRender, setShouldRender] = React.useState(open);
 
-  React.useEffect(() => {
-    if (open) { setShouldRender(true); requestAnimationFrame(() => setIsVisible(true)); }
-    else { setIsVisible(false); const t = setTimeout(() => setShouldRender(false), 150); return () => clearTimeout(t); }
-  }, [open]);
-
+  React.useEffect(() => { if (open) { setShouldRender(true); } else { const t = setTimeout(() => setShouldRender(false), 150); return () => clearTimeout(t); } }, [open]);
   React.useEffect(() => { if (!open) return undefined; const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); }; window.addEventListener('keydown', onKey); return () => window.removeEventListener('keydown', onKey); }, [open, onClose]);
   React.useEffect(() => { if (!open) setSubmenuOpen(false); }, [open]);
 
@@ -118,48 +115,13 @@ export const AddMenu: React.FC<AddMenuProps> = ({ open, variant, anchorRef, mode
   );
 
   if (variant === 'fullscreen') {
-    return (
-      <div className="assistant-add-overlay" data-variant="fullscreen" role="dialog" aria-label="Add to request" aria-modal="true">
-        <div className="assistant-add__fullscreen">
-          <div className="assistant-add__fullscreen-header">
-            <div className="assistant-add__fullscreen-titles">
-              <div className="assistant-section__label">Add to request</div>
-              <div className="assistant-add__fullscreen-title">Choose an option</div>
-            </div>
-            <button type="button" className="assistant-modal__close" onClick={onClose} aria-label="Close add options">×</button>
-          </div>
-          <div className="assistant-add__fullscreen-body">{content}</div>
-        </div>
-      </div>
-    );
+    return <FullscreenAddMenu content={content} onClose={onClose} />;
   }
 
   if (variant === 'sheet') {
-    const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
-    const peek = Math.round(vh * 0.2);
-    const snapPoints = [vh, peek, 0];
-
-    return (
-      <Sheet isOpen={open} onClose={onClose} snapPoints={snapPoints} initialSnap={1} detent="full-height">
-        <Sheet.Container>
-          <Sheet.Header />
-          <Sheet.Content // @ts-expect-error v1 supports boolean disableDrag, newer versions support callback
-            disableDrag={(state: { scrollPosition: 'top' | 'middle' | 'bottom' }) => state.scrollPosition !== 'top'}
-          >
-            <div className="assistant-add__body assistant-add__body--sheet">{content}</div>
-          </Sheet.Content>
-        </Sheet.Container>
-        <Sheet.Backdrop />
-      </Sheet>
-    );
+    return <SheetAddMenu open={open} content={content} onClose={onClose} />;
   }
 
-  return (
-    <div className="assistant-add-overlay" data-variant="context" role="dialog" aria-label="Add to request" aria-modal="true" onClick={onClose}>
-      <div className="assistant-add__panel" onClick={(e) => e.stopPropagation()} role="presentation" style={{ bottom: `${contextPlacement.bottom}px`, right: `${contextPlacement.right}px`, width: `${contextPlacement.width}px`, maxHeight: contextPlacement.maxHeight || undefined }}>
-        {content}
-      </div>
-    </div>
-  );
+  const style: React.CSSProperties = { bottom: `${contextPlacement.bottom}px`, right: `${contextPlacement.right}px`, width: `${contextPlacement.width}px`, maxHeight: contextPlacement.maxHeight || undefined };
+  return <ContextAddMenu content={content} onClose={onClose} style={style} />;
 };
-

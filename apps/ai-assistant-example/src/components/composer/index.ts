@@ -1,7 +1,7 @@
 export { ComposerPanel } from './ComposerPanel';
-export { PreferencesControl } from './PreferencesControl';
+export { PreferencesControl } from './preferences/PreferencesControl';
 export { PhotoPicker } from './PhotoPicker';
 export { ComposeInputCard } from './ComposeInputCard';
-export { AddMenu } from './AddMenu';
+export { AddMenu } from './add-menu/AddMenu';
 export * as ComposerIcons from './icons';
 
