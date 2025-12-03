@@ -634,7 +634,16 @@ export const AddMenu: React.FC<AddMenuProps> = ({
   const handleRef = React.useRef<HTMLDivElement | null>(null);
   const sheetRef = React.useRef<HTMLDivElement | null>(null);
   const moreRowRef = React.useRef<HTMLDivElement | null>(null);
-  const [sheetHeightPx, setSheetHeightPx] = React.useState<number | null>(null);
+  // Removed pixel-height measurement; adopt fractional height like mobile draggable sheet
+  const scrollAreaRef = React.useRef<HTMLDivElement | null>(null);
+
+  // Fractional snap points relative to viewport height
+  const SHEET_PEEK = 0.5;
+  const SHEET_FULL = 0.9;
+  const SHEET_CLOSE_THRESHOLD = 0.35;
+
+  const [sheetHeight, setSheetHeight] = React.useState<number>(SHEET_PEEK); // fraction of viewport height
+
   const [submenuOpen, setSubmenuOpen] = React.useState(false);
   const [contextPlacement, setContextPlacement] = React.useState<{
     bottom: number;
@@ -648,67 +657,35 @@ export const AddMenu: React.FC<AddMenuProps> = ({
     maxHeight: 520
   });
 
-  // Animation and Drag State
+  // Animation visibility + mount control
   const [isVisible, setIsVisible] = React.useState(false);
   const [shouldRender, setShouldRender] = React.useState(open);
-  const [dragY, setDragY] = React.useState(0);
-  const [isDragging, setIsDragging] = React.useState(false);
-  const dragStartY = React.useRef<number>(0);
-  const currentDragY = React.useRef<number>(0);
+
+  // Drag state for mobile sheet
+  const dragState = React.useRef<{
+    startY: number;
+    startHeight: number;
+    startScrollTop: number;
+    dragging: boolean;
+  } | null>(null);
 
   React.useEffect(() => {
     if (open) {
       setShouldRender(true);
-      // Small delay to allow render before animating in
-      requestAnimationFrame(() => {
-        setIsVisible(true);
-      });
+      requestAnimationFrame(() => setIsVisible(true));
     } else {
       setIsVisible(false);
-      setDragY(0);
-      // Delay unmount for animation
-      const timer = setTimeout(() => {
-        setShouldRender(false);
-      }, 300);
+      const timer = setTimeout(() => setShouldRender(false), 200);
       return () => clearTimeout(timer);
     }
   }, [open]);
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (variant !== 'sheet') return;
-    
-    // If touching content that is scrolled, ignore
-    if (panelRef.current && panelRef.current.contains(e.target as Node)) {
-      if (panelRef.current.scrollTop > 0) return;
+  // Reset height when opening in sheet variant
+  React.useEffect(() => {
+    if (open && variant === 'sheet') {
+      setSheetHeight(SHEET_PEEK);
     }
-    
-    setIsDragging(true);
-    dragStartY.current = e.touches[0].clientY;
-    currentDragY.current = 0;
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || variant !== 'sheet') return;
-    const deltaY = e.touches[0].clientY - dragStartY.current;
-    // Only allow dragging down
-    if (deltaY > 0) {
-      currentDragY.current = deltaY;
-      setDragY(deltaY);
-    }
-  };
-
-  const handleTouchEnd = () => {
-    if (!isDragging || variant !== 'sheet') return;
-    setIsDragging(false);
-
-    const threshold = (sheetHeightPx || 300) * 0.25; // Close if dragged 25% down
-    if (currentDragY.current > threshold) {
-      onClose();
-    } else {
-      setDragY(0);
-    }
-    currentDragY.current = 0;
-  };
+  }, [open, variant]);
 
   React.useEffect(() => {
     if (!open) return undefined;
@@ -727,37 +704,7 @@ export const AddMenu: React.FC<AddMenuProps> = ({
     }
   }, [open]);
 
-  React.useLayoutEffect(() => {
-    if (!open || variant !== 'sheet') {
-      return undefined;
-    }
-
-    if (typeof window === 'undefined') return undefined;
-
-    const measure = () => {
-      const vh = window.innerHeight || 0;
-      const minHeight = vh * 0.34;
-      const maxHeight = vh * 0.88;
-      const contentHeight = panelRef.current ? panelRef.current.scrollHeight : 0;
-      const handleElement = handleRef.current;
-      const handleRect = handleElement?.getBoundingClientRect();
-      const handleStyles = handleElement ? window.getComputedStyle(handleElement) : null;
-      const handleMargin =
-        (handleStyles ? parseFloat(handleStyles.marginTop || '0') + parseFloat(handleStyles.marginBottom || '0') : 0) || 0;
-      const handleHeight = (handleRect?.height || 0) + handleMargin;
-      const sheetStyles = sheetRef.current ? window.getComputedStyle(sheetRef.current) : null;
-      const borderTop = sheetStyles ? parseFloat(sheetStyles.borderTopWidth || '0') : 0;
-      const borderBottom = sheetStyles ? parseFloat(sheetStyles.borderBottomWidth || '0') : 0;
-      const totalNeeded = contentHeight + handleHeight + borderTop + borderBottom;
-      const desired = Math.max(minHeight, Math.min(maxHeight, totalNeeded));
-      setSheetHeightPx(desired);
-    };
-
-    measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
-  }, [open, variant]);
-
+  // Positioning for context variant
   React.useEffect(() => {
     if (!open || variant !== 'context') {
       setContextPlacement((prev) => ({ ...prev, maxHeight: 0 }));
@@ -778,12 +725,7 @@ export const AddMenu: React.FC<AddMenuProps> = ({
       const bottom = anchorRect ? Math.max(gutter, viewportH - anchorRect.top + verticalGap) : 24;
       const maxHeight = Math.max(340, Math.min(640, viewportH - bottom - gutter));
 
-      setContextPlacement({
-        bottom,
-        right,
-        width,
-        maxHeight
-      });
+      setContextPlacement({ bottom, right, width, maxHeight });
     };
 
     const frame = window.requestAnimationFrame(computePosition);
@@ -843,13 +785,11 @@ export const AddMenu: React.FC<AddMenuProps> = ({
     }
   }));
 
-  // Order: vision first, random last; for context menu, split into main + more
   const orderedQuickModes = ['vision', 'plan', 'brainstorm', 'rewrite', 'organize', 'random'];
   const filteredQuickModes = orderedQuickModes
     .map((key) => quickModeItems.find((item) => item.key === key))
     .filter((item): item is NonNullable<typeof item> => item !== undefined);
 
-  // For context menu: show first 3, rest go to "More" submenu
   const contextMainModes = filteredQuickModes.slice(0, 3);
   const contextMoreModes = filteredQuickModes.slice(3);
 
@@ -945,6 +885,7 @@ export const AddMenu: React.FC<AddMenuProps> = ({
     </div>
   );
 
+  // Fullscreen variant unchanged
   if (variant === 'fullscreen') {
     return (
       <div
@@ -975,9 +916,81 @@ export const AddMenu: React.FC<AddMenuProps> = ({
     );
   }
 
+  // Draggable, resizable bottom sheet variant (mobile)
   if (variant === 'sheet') {
-    const transformY = isDragging ? dragY : isVisible ? 0 : 100;
-    const transition = isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
+    const stop = (e: React.SyntheticEvent) => e.stopPropagation();
+    const clampHeight = (val: number) => Math.min(SHEET_FULL, Math.max(0.0, val));
+    const snapHeight = (val: number) => {
+      if (val < SHEET_CLOSE_THRESHOLD) return 0;
+      if (val < (SHEET_PEEK + SHEET_FULL) / 2) return SHEET_PEEK;
+      return SHEET_FULL;
+    };
+
+    const onDragStart = (clientY: number) => {
+      dragState.current = {
+        startY: clientY,
+        startHeight: sheetHeight,
+        startScrollTop: scrollAreaRef.current?.scrollTop || 0,
+        dragging: false
+      };
+    };
+
+    const onDragMove = (
+      clientY: number,
+      evt?: TouchEvent | MouseEvent | React.TouchEvent | React.MouseEvent
+    ) => {
+      if (!dragState.current) return;
+
+      const scrollEl = scrollAreaRef.current;
+      const atTop = (scrollEl?.scrollTop || 0) <= 0;
+      const delta = dragState.current.startY - clientY; // up is positive
+      const vh = typeof window !== 'undefined' ? window.innerHeight || 1 : 1000;
+      const deltaFraction = delta / vh;
+      const atMaxHeight =
+        dragState.current.startHeight >= SHEET_FULL - 0.02 || sheetHeight >= SHEET_FULL - 0.02;
+
+      const shouldResize = !atMaxHeight || (atTop && delta < 0); // resize below max or pulling down from top
+      if (!shouldResize) return;
+
+      if ((evt as any) && 'cancelable' in (evt as any) && (evt as any).cancelable) {
+        (evt as any).preventDefault();
+      }
+      if (scrollEl) scrollEl.scrollTop = 0;
+
+      dragState.current.dragging = true;
+      setSheetHeight(clampHeight(dragState.current.startHeight + deltaFraction));
+    };
+
+    const onDragEnd = () => {
+      if (!dragState.current) return;
+      const wasDragging = dragState.current.dragging;
+      dragState.current = null;
+      if (!wasDragging) return;
+
+      const next = snapHeight(sheetHeight);
+      if (next === 0) onClose();
+      else setSheetHeight(next);
+    };
+
+    const attachDragHandlers = {
+      onMouseDown: (e: React.MouseEvent) => onDragStart(e.clientY),
+      onMouseMove: (e: React.MouseEvent) => {
+        if (dragState.current) {
+          e.preventDefault();
+          onDragMove(e.clientY, e);
+        }
+      },
+      onMouseUp: onDragEnd,
+      onMouseLeave: onDragEnd,
+      onTouchStart: (e: React.TouchEvent) => onDragStart(e.touches[0].clientY),
+      onTouchMove: (e: React.TouchEvent) => {
+        onDragMove(e.touches[0].clientY, e);
+      },
+      onTouchEnd: onDragEnd,
+      onTouchCancel: onDragEnd
+    } as React.DOMAttributes<HTMLDivElement>;
+
+    const allowContentScroll = sheetHeight >= SHEET_FULL - 0.02;
 
     return (
       <div
@@ -989,25 +1002,32 @@ export const AddMenu: React.FC<AddMenuProps> = ({
         onClick={onClose}
         style={{
           opacity: isVisible ? 1 : 0,
-          transition: 'opacity 0.3s ease'
+          transition: 'opacity 0.2s ease'
         }}
       >
         <div
           className="assistant-add__sheet"
-          onClick={(e) => e.stopPropagation()}
+          onClick={stop}
           role="presentation"
           ref={sheetRef}
           style={{
-            height: sheetHeightPx ? `${sheetHeightPx}px` : undefined,
-            transform: `translateY(${transformY}${isDragging ? 'px' : '%'})`,
-            transition
+            alignSelf: 'flex-end',
+            maxHeight: `${sheetHeight * 100}vh`,
+            height: `${sheetHeight * 100}vh`
           }}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
+          {...attachDragHandlers}
         >
-          <div ref={handleRef} className="assistant-add__handle" />
-          <div className="assistant-add__body">
+          <div ref={handleRef} className="assistant-add__handle" {...attachDragHandlers} />
+          <div
+            className="assistant-add__body"
+            ref={scrollAreaRef}
+            style={{
+              // Only allow scrolling when fully expanded
+              overflowY: allowContentScroll ? 'auto' : 'hidden',
+              touchAction: allowContentScroll ? 'pan-y' : 'none'
+            }}
+            {...attachDragHandlers}
+          >
             {content}
           </div>
         </div>
@@ -1015,6 +1035,7 @@ export const AddMenu: React.FC<AddMenuProps> = ({
     );
   }
 
+  // Context variant unchanged
   return (
     <div
       className="assistant-add-overlay"
