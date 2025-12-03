@@ -12,7 +12,9 @@
     "composer-layout": "0.0.2",
     "example-styles": "*",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-modal-sheet": "^1.2.0",
+    "react-spring": "^9.7.2"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.0.0",

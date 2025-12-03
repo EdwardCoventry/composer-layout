@@ -1,5 +1,6 @@
 import React from 'react';
 import { AssistantImage, AssistantMode, AssistantPreferences, SendState } from './types';
+import { Sheet } from 'react-modal-sheet';
 
 type PreferencesControlProps = {
   preferences: AssistantPreferences;
@@ -631,43 +632,18 @@ export const AddMenu: React.FC<AddMenuProps> = ({
   onPickGallery
 }) => {
   const panelRef = React.useRef<HTMLDivElement | null>(null);
-  const handleRef = React.useRef<HTMLDivElement | null>(null);
-  const sheetRef = React.useRef<HTMLDivElement | null>(null);
   const moreRowRef = React.useRef<HTMLDivElement | null>(null);
-  // Removed pixel-height measurement; adopt fractional height like mobile draggable sheet
-  const scrollAreaRef = React.useRef<HTMLDivElement | null>(null);
-
-  // Fractional snap points relative to viewport height
-  const SHEET_PEEK = 0.5;
-  const SHEET_FULL = 0.9;
-  const SHEET_CLOSE_THRESHOLD = 0.35;
-
-  const [sheetHeight, setSheetHeight] = React.useState<number>(SHEET_PEEK); // fraction of viewport height
-
   const [submenuOpen, setSubmenuOpen] = React.useState(false);
   const [contextPlacement, setContextPlacement] = React.useState<{
     bottom: number;
     right: number;
     width: number;
     maxHeight: number;
-  }>({
-    bottom: 24,
-    right: 16,
-    width: 380,
-    maxHeight: 520
-  });
+  }>({ bottom: 24, right: 16, width: 380, maxHeight: 520 });
 
-  // Animation visibility + mount control
+  // Visibility / mount for overlay
   const [isVisible, setIsVisible] = React.useState(false);
   const [shouldRender, setShouldRender] = React.useState(open);
-
-  // Drag state for mobile sheet
-  const dragState = React.useRef<{
-    startY: number;
-    startHeight: number;
-    startScrollTop: number;
-    dragging: boolean;
-  } | null>(null);
 
   React.useEffect(() => {
     if (open) {
@@ -675,144 +651,60 @@ export const AddMenu: React.FC<AddMenuProps> = ({
       requestAnimationFrame(() => setIsVisible(true));
     } else {
       setIsVisible(false);
-      const timer = setTimeout(() => setShouldRender(false), 200);
-      return () => clearTimeout(timer);
+      const t = setTimeout(() => setShouldRender(false), 150);
+      return () => clearTimeout(t);
     }
   }, [open]);
-
-  // Reset height when opening in sheet variant
-  React.useEffect(() => {
-    if (open && variant === 'sheet') {
-      setSheetHeight(SHEET_PEEK);
-    }
-  }, [open, variant]);
 
   React.useEffect(() => {
     if (!open) return undefined;
-
-    const handleKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
-    };
-
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
+  React.useEffect(() => { if (!open) setSubmenuOpen(false); }, [open]);
+
+  // Context placement
   React.useEffect(() => {
-    if (!open) {
-      setSubmenuOpen(false);
-    }
-  }, [open]);
-
-  // Positioning for context variant
-  React.useEffect(() => {
-    if (!open || variant !== 'context') {
-      setContextPlacement((prev) => ({ ...prev, maxHeight: 0 }));
-      return undefined;
-    }
-
-    const computePosition = () => {
-      const anchorRect = anchorRef?.current?.getBoundingClientRect();
-      const viewportW = typeof window !== 'undefined' ? window.innerWidth : 0;
-      const viewportH = typeof window !== 'undefined' ? window.innerHeight : 0;
-      if (!viewportW || !viewportH) return;
-
+    if (!open || variant !== 'context') { setContextPlacement((p) => ({ ...p, maxHeight: 0 })); return; }
+    const compute = () => {
+      const rect = anchorRef?.current?.getBoundingClientRect();
+      const vw = typeof window !== 'undefined' ? window.innerWidth : 0;
+      const vh = typeof window !== 'undefined' ? window.innerHeight : 0;
+      if (!vw || !vh) return;
       const gutter = 16;
-      const targetWidth = Math.min(420, Math.max(340, viewportW * 0.42));
-      const width = Math.min(targetWidth, viewportW - gutter * 2);
-      const right = anchorRect ? Math.max(gutter, viewportW - anchorRect.right) : gutter;
-      const verticalGap = 10;
-      const bottom = anchorRect ? Math.max(gutter, viewportH - anchorRect.top + verticalGap) : 24;
-      const maxHeight = Math.max(340, Math.min(640, viewportH - bottom - gutter));
-
+      const targetWidth = Math.min(420, Math.max(340, vw * 0.42));
+      const width = Math.min(targetWidth, vw - gutter * 2);
+      const right = rect ? Math.max(gutter, vw - rect.right) : gutter;
+      const gap = 10;
+      const bottom = rect ? Math.max(gutter, vh - rect.top + gap) : 24;
+      const maxHeight = Math.max(340, Math.min(640, vh - bottom - gutter));
       setContextPlacement({ bottom, right, width, maxHeight });
     };
-
-    const frame = window.requestAnimationFrame(computePosition);
-    const handleRelayout = () => computePosition();
-
-    window.addEventListener('resize', handleRelayout);
-    window.addEventListener('scroll', handleRelayout, true);
-
-    return () => {
-      window.cancelAnimationFrame(frame);
-      window.removeEventListener('resize', handleRelayout);
-      window.removeEventListener('scroll', handleRelayout, true);
-    };
+    const f = window.requestAnimationFrame(compute);
+    const relayout = () => compute();
+    window.addEventListener('resize', relayout);
+    window.addEventListener('scroll', relayout, true);
+    return () => { window.cancelAnimationFrame(f); window.removeEventListener('resize', relayout); window.removeEventListener('scroll', relayout, true); };
   }, [open, variant, anchorRef]);
 
   if (!shouldRender) return null;
 
-  const contentStyle: React.CSSProperties =
-    variant === 'context'
-      ? {
-          maxHeight: contextPlacement.maxHeight || undefined,
-          overflow: 'visible'
-        }
-      : {};
-
+  // Build content once; reuse across variants
   const primaryItems = [
-    {
-      key: 'camera',
-      label: 'Take a photo',
-      subLabel: 'Use your camera',
-      icon: <CameraIcon />,
-      action: () => {
-        onPickCamera();
-        onClose();
-      }
-    },
-    {
-      key: 'gallery',
-      label: 'Choose from gallery',
-      subLabel: 'Choose from files',
-      icon: <GalleryIcon />,
-      action: () => {
-        onPickGallery();
-        onClose();
-      }
-    }
+    { key: 'camera', label: 'Take a photo', subLabel: 'Use your camera', icon: <CameraIcon />, action: () => { onPickCamera(); onClose(); } },
+    { key: 'gallery', label: 'Choose from gallery', subLabel: 'Choose from files', icon: <GalleryIcon />, action: () => { onPickGallery(); onClose(); } }
   ];
-
-  const quickModeItems = modes.map((m) => ({
-    key: m.key,
-    label: m.tagLine,
-    subLabel: m.description || m.heroSubtitle,
-    icon: m.emoji,
-    action: () => {
-      onSelectMode(m.key);
-      onClose();
-    }
-  }));
-
+  const quickModeItems = modes.map((m) => ({ key: m.key, label: m.tagLine, subLabel: m.description || m.heroSubtitle, icon: m.emoji, action: () => { onSelectMode(m.key); onClose(); } }));
   const orderedQuickModes = ['vision', 'plan', 'brainstorm', 'rewrite', 'organize', 'random'];
-  const filteredQuickModes = orderedQuickModes
-    .map((key) => quickModeItems.find((item) => item.key === key))
-    .filter((item): item is NonNullable<typeof item> => item !== undefined);
-
+  const filteredQuickModes = orderedQuickModes.map((key) => quickModeItems.find((i) => i.key === key)).filter((i): i is NonNullable<typeof i> => i !== undefined);
   const contextMainModes = filteredQuickModes.slice(0, 3);
   const contextMoreModes = filteredQuickModes.slice(3);
 
-  const renderRow = (
-    item: {
-      key: string;
-      label: string;
-      subLabel?: string;
-      icon: React.ReactNode;
-      action: () => void;
-    },
-    kind: 'primary' | 'mode'
-  ) => (
-    <button
-      key={item.key}
-      type="button"
-      className="assistant-add__row"
-      data-kind={kind}
-      onClick={item.action}
-    >
-      <span className="assistant-add__row-icon" aria-hidden>
-        {item.icon}
-      </span>
+  const renderRow = (item: { key: string; label: string; subLabel?: string; icon: React.ReactNode; action: () => void }, kind: 'primary' | 'mode') => (
+    <button key={item.key} type="button" className="assistant-add__row" data-kind={kind} onClick={item.action}>
+      <span className="assistant-add__row-icon" aria-hidden>{item.icon}</span>
       <span className="assistant-add__row-text">
         <span className="assistant-add__row-title">{item.label}</span>
         {item.subLabel ? <span className="assistant-add__row-sub">{item.subLabel}</span> : null}
@@ -821,36 +713,16 @@ export const AddMenu: React.FC<AddMenuProps> = ({
   );
 
   const renderMoreRow = () => (
-    <div
-      ref={moreRowRef}
-      className="assistant-add__row assistant-add__row--more"
-      data-kind="mode"
-      onMouseEnter={() => setSubmenuOpen(true)}
-      onMouseLeave={() => setSubmenuOpen(false)}
-    >
-      <span className="assistant-add__row-icon assistant-add__row-icon--more" aria-hidden>
-        ···
-      </span>
-      <span className="assistant-add__row-text">
-        <span className="assistant-add__row-title">More</span>
-      </span>
+    <div ref={moreRowRef} className="assistant-add__row assistant-add__row--more" data-kind="mode" onMouseEnter={() => setSubmenuOpen(true)} onMouseLeave={() => setSubmenuOpen(false)}>
+      <span className="assistant-add__row-icon assistant-add__row-icon--more" aria-hidden>···</span>
+      <span className="assistant-add__row-text"><span className="assistant-add__row-title">More</span></span>
       <span className="assistant-add__row-arrow" aria-hidden>›</span>
       {submenuOpen && (
         <div className="assistant-add__submenu">
           {contextMoreModes.map((item) => (
-            <button
-              key={item.key}
-              type="button"
-              className="assistant-add__row"
-              data-kind="mode"
-              onClick={item.action}
-            >
-              <span className="assistant-add__row-icon" aria-hidden>
-                {item.icon}
-              </span>
-              <span className="assistant-add__row-text">
-                <span className="assistant-add__row-title">{item.label}</span>
-              </span>
+            <button key={item.key} type="button" className="assistant-add__row" data-kind="mode" onClick={item.action}>
+              <span className="assistant-add__row-icon" aria-hidden>{item.icon}</span>
+              <span className="assistant-add__row-text"><span className="assistant-add__row-title">{item.label}</span></span>
             </button>
           ))}
         </div>
@@ -859,26 +731,21 @@ export const AddMenu: React.FC<AddMenuProps> = ({
   );
 
   const content = (
-    <div className="assistant-add__content" ref={panelRef} style={contentStyle}>
+    <div className="assistant-add__content" ref={panelRef}>
       <div className="assistant-add__list assistant-add__list--primary">
         {primaryItems.map((item) => renderRow(item, 'primary'))}
       </div>
-
       <div className="assistant-add__section">
         <div className="assistant-add__label">QUICK MODES</div>
         {variant === 'fullscreen' ? (
-          <div className="assistant-add__quick-grid">
-            {filteredQuickModes.map((item) => renderRow(item, 'mode'))}
-          </div>
+          <div className="assistant-add__quick-grid">{filteredQuickModes.map((item) => renderRow(item, 'mode'))}</div>
         ) : variant === 'context' ? (
           <div className="assistant-add__list">
             {contextMainModes.map((item) => renderRow(item, 'mode'))}
             {contextMoreModes.length > 0 && renderMoreRow()}
           </div>
         ) : (
-          <div className="assistant-add__list">
-            {filteredQuickModes.map((item) => renderRow(item, 'mode'))}
-          </div>
+          <div className="assistant-add__list">{filteredQuickModes.map((item) => renderRow(item, 'mode'))}</div>
         )}
       </div>
       {variant === 'sheet' && <div className="assistant-add__bottom-line" />}
@@ -888,27 +755,14 @@ export const AddMenu: React.FC<AddMenuProps> = ({
   // Fullscreen variant unchanged
   if (variant === 'fullscreen') {
     return (
-      <div
-        className="assistant-add-overlay"
-        data-variant="fullscreen"
-        role="dialog"
-        aria-label="Add to request"
-        aria-modal="true"
-      >
+      <div className="assistant-add-overlay" data-variant="fullscreen" role="dialog" aria-label="Add to request" aria-modal="true">
         <div className="assistant-add__fullscreen">
           <div className="assistant-add__fullscreen-header">
             <div className="assistant-add__fullscreen-titles">
               <div className="assistant-section__label">Add to request</div>
               <div className="assistant-add__fullscreen-title">Choose an option</div>
             </div>
-            <button
-              type="button"
-              className="assistant-modal__close"
-              onClick={onClose}
-              aria-label="Close add options"
-            >
-              ×
-            </button>
+            <button type="button" className="assistant-modal__close" onClick={onClose} aria-label="Close add options">×</button>
           </div>
           <div className="assistant-add__fullscreen-body">{content}</div>
         </div>
@@ -916,260 +770,35 @@ export const AddMenu: React.FC<AddMenuProps> = ({
     );
   }
 
-  // Draggable, resizable bottom sheet variant (mobile)
+  // Sheet variant using react-modal-sheet for seamless drag-to-scroll handoff
   if (variant === 'sheet') {
-    const stop = (e: React.SyntheticEvent) => e.stopPropagation();
-    const clampHeight = (val: number) => Math.min(SHEET_FULL, Math.max(0.0, val));
-    const snapHeight = (val: number) => {
-      if (val < SHEET_CLOSE_THRESHOLD) return 0;
-      if (val < (SHEET_PEEK + SHEET_FULL) / 2) return SHEET_PEEK;
-      return SHEET_FULL;
-    };
-
-    const onDragStart = (clientY: number) => {
-      dragState.current = {
-        startY: clientY,
-        startHeight: sheetHeight,
-        startScrollTop: scrollAreaRef.current?.scrollTop || 0,
-        dragging: false
-      };
-    };
-
-    const onDragMove = (
-      clientY: number,
-      evt?: TouchEvent | MouseEvent | React.TouchEvent | React.MouseEvent
-    ) => {
-      if (!dragState.current) return;
-
-      const scrollEl = scrollAreaRef.current;
-      const atTop = (scrollEl?.scrollTop || 0) <= 0;
-      const delta = dragState.current.startY - clientY; // up is positive
-      const vh = typeof window !== 'undefined' ? window.innerHeight || 1 : 1000;
-      const deltaFraction = delta / vh;
-      const atMaxHeight =
-        dragState.current.startHeight >= SHEET_FULL - 0.02 || sheetHeight >= SHEET_FULL - 0.02;
-
-      const shouldResize = !atMaxHeight || (atTop && delta < 0); // resize below max or pulling down from top
-      if (!shouldResize) return;
-
-      if ((evt as any) && 'cancelable' in (evt as any) && (evt as any).cancelable) {
-        (evt as any).preventDefault();
-      }
-      if (scrollEl) scrollEl.scrollTop = 0;
-
-      dragState.current.dragging = true;
-      setSheetHeight(clampHeight(dragState.current.startHeight + deltaFraction));
-    };
-
-    const onDragEnd = () => {
-      if (!dragState.current) return;
-      const wasDragging = dragState.current.dragging;
-      dragState.current = null;
-      if (!wasDragging) return;
-
-      const next = snapHeight(sheetHeight);
-      if (next === 0) onClose();
-      else setSheetHeight(next);
-    };
-
-    const attachDragHandlers = {
-      onMouseDown: (e: React.MouseEvent) => onDragStart(e.clientY),
-      onMouseMove: (e: React.MouseEvent) => {
-        if (dragState.current) {
-          e.preventDefault();
-          onDragMove(e.clientY, e);
-        }
-      },
-      onMouseUp: onDragEnd,
-      onMouseLeave: onDragEnd,
-      onTouchStart: (e: React.TouchEvent) => onDragStart(e.touches[0].clientY),
-      onTouchMove: (e: React.TouchEvent) => {
-        onDragMove(e.touches[0].clientY, e);
-      },
-      onTouchEnd: onDragEnd,
-      onTouchCancel: onDragEnd
-    } as React.DOMAttributes<HTMLDivElement>;
-
-    const allowContentScroll = sheetHeight >= SHEET_FULL - 0.02;
-
     return (
-      <div
-        className="assistant-add-overlay"
-        data-variant="sheet"
-        role="dialog"
-        aria-label="Add to request"
-        aria-modal="true"
-        onClick={onClose}
-        style={{
-          opacity: isVisible ? 1 : 0,
-          transition: 'opacity 0.2s ease'
-        }}
-      >
-        <div
-          className="assistant-add__sheet"
-          onClick={stop}
-          role="presentation"
-          ref={sheetRef}
-          style={{
-            alignSelf: 'flex-end',
-            maxHeight: `${sheetHeight * 100}vh`,
-            height: `${sheetHeight * 100}vh`
-          }}
-          {...attachDragHandlers}
-        >
-          <div ref={handleRef} className="assistant-add__handle" {...attachDragHandlers} />
-          <div
-            className="assistant-add__body"
-            ref={scrollAreaRef}
-            style={{
-              // Only allow scrolling when fully expanded
-              overflowY: allowContentScroll ? 'auto' : 'hidden',
-              touchAction: allowContentScroll ? 'pan-y' : 'none'
-            }}
-            {...attachDragHandlers}
-          >
-            {content}
-          </div>
-        </div>
-      </div>
+      <Sheet isOpen={open} onClose={onClose} snapPoints={[0.5, 0.9, 1]} initialSnap={0}>
+        <Sheet.Container>
+          <Sheet.Header />
+          <Sheet.Content>
+            {/* inner content will scroll automatically at full snap */}
+            <div className="assistant-add__body">
+              {content}
+            </div>
+          </Sheet.Content>
+        </Sheet.Container>
+        <Sheet.Backdrop onTap={onClose} />
+      </Sheet>
     );
   }
 
   // Context variant unchanged
   return (
-    <div
-      className="assistant-add-overlay"
-      data-variant="context"
-      role="dialog"
-      aria-label="Add to request"
-      aria-modal="true"
-      onClick={onClose}
-    >
-      <div
-        className="assistant-add__panel"
-        onClick={(e) => e.stopPropagation()}
-        role="presentation"
-        style={{
-          bottom: `${contextPlacement.bottom}px`,
-          right: `${contextPlacement.right}px`,
-          width: `${contextPlacement.width}px`,
-          maxHeight: contextPlacement.maxHeight || undefined
-        }}
-      >
+    <div className="assistant-add-overlay" data-variant="context" role="dialog" aria-label="Add to request" aria-modal="true" onClick={onClose}>
+      <div className="assistant-add__panel" onClick={(e) => e.stopPropagation()} role="presentation" style={{
+        bottom: `${contextPlacement.bottom}px`,
+        right: `${contextPlacement.right}px`,
+        width: `${contextPlacement.width}px`,
+        maxHeight: contextPlacement.maxHeight || undefined
+      }}>
         {content}
       </div>
-    </div>
-  );
-};
-
-export const ComposerPanel: React.FC<ComposerPanelProps> = ({
-  mode,
-  modes,
-  text,
-  images,
-  preferences,
-  sendState,
-  error,
-  isMobile,
-  isEmbed = false,
-  showImagesSection = false,
-  onTextChange,
-  onFilesSelected,
-  onRemoveImage,
-  onUpdatePreferences,
-  onStart,
-  onClearMode,
-  onSelectMode
-}) => {
-  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
-  const cameraInputRef = React.useRef<HTMLInputElement | null>(null);
-  const addButtonRef = React.useRef<HTMLButtonElement | null>(null);
-  const requiresText = mode?.requiresText ?? false;
-  const requiresImages = mode?.requiresImages ?? false;
-  const trimmedText = text.trim();
-  const disableStart = sendState === 'sending' || (requiresText && !trimmedText) || (requiresImages && images.length === 0);
-  const placeholder = mode?.placeholder || 'Tell the assistant what you need.';
-
-  const openUpload = () => {
-    fileInputRef.current?.click();
-  };
-
-  const openCamera = () => {
-    cameraInputRef.current?.click();
-  };
-
-  const [addMenuOpen, setAddMenuOpen] = React.useState(false);
-  const addVariant: AddMenuVariant = isEmbed ? 'fullscreen' : isMobile ? 'sheet' : 'context';
-
-  return (
-    <div className="assistant-composer" data-mobile={isMobile}>
-      <div className="assistant-stack">
-        <PreferencesControl
-          preferences={preferences}
-          onUpdatePreferences={onUpdatePreferences}
-          isMobile={isMobile}
-          isEmbed={isEmbed}
-        />
-
-        <PhotoPicker
-          requiresImages={requiresImages}
-          images={images}
-          showWhenOptional={showImagesSection}
-          openCamera={openCamera}
-          openUpload={openUpload}
-          onRemoveImage={onRemoveImage}
-        />
-
-        <ComposeInputCard
-          mode={mode}
-          text={text}
-          placeholder={placeholder}
-          sendState={sendState}
-          error={error}
-          disableStart={disableStart}
-          isMobile={isMobile}
-          addButtonRef={addButtonRef}
-          onTextChange={onTextChange}
-          onStart={onStart}
-          onClearMode={onClearMode}
-          onAddAttachment={() => setAddMenuOpen(true)}
-        />
-      </div>
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        multiple
-        style={{ display: 'none' }}
-        onChange={(e) => {
-          if (e.target.files) onFilesSelected(e.target.files, 'upload');
-          e.target.value = '';
-        }}
-      />
-      <input
-        ref={cameraInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        multiple
-        style={{ display: 'none' }}
-        onChange={(e) => {
-          if (e.target.files) onFilesSelected(e.target.files, 'camera');
-          e.target.value = '';
-        }}
-      />
-
-      <AddMenu
-        open={addMenuOpen}
-        variant={addVariant}
-        anchorRef={addButtonRef}
-        modes={modes}
-        onClose={() => setAddMenuOpen(false)}
-        onSelectMode={onSelectMode}
-        onPickCamera={openCamera}
-        onPickGallery={openUpload}
-      />
     </div>
   );
 };
