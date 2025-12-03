@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "composer-layout": "0.0.2",
+    "example-styles": "*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
