@@ -802,3 +802,113 @@ export const AddMenu: React.FC<AddMenuProps> = ({
     </div>
   );
 };
+
+// Restore ComposerPanel named export
+export const ComposerPanel: React.FC<ComposerPanelProps> = ({
+  mode,
+  modes,
+  text,
+  images,
+  preferences,
+  sendState,
+  error,
+  isMobile,
+  isEmbed = false,
+  showImagesSection = false,
+  onTextChange,
+  onFilesSelected,
+  onRemoveImage,
+  onUpdatePreferences,
+  onStart,
+  onClearMode,
+  onSelectMode
+}) => {
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const cameraInputRef = React.useRef<HTMLInputElement | null>(null);
+  const addButtonRef = React.useRef<HTMLButtonElement | null>(null);
+
+  const requiresText = mode?.requiresText ?? false;
+  const requiresImages = mode?.requiresImages ?? false;
+  const trimmedText = text.trim();
+  const disableStart =
+    sendState === 'sending' || (requiresText && !trimmedText) || (requiresImages && images.length === 0);
+  const placeholder = mode?.placeholder || 'Tell the assistant what you need.';
+
+  const openUpload = () => fileInputRef.current?.click();
+  const openCamera = () => cameraInputRef.current?.click();
+
+  const [addMenuOpen, setAddMenuOpen] = React.useState(false);
+  const addVariant: AddMenuVariant = isEmbed ? 'fullscreen' : isMobile ? 'sheet' : 'context';
+
+  return (
+    <div className="assistant-composer" data-mobile={isMobile}>
+      <div className="assistant-stack">
+        <PreferencesControl
+          preferences={preferences}
+          onUpdatePreferences={onUpdatePreferences}
+          isMobile={isMobile}
+          isEmbed={isEmbed}
+        />
+
+        <PhotoPicker
+          requiresImages={requiresImages}
+          images={images}
+          showWhenOptional={showImagesSection}
+          openCamera={openCamera}
+          openUpload={openUpload}
+          onRemoveImage={onRemoveImage}
+        />
+
+        <ComposeInputCard
+          mode={mode}
+          text={text}
+          placeholder={placeholder}
+          sendState={sendState}
+          error={error}
+          disableStart={disableStart}
+          isMobile={isMobile}
+          addButtonRef={addButtonRef}
+          onTextChange={onTextChange}
+          onStart={onStart}
+          onClearMode={onClearMode}
+          onAddAttachment={() => setAddMenuOpen(true)}
+        />
+      </div>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        style={{ display: 'none' }}
+        onChange={(e) => {
+          if (e.target.files) onFilesSelected(e.target.files, 'upload');
+          e.target.value = '';
+        }}
+      />
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        multiple
+        style={{ display: 'none' }}
+        onChange={(e) => {
+          if (e.target.files) onFilesSelected(e.target.files, 'camera');
+          e.target.value = '';
+        }}
+      />
+
+      <AddMenu
+        open={addMenuOpen}
+        variant={addVariant}
+        anchorRef={addButtonRef}
+        modes={modes}
+        onClose={() => setAddMenuOpen(false)}
+        onSelectMode={onSelectMode}
+        onPickCamera={openCamera}
+        onPickGallery={openUpload}
+      />
+    </div>
+  );
+};
