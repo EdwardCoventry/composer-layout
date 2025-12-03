@@ -5,6 +5,9 @@
   "main": "index.css",
   "files": [
     "index.css"
-  ]
+  ],
+  "scripts": {
+    "build": "echo \"no build needed\""
+  }
 }
 
