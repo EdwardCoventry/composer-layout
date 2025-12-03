@@ -1038,7 +1038,7 @@
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   box-shadow: none;
   overflow: hidden;
-  max-height: 90dvh;
+  max-height: calc(90dvh - env(safe-area-inset-bottom, 0px));
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -1106,7 +1106,7 @@
   --assistant-add-quick-gap: var(--assistant-add-pad-x);
   --assistant-card-gap: var(--assistant-add-pad-x);
   padding-top: 0;
-  padding-bottom: 0;
+  padding-bottom: calc(max(var(--assistant-add-pad-y), env(safe-area-inset-bottom, 0px) + var(--assistant-add-pad-y)));
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
