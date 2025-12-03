@@ -3,10 +3,15 @@ import { SendState } from './types';
 
 type FooterNoteProps = {
   sendState: SendState;
+  onNavigate?: (path: string) => void;
 };
 
-export const FooterNote: React.FC<FooterNoteProps> = ({ sendState }) => {
-  const statusText = sendState === 'sending' ? 'Simulating response…' : sendState === 'sent' ? 'Response ready' : 'Ready';
+export const FooterNote: React.FC<FooterNoteProps> = ({ sendState, onNavigate }) => {
+  const handleEmbed = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!onNavigate) return;
+    event.preventDefault();
+    onNavigate('/embed');
+  };
 
   return (
     <div className="assistant-footer widget-surface widget-surface--footer">
@@ -22,7 +27,15 @@ export const FooterNote: React.FC<FooterNoteProps> = ({ sendState }) => {
           <span className="assistant-footer__link-arrow">↗</span>
         </a>
       </div>
-      <div className="assistant-footer__status">{statusText}</div>
+      <a
+        href="/embed"
+        className="assistant-footer__button"
+        onClick={handleEmbed}
+        data-testid="assistant-embed-link"
+        data-status={sendState}
+      >
+        Embed
+      </a>
     </div>
   );
 };

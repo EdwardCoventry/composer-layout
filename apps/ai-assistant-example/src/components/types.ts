@@ -18,6 +18,24 @@ export type AssistantPreferences = {
   tone: 'Friendly' | 'Neutral' | 'Direct';
   detail: 'Brief' | 'Balanced' | 'Deep';
   includeSources: boolean;
+  toneNotes?: string;
+  detailNotes?: string;
+  allergies?: {
+    tags: string[];
+    notes?: string;
+  };
+  dietary?: {
+    tags: string[];
+    notes?: string;
+  };
+  personalization?: {
+    tags: string[];
+    notes?: string;
+  };
+  servings?: {
+    value: number | null;
+    notes?: string;
+  };
 };
 
 export type AssistantImage = {
