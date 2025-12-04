@@ -24,14 +24,21 @@ export const SheetAddMenu: React.FC<{
             snapPoints={[0, peekPx, 1]}
             initialSnap={1} // Open to the peek state (index 1)
         >
-            <Sheet.Container className="assistant-sheet-container">
+            <Sheet.Container
+                className="assistant-sheet-container"
+                // Ensure the container has a solid background
+                style={{
+                    backgroundColor: 'var(--assistant-sheet-bg, #05060a)',
+                }}
+            >
                 <Sheet.Header className="assistant-sheet-header" />
                 <Sheet.Content
                     className="assistant-sheet-content"
-                    // 4. CRITICAL: Ensure content is at least as tall as the peek.
-                    // This prevents the "Full" snap point from being smaller
-                    // than the "Peek" point, which would break the sheet.
-                    style={{ minHeight: peekPx }}
+                    // 4. Ensure content is at least as tall as the peek and has a solid background
+                    style={{
+                        minHeight: peekPx,
+                        backgroundColor: 'var(--assistant-sheet-bg, #05060a)',
+                    }}
                 >
                     <div className="assistant-add__body assistant-add__body--sheet">
                         {content}
