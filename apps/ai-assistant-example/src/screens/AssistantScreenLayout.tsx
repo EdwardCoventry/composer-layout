@@ -71,12 +71,13 @@ export const AssistantScreenLayout: React.FC<AssistantScreenLayoutProps> = ({ on
     };
   }, [historyOpen]);
 
-  const composerHeightMode: ComposerHeightMode | undefined = React.useMemo(() => {
-    if (isMobile) {
-      return { type: 'content', maxFraction: 0.72 };
-    }
-    return { type: 'fraction', fraction: 0.48, minPx: 260, allowAutoHeight: true };
-  }, [isMobile]);
+    const composerHeightMode: ComposerHeightMode | undefined = React.useMemo(() => {
+        if (isMobile) {
+            return { type: 'content', maxFraction: 0.72 };
+        }
+        // Desktop: use a fixed fraction without allowAutoHeight to avoid hug-to-content behavior
+        return { type: 'fraction', fraction: 0.48, minPx: 260 };
+    }, [isMobile]);
 
   const handleCloseHistory = React.useCallback(() => {
     setHistoryOpen(false);
