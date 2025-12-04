@@ -13,6 +13,11 @@ export const TagInput: React.FC<TagInputProps> = ({ tags, placeholder, onAdd, on
   const handleAdd = () => {
     const value = input.trim();
     if (!value) return;
+    // avoid duplicate additions
+    if (tags.includes(value)) {
+      setInput('');
+      return;
+    }
     onAdd(value);
     setInput('');
   };
@@ -41,12 +46,15 @@ export const TagInput: React.FC<TagInputProps> = ({ tags, placeholder, onAdd, on
               handleAdd();
             }
           }}
+          type="text"
+          inputMode="text"
+          enterKeyHint="done"
+          aria-label="Add a tag"
         />
-        <button type="button" className="assistant-tag-input__add" onClick={handleAdd}>
+        <button type="button" className="assistant-tag-input__add" onClick={handleAdd} aria-label="Add tag">
           + Add
         </button>
       </div>
     </div>
   );
 };
-

@@ -109,8 +109,16 @@ export const PreferencesControl: React.FC<PreferencesControlProps> = ({ preferen
             </div>
           </div>
         </div>
+        {variant === 'fullscreen' && !isEmbed && (
+          <>
+            <div className="assistant-modal__divider" aria-hidden />
+            <div className="assistant-modal__footer">
+              <button type="button" className="assistant-send-btn" onClick={closePrefs}>Done</button>
+            </div>
+          </>
+        )}
       </div>
-      {!isEmbed && (
+      {variant !== 'fullscreen' && !isEmbed && (
         <>
           <div className="assistant-modal__divider" aria-hidden />
           <div className="assistant-modal__footer">

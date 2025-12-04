@@ -920,9 +920,7 @@
 }
 
 .assistant-modal__body[data-variant="fullscreen"] .assistant-modal__content {
-    padding-bottom: calc(
-            var(--assistant-fullscreen-pad, var(--assistant-sheet-pad-x)) + 64px
-    );
+    padding-bottom: var(--assistant-fullscreen-pad, var(--assistant-sheet-pad-x)); /* content manages its own footer inside */
 }
 
 .assistant-modal__body[data-embed="true"] .assistant-modal__content {
