@@ -1,9 +1,12 @@
 import React from 'react';
 import type { AssistantImage, AssistantMode, AssistantPreferences, SendState } from '../types';
-import { PreferencesControl } from './PreferencesControl';
+import { PreferencesControl } from './preferences/PreferencesControl';
 import { PhotoPicker } from './PhotoPicker';
 import { ComposeInputCard } from './ComposeInputCard';
 import { AddMenu, type AddMenuVariant } from './AddMenu';
+import { PreferencesPopup } from './preferences/Popup';
+import { PreferencesModal } from './preferences/Modal';
+import { PreferencesFullscreen } from './preferences/Fullscreen';
 
 export type ComposerPanelProps = {
   mode: AssistantMode | null;
@@ -46,11 +49,13 @@ export const ComposerPanel: React.FC<ComposerPanelProps> = ({ mode, modes, text,
 
   const [addMenuOpen, setAddMenuOpen] = React.useState(false);
   const addVariant: AddMenuVariant = isEmbed ? 'fullscreen' : isMobile ? 'sheet' : 'context';
+  const PrefShell = isEmbed ? PreferencesFullscreen : (isMobile ? PreferencesModal : PreferencesPopup);
+  const contentVariant = isEmbed ? 'fullscreen' : (isMobile ? 'modal' : 'popup');
 
   return (
     <div className="assistant-composer" data-mobile={isMobile}>
       <div className="assistant-stack">
-        <PreferencesControl preferences={preferences} onUpdatePreferences={onUpdatePreferences} isMobile={isMobile} isEmbed={isEmbed} />
+        <PreferencesControl preferences={preferences} onUpdatePreferences={onUpdatePreferences} Shell={PrefShell} contentVariant={contentVariant} isEmbed={isEmbed} />
 
         <PhotoPicker requiresImages={requiresImages} images={images} showWhenOptional={showImagesSection} openCamera={openCamera} openUpload={openUpload} onRemoveImage={onRemoveImage} />
 

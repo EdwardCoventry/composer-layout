@@ -1,11 +1,8 @@
 import React from 'react';
+import { PreferencesShell } from './PreferencesShell';
 
 export const PreferencesModal: React.FC<{ content: React.ReactNode; onClose: () => void; isEmbed?: boolean; }> = ({ content, onClose, isEmbed }) => (
-  <div className="assistant-modal" data-variant="modal" data-embed={isEmbed ? 'true' : 'false'} role="dialog" aria-label="Edit preferences">
-    <div className="assistant-modal__backdrop" onClick={onClose} />
-    <div className="assistant-modal__body" data-variant="modal" data-embed={isEmbed ? 'true' : 'false'}>
-      {content}
-    </div>
-  </div>
+  <PreferencesShell variant="modal" onClose={onClose} isEmbed={isEmbed}>
+    {content}
+  </PreferencesShell>
 );
-

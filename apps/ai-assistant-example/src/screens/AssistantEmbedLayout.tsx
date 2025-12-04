@@ -4,6 +4,7 @@ import { HeroPanel } from '../components/HeroPanel';
 import { ResultPanel } from '../components/ResultPanel';
 import { PreferencesControl, PhotoPicker, ComposeInputCard, AddMenu } from '../components/ComposerPanel';
 import { useAssistantExperience } from './useAssistantExperience';
+import { PreferencesFullscreen } from '../components/composer/preferences/Fullscreen';
 
 type CollapseFlags = { hideHeroCopy: boolean; hideTags: boolean; hidePreferences: boolean; hidePhotos: boolean };
 type EmbedMeasurements = {
@@ -374,7 +375,8 @@ export const AssistantEmbedLayout: React.FC<AssistantEmbedLayoutProps> = () => {
           <PreferencesControl
             preferences={preferences}
             onUpdatePreferences={updatePreferences}
-            isMobile={isMobile}
+            Shell={PreferencesFullscreen}
+            contentVariant="fullscreen"
             isEmbed
           />
         )}
