@@ -24,7 +24,7 @@ export const SheetAddMenu: React.FC<{
             snapPoints={[0, peekPx, 1]}
             initialSnap={1} // Open to the peek state (index 1)
         >
-            <Sheet.Container>
+            <Sheet.Container className="assistant-sheet-container">
                 <Sheet.Header className="assistant-sheet-header" />
                 <Sheet.Content
                     className="assistant-sheet-content"
