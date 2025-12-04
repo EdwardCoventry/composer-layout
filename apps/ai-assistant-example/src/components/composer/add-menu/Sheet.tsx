@@ -1,53 +1,44 @@
 import React from 'react';
 import Sheet from 'react-modal-sheet';
 
-export const SheetAddMenu: React.FC<{ open: boolean; content: React.ReactNode; onClose: () => void; }> = ({ open, content, onClose }) => {
-  const containerRef = React.useRef<HTMLDivElement | null>(null);
-  const [snapPoints, setSnapPoints] = React.useState<number[]>([0]);
-  const [initialSnap, setInitialSnap] = React.useState<number>(0);
+const SHEET_PEEK_FRACTION = 0.4;
 
-  const recomputeSnapPoints = React.useCallback(() => {
-    const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
-    const contentEl = containerRef.current;
-    const contentHeight = contentEl ? contentEl.getBoundingClientRect().height : 0;
-    // Cap the max snap at the content height and viewport height (whichever is smaller)
-    const maxSnap = Math.min(contentHeight, vh);
-    // Choose a peek around 40% of the viewport, but not greater than maxSnap
-    const peek = Math.min(Math.round(vh * 0.4), maxSnap);
-    // If content is smaller than peek, just open at content size
-    const points = maxSnap > 0 ? [maxSnap, peek, 0] : [peek, 0];
-    // Prefer opening at peek if peek < maxSnap, else open at 0 (closed) and user can drag up
-    const nextInitial = points.length === 3 ? 1 : 0;
-    setSnapPoints(points);
-    setInitialSnap(nextInitial);
-  }, []);
+export const SheetAddMenu: React.FC<{
+    open: boolean;
+    content: React.ReactNode;
+    onClose: () => void;
+}> = ({ open, content, onClose }) => {
+    // 1. Calculate the pixel value for the peek state
+    // (Safe check for SSR environments)
+    const vh = typeof window !== 'undefined' ? window.innerHeight : 0;
+    const peekPx = vh * SHEET_PEEK_FRACTION;
 
-  React.useEffect(() => {
-    if (!open) return;
-    // Measure after mount
-    const rAF = window.requestAnimationFrame(recomputeSnapPoints);
-    const onResize = () => recomputeSnapPoints();
-    window.addEventListener('resize', onResize);
-    return () => {
-      window.cancelAnimationFrame(rAF);
-      window.removeEventListener('resize', onResize);
-    };
-  }, [open, recomputeSnapPoints]);
-
-  return (
-    <Sheet isOpen={open} onClose={onClose} snapPoints={snapPoints} initialSnap={initialSnap}>
-      <Sheet.Container className="assistant-sheet-container">
-        <Sheet.Header className="assistant-sheet-header" />
-        <Sheet.Content // @ts-expect-error v1 supports boolean disableDrag, newer versions support callback
-          disableDrag={(state: { scrollPosition: 'top' | 'middle' | 'bottom' }) => state.scrollPosition !== 'top'}
-          className="assistant-sheet-content"
+    return (
+        <Sheet
+            isOpen={open}
+            onClose={onClose}
+            // 2. Tell the sheet to base "100%" on the content height, not the viewport
+            detent="content-height"
+            // 3. Define snap points: [Closed, Peek (px), Full (100% of content)]
+            // Note: v5 uses ascending order (0 -> 1)
+            snapPoints={[0, peekPx, 1]}
+            initialSnap={1} // Open to the peek state (index 1)
         >
-          <div ref={containerRef} className="assistant-add__body assistant-add__body--sheet">
-            {content}
-          </div>
-        </Sheet.Content>
-      </Sheet.Container>
-      <Sheet.Backdrop className="assistant-sheet-backdrop" />
-    </Sheet>
-  );
+            <Sheet.Container>
+                <Sheet.Header className="assistant-sheet-header" />
+                <Sheet.Content
+                    className="assistant-sheet-content"
+                    // 4. CRITICAL: Ensure content is at least as tall as the peek.
+                    // This prevents the "Full" snap point from being smaller
+                    // than the "Peek" point, which would break the sheet.
+                    style={{ minHeight: peekPx }}
+                >
+                    <div className="assistant-add__body assistant-add__body--sheet">
+                        {content}
+                    </div>
+                </Sheet.Content>
+            </Sheet.Container>
+            <Sheet.Backdrop className="assistant-sheet-backdrop" />
+        </Sheet>
+    );
 };
