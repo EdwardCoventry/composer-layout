@@ -109,23 +109,14 @@ export const PreferencesControl: React.FC<PreferencesControlProps> = ({ preferen
             </div>
           </div>
         </div>
-        {variant === 'fullscreen' && !isEmbed && (
-          <>
-            <div className="assistant-modal__divider" aria-hidden />
-            <div className="assistant-modal__footer">
-              <button type="button" className="assistant-send-btn" onClick={closePrefs}>Done</button>
-            </div>
-          </>
-        )}
+        {/* Moved divider & footer inside content container to align with content gutter */}
+        <div className="assistant-modal__divider" aria-hidden />
+        <div className="assistant-modal__footer">
+          <button type="button" className="assistant-send-btn" onClick={closePrefs}>Done</button>
+        </div>
       </div>
-      {variant !== 'fullscreen' && !isEmbed && (
-        <>
-          <div className="assistant-modal__divider" aria-hidden />
-          <div className="assistant-modal__footer">
-            <button type="button" className="assistant-send-btn" onClick={closePrefs}>Done</button>
-          </div>
-        </>
-      )}
+      {/* Remove external variant-specific divider/footer blocks; content now owns them */}
+      {/* previously: fullscreen/modal conditional blocks with divider/footer here */}
     </>
   );
 

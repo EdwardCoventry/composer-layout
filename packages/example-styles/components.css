@@ -1,0 +1,48 @@
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap");
+
+/* Global resets & base */
+*, *::before, *::after { box-sizing: border-box; }
+html, body, #root { min-height: 100dvh; margin: 0; }
+body {
+  font-family: Quicksand, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 500;
+  background: var(--page-bg);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+button { font: inherit; color: inherit; background: none; border: none; padding: 0; cursor: pointer; transition: background 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease; }
+button:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--accent); border-radius: inherit; }
+input, textarea { font-family: inherit; color: inherit; background: transparent; border: none; padding: 0; transition: background 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease; }
+input::placeholder, textarea::placeholder { color: var(--text-muted); font-size: 0.95rem; }
+input:focus-visible, textarea:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--accent); border-radius: var(--radius-sm); }
+
+::selection { background: var(--selection-bg); color: var(--selection-fg); }
+input::selection, textarea::selection { background: var(--selection-bg); color: var(--selection-fg); }
+
+/* Scrollbar styling */
+* { scrollbar-width: thin; scrollbar-color: var(--border-strong) var(--surface-muted); }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: var(--surface-muted); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); }
+*::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: var(--radius-sm); border: 2px solid var(--surface-muted); }
+*::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+*::-webkit-scrollbar-corner { background: var(--surface-muted); }
+
+/* Utility: surface */
+.widget-surface { border-radius: 0; border: var(--border-width) solid var(--border-strong); background: var(--surface-default); }
+.widget-surface--header { border-radius: 0; border: none; border-bottom: var(--border-width) solid transparent; border-image: var(--border-dash-pattern) 1 round; background: var(--header-bg); }
+.widget-surface--content { border-radius: var(--radius-lg); background: var(--content-bg); }
+.widget-surface--footer { border-radius: 0; border: none; border-top: var(--border-width) solid transparent; border-image: var(--border-dash-pattern) 1 round; background: var(--page-bg); }
+
+/* Line clamp helpers */
+.line-clamp { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+.line-clamp-2 { -webkit-line-clamp: 2; }
+.line-clamp-3 { -webkit-line-clamp: 3; }
+.line-clamp-4 { -webkit-line-clamp: 4; }
+
+/* Field */
+.field { width: 100%; padding: var(--space-sm); padding-block: var(--space-sm); padding-inline: var(--space-sm); border-radius: var(--radius-sm); border: var(--border-width) solid var(--border-strong); background: var(--surface-default); color: var(--text-primary); }
+.field--textarea { resize: vertical; }
+
+/* Badge */
+.badge { display: inline-flex; align-items: center; gap: var(--space-xs); padding: var(--space-xs) var(--space-sm); border-radius: 999px; border: var(--border-width) solid var(--border-strong); color: var(--text-primary); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; background: var(--surface-default); font-weight: 700; }

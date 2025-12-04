@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 const rootDir = path.resolve(__dirname, '..');
 const showcaseDist = path.join(rootDir, 'apps/showcase/dist');

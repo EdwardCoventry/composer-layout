@@ -33,7 +33,12 @@ export const ComposerPanel: React.FC<ComposerPanelProps> = ({ mode, modes, text,
   const requiresText = mode?.requiresText ?? false;
   const requiresImages = mode?.requiresImages ?? false;
   const trimmedText = text.trim();
-  const disableStart = sendState === 'sending' || (requiresText && !trimmedText) || (requiresImages && images.length === 0);
+  const defaultRequiresSomeInput = !mode; // when no mode, require text OR image
+  const disableStart =
+    sendState === 'sending' ||
+    (requiresText && !trimmedText) ||
+    (requiresImages && images.length === 0) ||
+    (defaultRequiresSomeInput && !trimmedText && images.length === 0);
   const placeholder = mode?.placeholder || 'Tell the assistant what you need.';
 
   const openUpload = () => fileInputRef.current?.click();
@@ -59,4 +64,3 @@ export const ComposerPanel: React.FC<ComposerPanelProps> = ({ mode, modes, text,
     </div>
   );
 };
-

@@ -1,0 +1,104 @@
+:root {
+  color-scheme: light;
+
+  /* Theme palette – light */
+  --color-bg-page: #fff;
+  --color-surface: #fff;
+  --color-surface-muted: #f5f5f5;
+  --color-surface-strong: #e8e8e8;
+  --color-surface-disabled: #f8f8f8;
+  --color-border-subtle: #b3b3b3;
+  --color-border-strong: #000;
+  --color-text-primary: #111;
+  --color-text-secondary: #444;
+  --color-text-muted: #777;
+  --color-header-text: #111;
+  --color-header-subtext: #555;
+  --color-footer-text: #333;
+  --color-accent: #000;
+  --color-selection-bg: #000;
+  --color-selection-fg: #fff;
+
+  /* Layout */
+  --page-bg: var(--color-bg-page);
+  --page-strong: #f7f7f7;
+  --shell-gutter: clamp(12px, 3vw, 20px);
+  --shell-block: var(--shell-gutter);
+
+  /* Surfaces */
+  --surface-default: var(--color-surface);
+  --surface-muted: var(--color-surface-muted);
+  --surface-strong: var(--color-surface-strong);
+  --surface-disabled: var(--color-surface-disabled);
+  --header-bg: var(--surface-default);
+  --content-bg: var(--surface-default);
+  --border-subtle: var(--color-border-subtle);
+  --border-strong: var(--color-border-strong);
+  --border-width: 2px;
+  --border-dash-length: 8px;
+  --border-gap-length: 8px;
+  --border-dash-pattern: repeating-linear-gradient(
+    90deg,
+    var(--border-strong) 0,
+    var(--border-strong) var(--border-dash-length),
+    transparent var(--border-dash-length),
+    transparent calc(var(--border-dash-length) + var(--border-gap-length))
+  );
+
+  /* Text */
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-secondary);
+  --text-muted: var(--color-text-muted);
+  --header-text: var(--color-header-text);
+  --header-subtext: var(--color-header-subtext);
+  --footer-text: var(--color-footer-text);
+
+  /* Accent (monochrome) */
+  --accent: var(--color-accent);
+  --selection-bg: var(--color-selection-bg);
+  --selection-fg: var(--color-selection-fg);
+
+  /* Radii */
+  --radius-lg: 10px;
+  --radius-md: 8px;
+  --radius-sm: 6px;
+
+  /* Spacing */
+  --space-xxs: 4px;
+  --space-xs: 6px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --assistant-add-fullscreen-pad: clamp(16px, 3vw, 20px);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Theme palette – dark */
+  --color-bg-page: #0c0c0c;
+  --color-surface: #121212;
+  --color-surface-muted: #1a1a1a;
+  --color-surface-strong: #1f1f1f;
+  --color-surface-disabled: #181818;
+  --color-border-subtle: #4a4a4a;
+  --color-border-strong: #f5f5f5;
+  --color-text-primary: #f2f2f2;
+  --color-text-secondary: #c7c7c7;
+  --color-text-muted: #9a9a9a;
+  --color-header-text: #f2f2f2;
+  --color-header-subtext: #c0c0c0;
+  --color-footer-text: #d0d0d0;
+  --color-accent: #fff;
+  --color-selection-bg: #fff;
+  --color-selection-fg: #000;
+  --page-strong: #0f0f0f;
+}
+
+@media (width <= 768px) {
+  :root {
+    --shell-gutter: clamp(8px, 2.2vw, 16px);
+    --shell-block: var(--shell-gutter);
+  }
+}

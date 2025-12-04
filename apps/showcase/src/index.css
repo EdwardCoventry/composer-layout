@@ -1,14 +1,23 @@
-@import "example-styles/index.css";
-
-body {
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  background: var(--page-bg);
-}
-
-#root {
-  width: 100%;
+.showcase-root {
+  --page-bg: #f0f0f0;
+  --shell-gutter: 16px;
+  --border-width: 2px;
+  --border-dash-pattern: #ccc;
+  --space-xl: 32px;
+  --space-lg: 24px;
+  --space-md: 16px;
+  --space-sm: 8px;
+  --space-xs: 4px;
+  --text-primary: #333;
+  --text-secondary: #666;
+  --text-muted: #999;
+  --surface-default: #fff;
+  --surface-muted: #f9f9f9;
+  --border-strong: #0078d4;
+  --radius-lg: 8px;
+  --radius-md: 4px;
+  --radius-sm: 2px;
+  min-height: 100vh;
 }
 
 .showcase-shell {

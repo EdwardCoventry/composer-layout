@@ -18,6 +18,10 @@
     "dev:quiz": "npm run dev --workspace quiz-app-example",
     "dev:assistant": "npm run dev --workspace ai-assistant-example",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:css": "stylelint \"**/*.css\"",
+    "lint:css:report": "powershell -NoLogo -NoProfile -Command \"$ErrorActionPreference='Continue'; New-Item -ItemType Directory -Force -Path .reports | Out-Null; stylelint '**/*.css' --no-color --formatter verbose | Tee-Object -FilePath .reports/stylelint.txt\"",
+    "lint:css:report:json": "powershell -NoLogo -NoProfile -Command \"$ErrorActionPreference='Continue'; New-Item -ItemType Directory -Force -Path .reports | Out-Null; stylelint '**/*.css' --allow-empty-input --formatter json > .reports/stylelint.json\"",
+    "lint:css:report:node": "node scripts/stylelint-report.js",
     "typecheck": "tsc -b --noEmit",
     "check": "npm run lint && npm run typecheck"
   },
@@ -35,6 +39,8 @@
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-jsx-a11y": "^6.7.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "stylelint": "^16.26.1",
+    "stylelint-config-standard": "^39.0.1"
   }
 }

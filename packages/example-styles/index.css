@@ -1,4 +1,12 @@
+/* Deprecated aggregator: prefer importing tokens.css and components.css from TS entry points
+   in a fixed order. This file remains for legacy, but without @import side effects. */
+/* Previously:
 @import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap");
+@import url("./tokens.css");
+@import url("./components.css");
+*/
+
+/* Intentionally empty to avoid global import ordering surprises. */
 
 /* -------------------------------------------------------
    Design Tokens – monochrome wireframe
@@ -8,22 +16,22 @@
   color-scheme: light;
 
   /* Theme palette – light */
-  --color-bg-page: #ffffff;
-  --color-surface: #ffffff;
+  --color-bg-page: #fff;
+  --color-surface: #fff;
   --color-surface-muted: #f5f5f5;
   --color-surface-strong: #e8e8e8;
   --color-surface-disabled: #f8f8f8;
   --color-border-subtle: #b3b3b3;
-  --color-border-strong: #000000;
-  --color-text-primary: #111111;
-  --color-text-secondary: #444444;
-  --color-text-muted: #777777;
-  --color-header-text: #111111;
-  --color-header-subtext: #555555;
-  --color-footer-text: #333333;
-  --color-accent: #000000;
-  --color-selection-bg: #000000;
-  --color-selection-fg: #ffffff;
+  --color-border-strong: #000;
+  --color-text-primary: #111;
+  --color-text-secondary: #444;
+  --color-text-muted: #777;
+  --color-header-text: #111;
+  --color-header-subtext: #555;
+  --color-footer-text: #333;
+  --color-accent: #000;
+  --color-selection-bg: #000;
+  --color-selection-fg: #fff;
 
   /* Layout */
   --page-bg: var(--color-bg-page);
@@ -97,9 +105,9 @@ body[data-theme="dark"] {
   --color-header-text: #f2f2f2;
   --color-header-subtext: #c0c0c0;
   --color-footer-text: #d0d0d0;
-  --color-accent: #ffffff;
-  --color-selection-bg: #ffffff;
-  --color-selection-fg: #000000;
+  --color-accent: #fff;
+  --color-selection-bg: #fff;
+  --color-selection-fg: #000;
   --page-strong: #0f0f0f;
 }
 
@@ -121,7 +129,7 @@ body,
 }
 
 body {
-  font-family: "Quicksand", system-ui, -apple-system, BlinkMacSystemFont,
+  font-family: Quicksand, system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", sans-serif;
   font-weight: 500;
   background: var(--page-bg);
@@ -169,7 +177,7 @@ input:focus-visible,
 textarea:focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px var(--accent);
-  border-radius: inherit;
+  border-radius: var(--radius-sm);
 }
 
 ::selection {
@@ -283,7 +291,25 @@ textarea::selection {
   resize: vertical;
 }
 
-@media (max-width: 768px) {
+/* -------------------------------------------------------
+   Utility: Badge (shared across apps)
+------------------------------------------------------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: 999px;
+  border: var(--border-width) solid var(--border-strong);
+  color: var(--text-primary);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: var(--surface-default);
+  font-weight: 700;
+}
+
+@media (width <= 768px) {
   :root {
     --shell-gutter: clamp(8px, 2.2vw, 16px);
     --shell-block: var(--shell-gutter);

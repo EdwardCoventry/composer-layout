@@ -58,7 +58,24 @@ export const ComposeInputCard: React.FC<ComposeInputCardProps> = ({ mode, text, 
 
       <div className="assistant-input-stack">
         <div className="assistant-input-row">
-          <textarea className="assistant-input assistant-input--row" placeholder={placeholder} value={text} onChange={(e) => onTextChange(e.target.value)} disabled={isSending} rows={isMobile ? 3 : 2} />
+          <textarea
+            className="assistant-input assistant-input--row"
+            placeholder={placeholder}
+            value={text}
+            onChange={(e) => onTextChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                // Enter sends; Shift+Enter makes a newline
+                e.preventDefault();
+                if (!disableStart && !isSending) {
+                  onStart();
+                }
+              }
+            }}
+            disabled={isSending}
+            rows={isMobile ? 3 : 2}
+            enterKeyHint="send"
+          />
           <div className="assistant-input-buttons">
             <button type="button" className="assistant-plus-btn" aria-label="Add attachment or quick option" ref={addButtonRef} onClick={() => { onAddAttachment(); }}>+</button>
             <button type="button" className="assistant-send-btn" data-state={sendState} onClick={onStart} disabled={disableStart}>
@@ -72,4 +89,3 @@ export const ComposeInputCard: React.FC<ComposeInputCardProps> = ({ mode, text, 
     </div>
   );
 };
-

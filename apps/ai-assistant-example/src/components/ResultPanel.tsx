@@ -2,50 +2,108 @@ import React from 'react';
 import { AssistantAnswer, AssistantImage, AssistantMode, AssistantPreferences } from './types';
 
 type ResultPanelProps = {
-  answer: AssistantAnswer | null;
-  selectedMode: AssistantMode | null;
-  preferences: AssistantPreferences;
-  images: AssistantImage[];
-  text: string;
-  onRestart: () => void;
+    answer: AssistantAnswer | null;
+    selectedMode: AssistantMode | null;
+    preferences: AssistantPreferences;
+    images: AssistantImage[];
+    text: string;
+    onRestart: () => void;
 };
 
-export const ResultPanel: React.FC<ResultPanelProps> = ({ answer, selectedMode, preferences, images, text, onRestart }) => {
-  const fallbackSummary = text.trim()
-    ? `Here is a quick response to: “${text.trim()}”.`
-    : 'Here is a placeholder response after the simulated wait.';
-  const bullets = answer?.bullets ?? [
-    'Reframes the request in assistant-friendly language.',
-    `Tone: ${preferences.tone}, Detail: ${preferences.detail}${preferences.includeSources ? ', with sources' : ''}.`,
-    images.length ? `Used ${images.length} attached image${images.length === 1 ? '' : 's'} for extra context.` : 'No images were provided, so this is text-first.',
-    'Tap “Back to composer” to try another request or change the mode.',
-  ];
+export const ResultPanel: React.FC<ResultPanelProps> = ({
+                                                            answer,
+                                                            selectedMode,
+                                                            preferences,
+                                                            images,
+                                                            text: _text,
+                                                            onRestart,
+                                                        }) => {
+    const modeLabel = selectedMode?.label || 'Organize info';
+    const summary =
+        answer?.summary ||
+        'Organize these meeting notes into action items, concise with a couple of explanations.';
+    const title = answer?.title || modeLabel;
 
-  const modeLabel = selectedMode?.label || 'Quick answer';
+    const outputLabel = selectedMode?.tagLine || 'Organize notes into actions';
 
-  return (
-    <div className="assistant-result">
-      <div className="assistant-result__card widget-surface widget-surface--content">
-        <div className="badge">Assistant response</div>
-        <h2 className="assistant-result__title">{answer?.title || 'Draft response'}</h2>
-        <p className="assistant-result__lead">{answer?.summary || fallbackSummary}</p>
-        <div className="assistant-result__callout">{answer?.highlight || 'Response generated after the 3 second demo delay.'}</div>
-        <ul className="assistant-result__list">
-          {bullets.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-        <div className="assistant-result__meta">
-          <span>{modeLabel}</span>
-          <span>{preferences.tone} · {preferences.detail}</span>
-          <span>{images.length ? `${images.length} image${images.length === 1 ? '' : 's'}` : 'Text-only run'}</span>
+    const toneLabel = preferences.tone;
+    const detailLabel = preferences.detail;
+    const sourcesLabel = preferences.includeSources ? 'Sources included' : 'No sources';
+    const imagesLabel = images.length
+        ? `${images.length} image${images.length === 1 ? '' : 's'}`
+        : 'No images';
+
+    // Focus "What this run will do" on behaviour, not settings.
+    const willDo = answer?.bullets ?? [
+        'Extract action items from the notes.',
+        'Group related actions together by topic.',
+        'Highlight anything ambiguous or missing that may need follow-up.',
+    ];
+
+    const behaviorBullets = [
+        'Preview appears after 3s if streaming is slow.',
+        'You can go back to the composer to edit settings.',
+    ];
+
+    return (
+        <div className="assistant-result">
+            <div className="assistant-result__card widget-surface widget-surface--content">
+                <div className="badge">Assistant response</div>
+
+                <h2 className="assistant-result__title">{title}</h2>
+                <p className="assistant-result__lead">{summary}</p>
+
+                {/* Compact run overview instead of a chip grid */}
+                <div className="assistant-result__run-overview">
+                    <div className="assistant-result__run-main">
+                        <span className="assistant-result__run-label">Mode</span>{' '}
+                        <span className="assistant-result__run-value">{modeLabel}</span>
+                        <span className="assistant-result__run-separator"> · </span>
+                        <span className="assistant-result__run-label">Output</span>{' '}
+                        <span className="assistant-result__run-value">{outputLabel}</span>
+                    </div>
+
+                    <div className="assistant-result__run-secondary">
+                        <span>Tone: {toneLabel}</span>
+                        <span className="assistant-result__run-separator"> · </span>
+                        <span>Detail: {detailLabel}</span>
+                        <span className="assistant-result__run-separator"> · </span>
+                        <span>{sourcesLabel}</span>
+                        <span className="assistant-result__run-separator"> · </span>
+                        <span>{imagesLabel}</span>
+                    </div>
+                </div>
+
+                <div className="assistant-result__groups">
+                    <div className="assistant-group">
+                        <div className="assistant-group__title">What this run will do</div>
+                        <ul className="assistant-result__list">
+                            {willDo.map((item) => (
+                                <li key={item}>{item}</li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <div className="assistant-group">
+                        <div className="assistant-group__title">How preview works</div>
+                        <ul className="assistant-result__list assistant-result__list--note">
+                            {behaviorBullets.map((item) => (
+                                <li key={item}>{item}</li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+
+                <div className="assistant-result__actions">
+                    <button
+                        type="button"
+                        className="assistant-primary"
+                        onClick={onRestart}
+                    >
+                        Back to composer
+                    </button>
+                </div>
+            </div>
         </div>
-        <div className="assistant-result__actions">
-          <button type="button" className="assistant-secondary" onClick={onRestart}>
-            Back to composer
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+    );
 };

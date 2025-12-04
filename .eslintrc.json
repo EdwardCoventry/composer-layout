@@ -39,7 +39,13 @@
       "rules": {
         "@typescript-eslint/no-var-requires": "off"
       }
+    },
+    {
+      "files": ["scripts/**/*.js"],
+      "env": { "node": true },
+      "rules": {
+        "@typescript-eslint/no-require-imports": "off"
+      }
     }
   ]
 }
-
