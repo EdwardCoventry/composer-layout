@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
-import fs from 'fs';
+import * as path from 'path';
+import * as fs from 'fs';
 
 export default defineConfig({
   plugins: [
@@ -11,8 +11,8 @@ export default defineConfig({
       configureServer(server) {
         server.middlewares.use((req, res, next) => {
           const url = req.url || '';
-          const [urlPath, query] = url.split('?');
-          
+          const [urlPath, _query] = url.split('?');
+
           if (urlPath.startsWith('/quiz-app-example') || urlPath.startsWith('/ai-assistant-example')) {
             // Map the URL to the file system path
             // url is like /quiz-app-example/foo.js

@@ -4,8 +4,7 @@ import { describe, test, expect } from 'vitest';
 import { QuizScreenLayout } from '../screens/QuizScreenLayout';
 
 if (typeof window !== 'undefined' && !window.matchMedia) {
-  // @ts-ignore
-  window.matchMedia = (query: string) => ({
+  (window as any).matchMedia = (query: string) => ({
     matches: false,
     media: query,
     onchange: null,

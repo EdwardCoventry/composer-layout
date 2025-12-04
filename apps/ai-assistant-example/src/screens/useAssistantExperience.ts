@@ -83,7 +83,6 @@ export function useAssistantExperience(): UseAssistantExperienceResult {
 
   const handleModeSelect = React.useCallback(
     (modeKey: string) => {
-      const next = ASSISTANT_MODES.find((mode) => mode.key === modeKey);
       const willSelect = selectedModeKey === modeKey ? '' : modeKey;
       setSelectedModeKey(willSelect);
       setError('');

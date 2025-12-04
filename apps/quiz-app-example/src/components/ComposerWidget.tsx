@@ -4,7 +4,6 @@ export type ComposerSizingPreset = 'auto' | 'vhFraction';
 
 type ComposerWidgetProps = {
   isMobile: boolean;
-  sizingPreset: ComposerSizingPreset;
   isOptionsOpen: boolean;
   onToggleOptions: () => void;
   optionsMaxHeight?: number | string | null;
@@ -73,7 +72,6 @@ const CheckIcon = () => (
 
 export const ComposerWidget: React.FC<ComposerWidgetProps> = ({
   isMobile,
-  sizingPreset,
   isOptionsOpen,
   onToggleOptions,
   optionsMaxHeight,
@@ -142,6 +140,12 @@ export const ComposerWidget: React.FC<ComposerWidgetProps> = ({
     el.style.height = `${nextHeight}px`;
     el.style.overflowY = el.scrollHeight > MAX_INPUT_HEIGHT ? 'auto' : 'hidden';
   }, [inputValue]);
+
+  React.useEffect(() => {
+    if (!isMobile && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isMobile]);
 
   const renderSendIcon = () => {
     const visualState = answeredBy === 'card' ? 'idle' : sendState;
@@ -225,7 +229,6 @@ export const ComposerWidget: React.FC<ComposerWidgetProps> = ({
               placeholder={inputPlaceholder}
               className="field composer-widget__input"
               onFocus={onInputFocus}
-              autoFocus={!isMobile}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               disabled={inputDisabled}

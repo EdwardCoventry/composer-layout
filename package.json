@@ -16,7 +16,10 @@
     "dev:all": "concurrently \"npm run dev:showcase\" \"npm run dev:quiz\" \"npm run dev:assistant\"",
     "dev:showcase": "npm run dev --workspace showcase-app",
     "dev:quiz": "npm run dev --workspace quiz-app-example",
-    "dev:assistant": "npm run dev --workspace ai-assistant-example"
+    "dev:assistant": "npm run dev --workspace ai-assistant-example",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "typecheck": "tsc -b --noEmit",
+    "check": "npm run lint && npm run typecheck"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
@@ -25,6 +28,12 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "vitest": "^4.0.14",
-    "framer-motion": "^11.11.17"
+    "framer-motion": "^11.11.17",
+    "eslint": "^8.57.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-jsx-a11y": "^6.7.1"
   }
 }

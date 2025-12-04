@@ -16,8 +16,6 @@ const ClockIcon = () => (
 );
 
 export const HistoryPanel: React.FC<HistoryPanelProps> = ({ open, items, onClose, onSelect }) => {
-  if (!open) return null;
-
   const hasItems = items.length > 0;
   const groupedItems = React.useMemo(() => {
     if (!hasItems) return [];
@@ -32,9 +30,11 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({ open, items, onClose
     return Array.from(map.entries());
   }, [hasItems, items]);
 
+  if (!open) return null;
+
   return (
     <div className="assistant-history" role="dialog" aria-modal aria-label="History">
-      <div className="assistant-history__backdrop" onClick={onClose} />
+      <button type="button" className="assistant-history__backdrop" onClick={onClose} aria-label="Close" />
 
       <div className="assistant-history__panel">
         <div className="assistant-history__header">

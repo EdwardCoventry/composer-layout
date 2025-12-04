@@ -70,12 +70,12 @@ describe('useKeyboardOptionsSync', () => {
     };
 
     const { container } = render(<TestComponent />);
-    expect(container.firstChild?.getAttribute('data-open')).toBe('true');
+    expect((container.firstElementChild as HTMLElement)?.getAttribute('data-open')).toBe('true');
 
     act(() => { vv.setHeight(650); });
 
     expect(closeSpy).toHaveBeenCalledTimes(1);
-    expect(container.firstChild?.getAttribute('data-open')).toBe('false');
+    expect((container.firstElementChild as HTMLElement)?.getAttribute('data-open')).toBe('false');
   });
 
   test('blurs the active element when opening options while keyboard is up', () => {
