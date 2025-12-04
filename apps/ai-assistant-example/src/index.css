@@ -1425,6 +1425,15 @@
     /* do not override overflow here; Sheet/variant CSS controls it */
 }
 
+/* Bottom sheet content should have a solid background matching the app */
+.assistant-sheet-content {
+  background: var(--surface-default) !important;
+}
+/* Dark mode: solid black surface with white outline already handled on container */
+[data-theme="dark"] .assistant-sheet-content {
+  background: #0a0a0a !important;
+}
+
 @media (max-width: 768px) {
     .assistant-content-shell {
         padding-top: var(--shell-block);
