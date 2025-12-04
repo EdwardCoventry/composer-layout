@@ -5,7 +5,6 @@ import { PhotoPicker } from './PhotoPicker';
 import { ComposeInputCard } from './ComposeInputCard';
 import { AddMenu, type AddMenuVariant } from './AddMenu';
 import { PreferencesPopup } from './preferences/Popup';
-import { PreferencesModal } from './preferences/Modal';
 import { PreferencesFullscreen } from './preferences/Fullscreen';
 
 export type ComposerPanelProps = {
@@ -49,8 +48,9 @@ export const ComposerPanel: React.FC<ComposerPanelProps> = ({ mode, modes, text,
 
   const [addMenuOpen, setAddMenuOpen] = React.useState(false);
   const addVariant: AddMenuVariant = isEmbed ? 'fullscreen' : isMobile ? 'sheet' : 'context';
-  const PrefShell = isEmbed ? PreferencesFullscreen : (isMobile ? PreferencesModal : PreferencesPopup);
-  const contentVariant = isEmbed ? 'fullscreen' : (isMobile ? 'modal' : 'popup');
+  // Use fullscreen preferences on embed and mobile; popup on desktop
+  const PrefShell = (isEmbed || isMobile) ? PreferencesFullscreen : PreferencesPopup;
+  const contentVariant = (isEmbed || isMobile) ? 'fullscreen' : 'popup';
 
   return (
     <div className="assistant-composer" data-mobile={isMobile}>

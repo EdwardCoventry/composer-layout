@@ -961,10 +961,33 @@
     backdrop-filter: none;
 }
 
+/* Variant-specific footer layout: popup uses side-by-side divider and button; fullscreen uses column */
+.assistant-modal__body[data-variant="popup"] .assistant-modal__footer {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+}
+
+.assistant-modal__body[data-variant="popup"] .assistant-modal__divider {
+    flex: 1 1 auto;
+    height: 0; /* ensure line height stays as border thickness only */
+}
+
+.assistant-modal__body[data-variant="popup"] .assistant-modal__footer-spacer {
+    display: none; /* no vertical spacers needed in row layout */
+}
+
+/* Fullscreen keeps column layout (already default) but ensure spacers render */
+.assistant-modal__body[data-variant="fullscreen"] .assistant-modal__footer {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
 .assistant-modal__footer .assistant-send-btn {
     min-height: 44px;
     min-width: min(260px, 100%);
-    padding-inline: 32px;
 }
 
 .assistant-modal__body[data-variant="fullscreen"] .assistant-modal__footer .assistant-send-btn {
@@ -2217,21 +2240,14 @@
     width: 100%;
 }
 
-.assistant-modal__body[data-variant="popup"] .assistant-modal__footer .assistant-send-btn {
-    /* keep sizing consistent but centered by parent flex */
-    min-height: 44px;
-    min-width: min(260px, 100%);
-}
-
-
-/* Popup-specific footer alignment and divider sizing */
+/* Remove legacy popup-specific unequal padding to keep spacing equal above/below */
+/* Previously:
 .assistant-modal__body[data-variant="popup"] .assistant-modal__footer {
     display: flex;
     align-items: center;
     justify-content: center;
-    /* add a bit more space above/below the button in popup */
     padding-top: 12px;
     padding-bottom: 24px;
-    /* ensure the footer establishes the content width context */
     background: transparent;
 }
+*/
