@@ -48,9 +48,15 @@ const App = () => {
       <div className="showcase-grid">
         {apps.map((app) => (
           <a 
-            key={app.name} 
-            href={`${app.path}?from=showcase`}
+            key={app.name}
+            href={app.path}
             className="showcase-card"
+            onClick={_e => {
+              // Set sessionStorage flag before navigating
+              if (typeof window !== 'undefined') {
+                window.sessionStorage.setItem('fromShowcase', '1');
+              }
+            }}
           >
             <div className="showcase-card__preview">
               {app.name.slice(0, 2)}
@@ -67,4 +73,3 @@ const App = () => {
 };
 
 export default App;
-

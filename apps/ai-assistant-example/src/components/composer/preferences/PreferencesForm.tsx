@@ -243,11 +243,11 @@ export const PreferencesForm: React.FC<PreferencesFormProps> = ({
 
 export const PreferencesFooter: React.FC<{ onClose: () => void; showDivider?: boolean }> = ({ onClose, showDivider = true }) => (
   <div className="assistant-modal__footer" role="group" aria-label="Preferences actions">
-    {showDivider && <div className="assistant-modal__divider" aria-hidden />}
-    <div className="assistant-modal__footer-spacer" aria-hidden />
-    <button type="button" className="assistant-send-btn" onClick={onClose}>
-      Done
-    </button>
-    <div className="assistant-modal__footer-spacer" aria-hidden />
+    {showDivider && <div className="assistant-footer-divider" aria-hidden />}
+    <div className="assistant-modal__footer-content">
+      <button type="button" className="done-btn" onClick={onClose}>
+        Done
+      </button>
+    </div>
   </div>
 );

@@ -733,6 +733,42 @@
     justify-content: center;
 }
 
+.done-btn {
+  border: var(--border-width) solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface-default);
+  color: var(--text-primary);
+  padding: 0 18px;
+  height: var(--assistant-button-height, 44px);
+  font-weight: 800;
+  font-size: 14px;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  justify-content: center;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.done-btn:hover,
+.done-btn:focus {
+  background: var(--surface-muted);
+  color: var(--text-primary);
+  box-shadow: 0 4px 0 0 var(--border-strong);
+}
+
+.done-btn:active {
+  background: var(--surface-strong);
+  color: var(--text-primary);
+}
+
+.done-btn:disabled {
+  opacity: 0.7;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+
 .assistant-input-buttons .assistant-send-btn {
     width: 100%;
 }
@@ -951,50 +987,68 @@
     padding: 4px;
 }
 
+
 .assistant-modal__footer {
     display: flex;
-    justify-content: center;
-    margin-top: var(--space-md);
-    padding-top: var(--space-sm);
-    padding-bottom: calc(max(16px, env(safe-area-inset-bottom, 0px) + 8px));
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-end;
+    margin: 0;
+    padding: 0;
     background: transparent;
     backdrop-filter: none;
 }
 
-/* Variant-specific footer layout: popup uses side-by-side divider and button; fullscreen uses column */
-.assistant-modal__body[data-variant="popup"] .assistant-modal__footer {
+.assistant-modal__footer-content {
+    display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: var(--space-sm);
+    padding: 16px 0 16px 0;
+    /* 16px top and bottom for a more compact look */
+    width: 100%;
 }
+
+.assistant-modal__footer-content > .done-btn {
+    margin: 0;
+    align-self: center;
+}
+
+.assistant-modal__body[data-variant="popup"] .assistant-modal__footer-content {
+    justify-content: flex-end;
+    padding-right: var(--prefs-gutter);
+    padding-left: var(--prefs-gutter);
+}
+
+.assistant-modal__body[data-variant="popup"] .assistant-modal__divider {
+    width: 100%;
+}
+
+.assistant-footer-divider {
+    width: 100%;
+    height: var(--border-width, 2px);
+    min-height: 2px;
+    background: var(--border-strong, #222);
+    flex-shrink: 0;
+    margin: 0;
+}
+/* Ensure the done button is centered and doesn't stretch */
+.assistant-modal__footer > button,
+.assistant-modal__footer > .assistant-primary {
+    margin-top: var(--space-md); /* Add space above the button */
+    align-self: center;
+    min-width: 120px; /* Optional: set a min width for a nice button shape */
+    width: auto;      /* Prevent full width */
+    display: inline-flex;
+    justify-content: center;
+}
+
 
 .assistant-modal__body[data-variant="popup"] .assistant-modal__divider {
     flex: 1 1 auto;
     height: 0; /* ensure line height stays as border thickness only */
 }
 
-.assistant-modal__body[data-variant="popup"] .assistant-modal__footer-spacer {
-    display: none; /* no vertical spacers needed in row layout */
-}
-
-/* Fullscreen keeps column layout (already default) but ensure spacers render */
-.assistant-modal__body[data-variant="fullscreen"] .assistant-modal__footer {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.assistant-modal__footer .assistant-send-btn {
-    min-height: 44px;
-    min-width: min(260px, 100%);
-}
-
-.assistant-modal__body[data-variant="fullscreen"] .assistant-modal__footer .assistant-send-btn {
-    min-height: 48px;
-    min-width: 50%;
-    max-width: 420px;
-}
 
 .assistant-add-overlay {
     position: fixed;
@@ -1109,7 +1163,6 @@
     flex-direction: column;
     gap: var(--assistant-add-gap);
     padding: var(--assistant-add-pad-y) var(--assistant-add-pad-x);
-    padding-bottom: 0;
     min-height: 0;
     flex: 1 1 auto;
     position: relative;
@@ -1681,7 +1734,7 @@
 .assistant-history__inline-error {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-sm);
+    gap:  var(--space-sm);
     border: var(--border-width) dashed var(--border-strong);
     border-radius: var(--radius-md);
     padding: 10px 12px;
@@ -1884,7 +1937,7 @@
 .assistant-footer.widget-surface {
     border: none;
     border-image: none;
-    padding-inline: 0;
+    /* padding-inline: 0; */
 }
 
 .assistant-footer::before {
@@ -2240,14 +2293,3 @@
     width: 100%;
 }
 
-/* Remove legacy popup-specific unequal padding to keep spacing equal above/below */
-/* Previously:
-.assistant-modal__body[data-variant="popup"] .assistant-modal__footer {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-top: 12px;
-    padding-bottom: 24px;
-    background: transparent;
-}
-*/

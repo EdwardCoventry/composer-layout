@@ -93,12 +93,17 @@ export default defineConfig({
     port: 3000,
     strictPort: true,
     fs: {
-      allow: ['../..']
+      // Allow serving files from sibling example apps and shared components
+      allow: [
+        path.resolve(__dirname, '..'), // ../*
+        path.resolve(__dirname, '../..'), // repo root
+      ]
     }
   },
   resolve: {
     alias: {
       'composer-layout': path.resolve(__dirname, '../../packages/composer-layout/src'),
+      '@common': path.resolve(__dirname, '../common/components'),
     },
   },
 });

@@ -6,9 +6,8 @@
     "paths": {
       "composer-layout": ["../../packages/composer-layout/src"],
       "composer-layout/*": ["../../packages/composer-layout/src/*"]
-    }
+    },
+    "resolveJsonModule": true
   },
   "include": ["src"]
 }
-
-

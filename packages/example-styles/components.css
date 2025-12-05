@@ -32,7 +32,7 @@ input::selection, textarea::selection { background: var(--selection-bg); color: 
 .widget-surface { border-radius: 0; border: var(--border-width) solid var(--border-strong); background: var(--surface-default); }
 .widget-surface--header { border-radius: 0; border: none; border-bottom: var(--border-width) solid transparent; border-image: var(--border-dash-pattern) 1 round; background: var(--header-bg); }
 .widget-surface--content { border-radius: var(--radius-lg); background: var(--content-bg); }
-.widget-surface--footer { border-radius: 0; border: none; border-top: var(--border-width) solid transparent; border-image: var(--border-dash-pattern) 1 round; background: var(--page-bg); }
+.widget-surface--footer { border-radius: 0; border: none; border-top: var(--border-width) solid transparent; border-image: var(--border-dash-pattern) 1 round; background: var(--page-bg); padding-left: var(--shell-gutter, 24px); padding-right: var(--shell-gutter, 24px); }
 
 /* Line clamp helpers */
 .line-clamp { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }

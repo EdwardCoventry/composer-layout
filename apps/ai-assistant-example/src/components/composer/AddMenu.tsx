@@ -242,7 +242,6 @@ export const AddMenu: React.FC<AddMenuProps> = ({
                         className="assistant-add__list">{filteredQuickModes.map((item) => renderRow(item, 'mode'))}</div>
                 )}
             </div>
-            {variant === 'sheet' && <div className="assistant-add__bottom-line"/>}
         </div>
     );
 

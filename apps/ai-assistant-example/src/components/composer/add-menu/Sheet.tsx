@@ -38,6 +38,7 @@ export const SheetAddMenu: React.FC<{
                     <div className="assistant-add__body assistant-add__body--sheet">
                         {content}
                     </div>
+                    <div className="assistant-footer-divider" />
                 </Sheet.Content>
             </Sheet.Container>
             {/* Backdrop is non-interactive by default in v5; it won't close on tap
