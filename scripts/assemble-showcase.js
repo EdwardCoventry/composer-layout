@@ -1,5 +1,10 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Derive __filename and __dirname in ESM context
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const rootDir = path.resolve(__dirname, '..');
 const showcaseDist = path.join(rootDir, 'apps/showcase/dist');
@@ -32,4 +37,3 @@ apps.forEach(app => {
 });
 
 console.log('Showcase assembly complete.');
-
