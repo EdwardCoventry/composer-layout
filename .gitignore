@@ -16,6 +16,7 @@ npm-packages-offline-cache/
 # Test coverage
 coverage/
 .nyc_output/
+.reports/
 
 # Logs
 npm-debug.log*
