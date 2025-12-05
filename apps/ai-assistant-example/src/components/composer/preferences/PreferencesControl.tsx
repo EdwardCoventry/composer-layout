@@ -33,6 +33,16 @@ export const PreferencesControl: React.FC<PreferencesControlProps> = ({ preferen
   const openPrefs = () => setPrefsOpen(true);
   const closePrefs = () => setPrefsOpen(false);
 
+  const form = (
+    <PreferencesForm
+      preferences={preferences}
+      onUpdatePreferences={onUpdatePreferences}
+      contentVariant={contentVariant}
+      onClose={closePrefs}
+      renderFooterInside={contentVariant !== 'popup'}
+    />
+  );
+
   return (
     <>
       <PreferencesSummaryBar preferences={preferences} onOpen={openPrefs} />
@@ -42,15 +52,17 @@ export const PreferencesControl: React.FC<PreferencesControlProps> = ({ preferen
           isEmbed={isEmbed}
           onClose={closePrefs}
           content={
-            <>
-              <PreferencesForm
-                preferences={preferences}
-                onUpdatePreferences={onUpdatePreferences}
-                contentVariant={contentVariant}
-                onClose={closePrefs}
-              />
-              <PreferencesFooter onClose={closePrefs} showDivider={true} />
-            </>
+            contentVariant === 'popup' ? (
+              <>
+                {form}
+                {/* Footer outside content for popup; visually pinned at bottom */}
+                <PreferencesFooter onClose={closePrefs} showDivider={true} />
+              </>
+            ) : contentVariant === 'fullscreen' ? (
+              <div className="assistant-modal__scroll-frame">{form}</div>
+            ) : (
+              form
+            )
           }
         />
       )}

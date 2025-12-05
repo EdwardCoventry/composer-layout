@@ -266,6 +266,9 @@
     gap: var(--assistant-pref-cluster-gap);
     padding-top: var(--space-sm);
     padding-inline: var(--prefs-gutter);
+    padding-bottom: calc(
+            var(--assistant-fullscreen-pad, var(--assistant-sheet-pad-x))
+    );
 }
 
 .assistant-pref-form__section {
@@ -435,11 +438,14 @@
 
 @media (width <= 768px) {
     .assistant-modal {
-        padding: 0;
+        /* Preserve a small gap around the popup on tiny screens */
+        --assistant-mobile-gap: clamp(8px, 2vw, 16px);
+        padding: var(--assistant-mobile-gap);
     }
 
     .assistant-modal__body {
-        max-height: 100vh;
+        /* Account for container padding so the body never touches the viewport edges */
+        max-height: calc(100vh - 2 * var(--assistant-mobile-gap));
     }
 
     .assistant-pref-form__row {
@@ -734,39 +740,39 @@
 }
 
 .done-btn {
-  border: var(--border-width) solid var(--border-strong);
-  border-radius: 999px;
-  background: var(--surface-default);
-  color: var(--text-primary);
-  padding: 0 18px;
-  height: var(--assistant-button-height, 44px);
-  font-weight: 800;
-  font-size: 14px;
-  min-width: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
-  justify-content: center;
-  transition: background 0.15s, box-shadow 0.15s;
+    border: var(--border-width) solid var(--border-strong);
+    border-radius: 999px;
+    background: var(--surface-default);
+    color: var(--text-primary);
+    padding: 0 18px;
+    height: var(--assistant-button-height, 44px);
+    font-weight: 800;
+    font-size: 14px;
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    justify-content: center;
+    transition: background 0.15s, box-shadow 0.15s;
 }
 
 .done-btn:hover,
 .done-btn:focus {
-  background: var(--surface-muted);
-  color: var(--text-primary);
-  box-shadow: 0 4px 0 0 var(--border-strong);
+    background: var(--surface-muted);
+    color: var(--text-primary);
+    box-shadow: 0 4px 0 0 var(--border-strong);
 }
 
 .done-btn:active {
-  background: var(--surface-strong);
-  color: var(--text-primary);
+    background: var(--surface-strong);
+    color: var(--text-primary);
 }
 
 .done-btn:disabled {
-  opacity: 0.7;
-  background: var(--surface-muted);
-  color: var(--text-secondary);
-  cursor: not-allowed;
+    opacity: 0.7;
+    background: var(--surface-muted);
+    color: var(--text-secondary);
+    cursor: not-allowed;
 }
 
 .assistant-input-buttons .assistant-send-btn {
@@ -880,12 +886,11 @@
     background: var(--surface-default);
     border: calc(var(--border-width) + 1px) solid var(--border-strong);
     border-radius: var(--radius-lg);
-    padding: clamp(var(--space-md), 2vw, 26px);
     display: flex;
     flex-direction: column;
     gap: 0;
     box-shadow: 0 12px 0 0 var(--border-strong);
-    max-height: calc(100vh - 2 * var(--space-md));
+    max-height: calc(100vh - 2 * var(--assistant-mobile-gap));
     --assistant-sheet-pad-x: clamp(var(--space-md), 4vw, 28px);
 }
 
@@ -959,11 +964,6 @@
     padding: var(--space-xs) 0 0 0;
 }
 
-.assistant-modal__body[data-variant="fullscreen"] .assistant-modal__content {
-    padding-bottom: calc(
-            var(--assistant-fullscreen-pad, var(--assistant-sheet-pad-x)) + 64px
-    );
-}
 
 .assistant-modal__body[data-embed="true"] .assistant-modal__content {
     padding: var(--space-xs) 0 calc(var(--assistant-embed-pad) + 64px);
@@ -997,6 +997,7 @@
     padding: 0;
     background: transparent;
     backdrop-filter: none;
+    flex-shrink: 0;
 }
 
 .assistant-modal__footer-content {
@@ -1032,13 +1033,14 @@
     flex-shrink: 0;
     margin: 0;
 }
+
 /* Ensure the done button is centered and doesn't stretch */
 .assistant-modal__footer > button,
 .assistant-modal__footer > .assistant-primary {
     margin-top: var(--space-md); /* Add space above the button */
     align-self: center;
     min-width: 120px; /* Optional: set a min width for a nice button shape */
-    width: auto;      /* Prevent full width */
+    width: auto; /* Prevent full width */
     display: inline-flex;
     justify-content: center;
 }
@@ -1734,7 +1736,7 @@
 .assistant-history__inline-error {
     display: inline-flex;
     align-items: center;
-    gap:  var(--space-sm);
+    gap: var(--space-sm);
     border: var(--border-width) dashed var(--border-strong);
     border-radius: var(--radius-md);
     padding: 10px 12px;
@@ -1963,6 +1965,7 @@
     background: var(--surface-default);
     z-index: -1; /* put behind footer content */
 }
+
 .assistant-footer__left {
     display: flex;
     flex-direction: column;
@@ -2208,6 +2211,7 @@
 .assistant-sheet-backdrop {
     background: rgb(0 0 0 / 52%) !important; /* darker overlay */
 }
+
 .assistant-sheet-container {
     background: var(--surface-default) !important;
     border-top-left-radius: 16px !important;
@@ -2282,14 +2286,40 @@
 }
 
 
-.assistant-modal__body[data-variant="modal"] .assistant-modal__divider {
-    width: 100%;
-    box-sizing: border-box;
+.assistant-modal__body[data-variant="modal"] {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
+.assistant-modal__scroll-frame {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+}
 
+.assistant-modal[data-variant="popup"][data-embed="false"] {
+    /* Equal, responsive top/bottom margins around the popup */
+    --assistant-popup-gap-y: clamp(16px, 4vh, 40px);
+    padding-top: var(--assistant-popup-gap-y);
+    padding-bottom: var(--assistant-popup-gap-y);
+}
 
-.assistant-modal__body[data-variant="popup"] .assistant-modal__divider {
-    width: 100%;
+/* Constrain popup body height to viewport minus margins */
+.assistant-modal__body[data-variant="popup"][data-embed="false"] {
+    max-height: calc(100dvh - 2 * var(--assistant-popup-gap-y));
+}
+
+/* Ensure internal scrolling happens within content area, not body/page */
+.assistant-modal__body[data-variant="popup"][data-embed="false"] {
+    display: flex;
+    flex-direction: column;
+}
+.assistant-modal__content {
+    flex: 1 1 auto;
+    min-height: 0; /* allow child to shrink and enable scrolling */
+    overflow-y: auto;
 }
 

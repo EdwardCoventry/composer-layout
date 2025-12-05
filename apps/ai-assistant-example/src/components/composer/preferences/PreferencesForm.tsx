@@ -29,6 +29,7 @@ export type PreferencesFormProps = {
   onUpdatePreferences: (prefs: Partial<AssistantPreferences>) => void;
   contentVariant: 'popup' | 'modal' | 'fullscreen';
   onClose: () => void;
+  renderFooterInside?: boolean; // when true, render footer inside the scrollable content
 };
 
 export const PreferencesForm: React.FC<PreferencesFormProps> = ({
@@ -36,6 +37,7 @@ export const PreferencesForm: React.FC<PreferencesFormProps> = ({
   onUpdatePreferences,
   contentVariant,
   onClose,
+  renderFooterInside = contentVariant !== 'popup',
 }) => {
   const servingsInputRef = React.useRef<HTMLInputElement | null>(null);
 
@@ -236,6 +238,9 @@ export const PreferencesForm: React.FC<PreferencesFormProps> = ({
             </div>
           </div>
         </div>
+        {renderFooterInside && (
+          <PreferencesFooter onClose={onClose} showDivider={true} />
+        )}
       </div>
     </>
   );

@@ -90,8 +90,9 @@ export default defineConfig({
     }
   ],
   server: {
-    port: 3000,
-    strictPort: true,
+    host: true,
+    port: process.env.PORT ? Number(process.env.PORT) : 3000,
+    strictPort: false,
     fs: {
       // Allow serving files from sibling example apps and shared components
       allow: [

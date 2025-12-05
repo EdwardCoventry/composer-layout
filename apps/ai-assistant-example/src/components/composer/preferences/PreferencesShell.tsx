@@ -53,8 +53,13 @@ export const PreferencesShell: React.FC<PreferencesShellInnerProps> = ({
         className="assistant-modal__body"
         data-variant={variant}
         data-embed={embedAttr}
-        style={variant === 'popup' ? { padding: 0 } : undefined}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          ...(variant === 'popup' ? { padding: 0 } : {}),
+        }}
       >
+        {/* Render children directly; callers control scroll frame composition */}
         {children}
       </div>
     </div>

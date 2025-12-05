@@ -1,12 +1,12 @@
 import React from 'react';
-import {PreferencesShell} from './PreferencesShell';
+import { PreferencesShell } from './PreferencesShell';
 
 export const PreferencesModal: React.FC<{
     content: React.ReactNode;
     onClose: () => void;
     isEmbed?: boolean;
-}> = ({content, onClose, isEmbed}) => (
-    <PreferencesShell variant="modal" onClose={onClose} isEmbed={isEmbed}>
-        {content}
-    </PreferencesShell>
+}> = ({ content, onClose, isEmbed }) => (
+  <PreferencesShell variant="modal" onClose={onClose} isEmbed={isEmbed}>
+    {content}
+  </PreferencesShell>
 );
