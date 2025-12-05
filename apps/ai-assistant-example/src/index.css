@@ -901,7 +901,7 @@
 
 .assistant-modal__body[data-variant="fullscreen"] {
     width: 100%;
-    height: 100lvh;
+    height: 100dvh;
     max-width: none;
     max-height: none;
     border-radius: 0;
