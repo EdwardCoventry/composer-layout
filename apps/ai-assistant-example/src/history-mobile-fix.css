@@ -1,0 +1,6 @@
+@media (max-width: 768px) {
+  .assistant-history__panel::before {
+    border: none !important;
+  }
+}
+

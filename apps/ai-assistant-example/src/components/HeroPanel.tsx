@@ -9,7 +9,41 @@ type HeroPanelProps = {
   heroSubtitle: string;
   hideTitleSubtitle?: boolean;
   hideModes?: boolean;
+  /**
+   * Layout variant: 'embed' (hug content) or 'fill' (fill available space)
+   * Default is 'embed'.
+   */
+  variant?: 'embed' | 'fill';
 };
+
+type ModeTagsPanelProps = {
+  modes: AssistantMode[];
+  selectedModeKey: string;
+  onSelectMode: (modeKey: string) => void;
+};
+
+export const ModeTagsPanel: React.FC<ModeTagsPanelProps> = ({
+  modes,
+  selectedModeKey,
+  onSelectMode
+}) => (
+  <div className="assistant-mode-row">
+    {modes.map((mode) => (
+      <button
+        key={mode.key}
+        type="button"
+        className="assistant-mode-pill"
+        data-active={mode.key === selectedModeKey}
+        onClick={() => onSelectMode(mode.key)}
+      >
+        <span className="assistant-mode-pill__emoji" aria-hidden>
+          {mode.emoji}
+        </span>
+        <span className="assistant-mode-pill__label">{mode.tagLine}</span>
+      </button>
+    ))}
+  </div>
+);
 
 export const HeroPanel: React.FC<HeroPanelProps> = ({
   modes,
@@ -18,10 +52,14 @@ export const HeroPanel: React.FC<HeroPanelProps> = ({
   heroTitle,
   heroSubtitle,
   hideTitleSubtitle = false,
-  hideModes = false
+  hideModes = false,
+  variant = 'embed',
 }) => {
   return (
-    <div className="assistant-hero">
+    <div
+      className={`assistant-hero${variant === 'fill' ? ' assistant-hero--fill' : ''}`}
+      // Optionally, you can add style={{ flex: variant === 'fill' ? 1 : undefined }}
+    >
       <div className="assistant-hero__content">
         {!hideTitleSubtitle && (
           <>
@@ -31,22 +69,11 @@ export const HeroPanel: React.FC<HeroPanelProps> = ({
         )}
 
         {!hideModes && (
-          <div className="assistant-mode-row">
-            {modes.map((mode) => (
-              <button
-                key={mode.key}
-                type="button"
-                className="assistant-mode-pill"
-                data-active={mode.key === selectedModeKey}
-                onClick={() => onSelectMode(mode.key)}
-              >
-                <span className="assistant-mode-pill__emoji" aria-hidden>
-                  {mode.emoji}
-                </span>
-                <span className="assistant-mode-pill__label">{mode.tagLine}</span>
-              </button>
-            ))}
-          </div>
+          <ModeTagsPanel
+            modes={modes}
+            selectedModeKey={selectedModeKey}
+            onSelectMode={onSelectMode}
+          />
         )}
       </div>
     </div>

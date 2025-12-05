@@ -39,8 +39,6 @@ export const PreferencesForm: React.FC<PreferencesFormProps> = ({
   onClose,
   renderFooterInside = contentVariant !== 'popup',
 }) => {
-  const servingsInputRef = React.useRef<HTMLInputElement | null>(null);
-
   const updateTags = (key: TagPreferenceKey, tag: string) => {
     const current = preferences[key]?.tags || [];
     if (current.includes(tag)) return;
@@ -130,32 +128,23 @@ export const PreferencesForm: React.FC<PreferencesFormProps> = ({
           <div className="assistant-pref-form__row">
             <div className="assistant-pref-form__section">
               <div className="assistant-pref-form__label">Audience size</div>
-              <div className="assistant-tag-row">
-                <input
-                  ref={servingsInputRef}
-                  type="number"
-                  min={1}
-                  className="assistant-pref-input"
-                  placeholder="Number of people"
-                  value={preferences.servings?.value ?? ''}
-                  onChange={(e) =>
-                    onUpdatePreferences({
-                      servings: {
-                        ...(preferences.servings || { notes: '' }),
-                        value: e.target.value ? Number(e.target.value) : null,
-                      },
-                    })
-                  }
-                />
-                <button
-                  type="button"
-                  className="assistant-tag-input__add"
-                  onClick={() => servingsInputRef.current?.focus()}
-                  aria-label="Edit servings"
-                >
-                  + Add
-                </button>
-              </div>
+              {/* Replace TagInput for servings with a numeric input bound to value */}
+              <input
+                type="number"
+                className="assistant-pref-input"
+                placeholder="Number of people"
+                value={preferences.servings?.value ?? ''}
+                onChange={(e) => {
+                  const raw = e.target.value;
+                  const parsed = raw === '' ? null : Number(raw);
+                  onUpdatePreferences({
+                    servings: {
+                      ...(preferences.servings || {}),
+                      value: Number.isNaN(parsed) ? null : parsed,
+                    },
+                  });
+                }}
+              />
               <textarea
                 className="assistant-pref-textarea"
                 placeholder="Who this is for (role, team size)"

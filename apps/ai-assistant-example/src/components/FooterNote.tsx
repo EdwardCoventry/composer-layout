@@ -1,6 +1,7 @@
 import React from 'react';
 import { SendState } from './types';
 import Footer from '@common/footer/Footer';
+import { ExpandIcon } from './ExpandIcon';
 
 type FooterNoteProps = {
   sendState: SendState;
@@ -24,7 +25,7 @@ export const FooterNote: React.FC<FooterNoteProps> = ({ sendState, onNavigate })
           data-testid="assistant-embed-link"
           data-status={sendState}
         >
-          Embed
+          Embed <ExpandIcon size={16} style={{ marginLeft: 4, verticalAlign: 'middle' }} />
         </a>
       }
     />

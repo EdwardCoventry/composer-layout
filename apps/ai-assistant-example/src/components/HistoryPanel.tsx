@@ -37,16 +37,18 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({ open, items, onClose
       <button type="button" className="assistant-history__backdrop" onClick={onClose} aria-label="Close" />
 
       <div className="assistant-history__panel">
-        <div className="assistant-history__header">
-          <div className="assistant-history__inner">
-            <button type="button" className="assistant-history__close" onClick={onClose} aria-label="Close history">
+        <header className="assistant-header" style={{ background: 'none' }}>
+          <div className="assistant-header__inner">
+            <button type="button" className="assistant-header__icon-btn" onClick={onClose} aria-label="Close history">
               ×
             </button>
-            <div className="assistant-history__title">
-              <span className="assistant-history__title-text">History</span>
+            <div className="assistant-header__text">
+              <span className="assistant-header__title">History</span>
             </div>
+            {/* Placeholder for symmetry to center the title */}
+            <div style={{ width: 42, height: 42 }} aria-hidden="true" />
           </div>
-        </div>
+        </header>
 
         <div className="assistant-history__body">
           <div className="assistant-history__column">

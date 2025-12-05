@@ -3,7 +3,7 @@ import type { AssistantImage, AssistantMode, AssistantPreferences, SendState } f
 import { PreferencesControl } from './preferences/PreferencesControl';
 import { PhotoPicker } from './PhotoPicker';
 import { ComposeInputCard } from './ComposeInputCard';
-import { AddMenu, type AddMenuVariant } from './AddMenu';
+import { AddMenu, type AddMenuVariant } from './add-menu/AddMenu';
 import { PreferencesPopup } from './preferences/Popup';
 import { PreferencesFullscreen } from './preferences/Fullscreen';
 

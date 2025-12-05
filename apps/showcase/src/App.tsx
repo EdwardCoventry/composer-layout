@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import PreviewFrame from './components/PreviewFrame';
+import ShowcaseFooter from './components/ShowcaseFooter';
 
 interface AppEntry {
   name: string;
@@ -35,39 +37,42 @@ const App = () => {
   useEffect(() => {
     // In a real scenario, we might fetch this, but here we import it.
     // Use type assertion if the JSON import structure isn't strictly typed in TS yet.
-    setApps((registryData as unknown as { apps: AppEntry[] }).apps || []);
+    const loadedApps = (registryData as unknown as { apps: AppEntry[] }).apps || [];
+    // Sort so AI Assistant is first, Quiz App second
+    const sortedApps = [...loadedApps].sort((a, b) => {
+      if (a.name === 'ai-assistant-example') return -1;
+      if (b.name === 'ai-assistant-example') return 1;
+      return 0;
+    });
+    setApps(sortedApps);
   }, []);
 
   return (
     <div className="showcase-shell">
-      <header className="showcase-header">
-        <h1 className="showcase-header__title">Examples Showcase</h1>
+      <header className="showcase-header widget-surface widget-surface--header">
+        <h1 className="showcase-header__title">Composer-Layout</h1>
         <p className="showcase-header__subtitle">Select an example application to launch.</p>
       </header>
-
       <div className="showcase-grid">
         {apps.map((app) => (
-          <a 
+          <a
             key={app.name}
             href={app.path}
-            className="showcase-card"
-            onClick={_e => {
-              // Set sessionStorage flag before navigating
-              if (typeof window !== 'undefined') {
-                window.sessionStorage.setItem('fromShowcase', '1');
-              }
-            }}
+            className="showcase-frame-link"
+            tabIndex={0}
+            aria-label={`Open ${app.title}`}
           >
             <div className="showcase-card__preview">
-              {app.name.slice(0, 2)}
+              <PreviewFrame
+                appPath={app.path}
+                title={app.title}
+                initials={app.name.slice(0, 2).toUpperCase()}
+              />
             </div>
-            <h2 className="showcase-card__title">{app.title}</h2>
-            <p className="showcase-card__desc">
-              {app.description || `Launch the ${app.title} application.`}
-            </p>
           </a>
         ))}
       </div>
+      <ShowcaseFooter />
     </div>
   );
 };

@@ -112,7 +112,7 @@ export function useAssistantExperience(): UseAssistantExperienceResult {
   }, []);
 
   const handleStart = React.useCallback(() => {
-    if (sendState === 'sending') return;
+    if (sendState === 'sending' || sendState === 'sent') return;
     const trimmed = text.trim();
     const needsText = selectedMode?.requiresText ?? false;
     const needsImages = selectedMode?.requiresImages ?? false;
@@ -127,12 +127,19 @@ export function useAssistantExperience(): UseAssistantExperienceResult {
 
     setError('');
     setSendState('sending');
+    if (sendTimerRef.current !== null) {
+      window.clearTimeout(sendTimerRef.current);
+    }
+    // Step 1: 'sending' to 'sent'
     sendTimerRef.current = window.setTimeout(() => {
       setSendState('sent');
-      setAnswer(buildAnswer(selectedMode ?? effectiveMode, trimmed, preferences, images));
-      setStage('answer');
-      sendTimerRef.current = null;
-    }, 3000);
+      // Step 2: 'sent' to 'answer'
+      sendTimerRef.current = window.setTimeout(() => {
+        setAnswer(buildAnswer(selectedMode ?? effectiveMode, trimmed, preferences, images));
+        setStage('answer');
+        sendTimerRef.current = null;
+      }, 2000); // 2 seconds for 'sent' state
+    }, 2000); // 2 seconds for 'sending' state
   }, [effectiveMode, images, preferences, selectedMode, sendState, text]);
 
   const handleRestart = React.useCallback(() => {

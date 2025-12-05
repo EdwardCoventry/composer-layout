@@ -4,6 +4,7 @@ type AssistantHeaderProps = {
   historyOpen: boolean;
   onToggleHistory: () => void;
   onShare: () => void | Promise<void>;
+  onHomeClick?: () => void;
 };
 
 const MenuIcon = () => (
@@ -21,7 +22,7 @@ const ShareIcon = () => (
   </svg>
 );
 
-export const AssistantHeader: React.FC<AssistantHeaderProps> = ({ historyOpen, onToggleHistory, onShare }) => {
+export const AssistantHeader: React.FC<AssistantHeaderProps> = ({ historyOpen, onToggleHistory, onShare, onHomeClick }) => {
   return (
     <div className="assistant-header widget-surface widget-surface--header">
       <div className="assistant-header__inner">
@@ -37,9 +38,16 @@ export const AssistantHeader: React.FC<AssistantHeaderProps> = ({ historyOpen, o
         </button>
 
         <div className="assistant-header__text">
-          <span className="assistant-header__title">AI Assistant</span>
+          <button
+            type="button"
+            className="assistant-header__title"
+            onClick={onHomeClick}
+            tabIndex={0}
+            aria-label="Go to AI Assistant home"
+          >
+            AI Assistant
+          </button>
         </div>
-
         <div className="assistant-header__actions">
           <button type="button" className="assistant-header__icon-btn assistant-header__share" onClick={onShare} aria-label="Share">
             <ShareIcon />

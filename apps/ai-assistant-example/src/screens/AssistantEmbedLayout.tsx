@@ -1,6 +1,6 @@
 import React from 'react';
 import { useViewportCategory } from 'composer-layout';
-import { HeroPanel } from '../components/HeroPanel';
+import { HeroPanel, ModeTagsPanel } from '../components/HeroPanel';
 import { ResultPanel } from '../components/ResultPanel';
 import { PreferencesControl, PhotoPicker, ComposeInputCard, AddMenu } from '../components/ComposerPanel';
 import { useAssistantExperience } from './useAssistantExperience';
@@ -359,16 +359,14 @@ export const AssistantEmbedLayout: React.FC<AssistantEmbedLayoutProps> = () => {
             heroTitle={heroTitle}
             heroSubtitle={heroSubtitle}
             hideModes
+            // variant='embed' is default, so no need to specify
           />
         )}
         {!collapsePlan.hideTags && (
-          <HeroPanel
+          <ModeTagsPanel
             modes={modes}
             selectedModeKey={selectedModeKey}
             onSelectMode={handleModeSelect}
-            heroTitle={heroTitle}
-            heroSubtitle={heroSubtitle}
-            hideTitleSubtitle
           />
         )}
         {!collapsePlan.hidePreferences && (
@@ -425,7 +423,7 @@ export const AssistantEmbedLayout: React.FC<AssistantEmbedLayoutProps> = () => {
         anchorRef={addButtonRef}
         modes={modes}
         onClose={() => setAddMenuOpen(false)}
-        onSelectMode={(modeKey) => {
+        onSelectMode={(modeKey: string) => {
           handleModeSelect(modeKey);
           setAddMenuOpen(false);
         }}

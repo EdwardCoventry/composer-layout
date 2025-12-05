@@ -8,6 +8,7 @@ type FooterWidgetProps = {
 export const FooterWidget: React.FC<FooterWidgetProps> = ({ sizingLabel }) => {
   return (
     <Footer
+      className="footer-widget"
       rightElement={
         sizingLabel ? (
           <div className="footer-widget__sizing">{sizingLabel}</div>

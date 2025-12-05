@@ -24,7 +24,16 @@ type ComposeInputCardProps = {
 
 export const ComposeInputCard: React.FC<ComposeInputCardProps> = ({ mode, text, placeholder, sendState, error, disableStart, isMobile, addButtonRef, showInlinePhotos = false, photosCount = 0, photosRequired = false, onPickCamera, onPickGallery, onTextChange, onStart, onClearMode, onAddAttachment }) => {
   const isSending = sendState === 'sending';
-  const buttonLabel = isSending ? 'Working...' : sendState === 'sent' ? 'Done' : 'Start';
+  const isSent = sendState === 'sent';
+  const buttonLabel = isSending ? 'Working...' : isSent ? 'Sent' : 'Start';
+
+  // Inline tick icon for 'sent' state
+  const TickIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden focusable="false">
+      <circle cx="10" cy="10" r="10" fill="currentColor" />
+      <path d="M6 10.5L9 13.5L14 8.5" stroke="#111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </svg>
+  );
 
   return (
     <div className="assistant-compose-card">
@@ -79,7 +88,7 @@ export const ComposeInputCard: React.FC<ComposeInputCardProps> = ({ mode, text, 
           <div className="assistant-input-buttons">
             <button type="button" className="assistant-plus-btn" aria-label="Add attachment or quick option" ref={addButtonRef} onClick={() => { onAddAttachment(); }}>+</button>
             <button type="button" className="assistant-send-btn" data-state={sendState} onClick={onStart} disabled={disableStart}>
-              <SendIcon />
+              {isSent ? <TickIcon /> : <SendIcon />}
               {buttonLabel}
             </button>
           </div>

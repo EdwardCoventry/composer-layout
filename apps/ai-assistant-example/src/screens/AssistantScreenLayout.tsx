@@ -159,6 +159,7 @@ export const AssistantScreenLayout: React.FC<AssistantScreenLayoutProps> = ({ on
         onSelectMode={handleModeSelect}
         heroTitle={heroTitle}
         heroSubtitle={heroSubtitle}
+        variant="fill"
       />
     );
 
@@ -169,6 +170,15 @@ export const AssistantScreenLayout: React.FC<AssistantScreenLayoutProps> = ({ on
           historyOpen={historyOpen}
           onToggleHistory={handleToggleHistory}
           onShare={handleShare}
+          onHomeClick={() => {
+            if (stage === 'answer') {
+              handleRestart();
+            } else if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+              if (onNavigate) {
+                onNavigate('/');
+              }
+            }
+          }}
         />
       }
       contentPanel={

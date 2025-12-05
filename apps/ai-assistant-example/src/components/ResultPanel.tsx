@@ -48,8 +48,6 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
     return (
         <div className="assistant-result">
             <div className="assistant-result__card widget-surface widget-surface--content">
-                <div className="badge">Assistant response</div>
-
                 <h2 className="assistant-result__title">{title}</h2>
                 <p className="assistant-result__lead">{summary}</p>
 
