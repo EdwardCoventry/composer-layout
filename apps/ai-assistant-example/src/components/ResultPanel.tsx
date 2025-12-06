@@ -10,40 +10,28 @@ type ResultPanelProps = {
     onRestart: () => void;
 };
 
-export const ResultPanel: React.FC<ResultPanelProps> = ({
-                                                            answer,
-                                                            selectedMode,
-                                                            preferences,
-                                                            images,
-                                                            text: _text,
-                                                            onRestart,
-                                                        }) => {
-    const modeLabel = selectedMode?.label || 'Organize info';
-    const summary =
-        answer?.summary ||
-        'Organize these meeting notes into action items, concise with a couple of explanations.';
-    const title = answer?.title || modeLabel;
+export const ResultPanel: React.FC<ResultPanelProps> = ({ answer, selectedMode, preferences, images, text: _text, onRestart }) => {
+    const modeLabel = React.useMemo(() => selectedMode?.label || 'Organize info', [selectedMode]);
+    const summary = React.useMemo(() => answer?.summary || 'Organize these meeting notes into action items, concise with a couple of explanations.', [answer]);
+    const title = React.useMemo(() => answer?.title || modeLabel, [answer, modeLabel]);
 
-    const outputLabel = selectedMode?.tagLine || 'Organize notes into actions';
+    const outputLabel = React.useMemo(() => selectedMode?.tagLine || 'Organize notes into actions', [selectedMode]);
 
     const toneLabel = preferences.tone;
     const detailLabel = preferences.detail;
-    const sourcesLabel = preferences.includeSources ? 'Sources included' : 'No sources';
-    const imagesLabel = images.length
-        ? `${images.length} image${images.length === 1 ? '' : 's'}`
-        : 'No images';
+    const sourcesLabel = React.useMemo(() => preferences.includeSources ? 'Sources included' : 'No sources', [preferences.includeSources]);
+    const imagesLabel = React.useMemo(() => (images.length ? `${images.length} image${images.length === 1 ? '' : 's'}` : 'No images'), [images]);
 
-    // Focus "What this run will do" on behaviour, not settings.
-    const willDo = answer?.bullets ?? [
+    const willDo = React.useMemo(() => answer?.bullets ?? [
         'Extract action items from the notes.',
         'Group related actions together by topic.',
         'Highlight anything ambiguous or missing that may need follow-up.',
-    ];
+    ], [answer]);
 
-    const behaviorBullets = [
+    const behaviorBullets = React.useMemo(() => [
         'Preview appears after 3s if streaming is slow.',
         'You can go back to the composer to edit settings.',
-    ];
+    ], []);
 
     return (
         <div className="assistant-result">
@@ -56,18 +44,18 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
                     <div className="assistant-result__run-main">
                         <span className="assistant-result__run-label">Mode</span>{' '}
                         <span className="assistant-result__run-value">{modeLabel}</span>
-                        <span className="assistant-result__run-separator"> · </span>
+                        <span className="assistant-result__run-separator"> \u00b7 </span>
                         <span className="assistant-result__run-label">Output</span>{' '}
                         <span className="assistant-result__run-value">{outputLabel}</span>
                     </div>
 
                     <div className="assistant-result__run-secondary">
                         <span>Tone: {toneLabel}</span>
-                        <span className="assistant-result__run-separator"> · </span>
+                        <span className="assistant-result__run-separator"> \u00b7 </span>
                         <span>Detail: {detailLabel}</span>
-                        <span className="assistant-result__run-separator"> · </span>
+                        <span className="assistant-result__run-separator"> \u00b7 </span>
                         <span>{sourcesLabel}</span>
-                        <span className="assistant-result__run-separator"> · </span>
+                        <span className="assistant-result__run-separator"> \u00b7 </span>
                         <span>{imagesLabel}</span>
                     </div>
                 </div>
@@ -93,11 +81,7 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
                 </div>
 
                 <div className="assistant-result__actions">
-                    <button
-                        type="button"
-                        className="assistant-primary"
-                        onClick={onRestart}
-                    >
+                    <button type="button" className="assistant-primary" onClick={onRestart}>
                         Back to composer
                     </button>
                 </div>

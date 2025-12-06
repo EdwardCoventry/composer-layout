@@ -15,25 +15,28 @@ export type PreferencesControlProps = {
   isEmbed?: boolean;
 };
 
-const PreferencesSummaryBar: React.FC<{ preferences: AssistantPreferences; onOpen: () => void; }> = ({ preferences, onOpen }) => (
-  <div className="assistant-pref-bar">
-    <div className="assistant-pref-bar__text">
-      <div className="assistant-pref-bar__label">Preferences</div>
-      <div className="assistant-pref-bar__summary">{preferencesSummary(preferences)}</div>
+const PreferencesSummaryBar: React.FC<{ preferences: AssistantPreferences; onOpen: () => void; }> = ({ preferences, onOpen }) => {
+  const summaryText = preferencesSummary(preferences);
+  return (
+    <div className="assistant-pref-bar">
+      <div className="assistant-pref-bar__text">
+        <div className="assistant-pref-bar__label">Preferences</div>
+        <div className="assistant-pref-bar__summary">{summaryText}</div>
+      </div>
+      <button type="button" className="assistant-pref-bar__edit" onClick={onOpen}>
+        <SliderIcon />
+        Edit
+      </button>
     </div>
-    <button type="button" className="assistant-pref-bar__edit" onClick={onOpen}>
-      <SliderIcon />
-      Edit
-    </button>
-  </div>
-);
+  );
+};
 
 export const PreferencesControl: React.FC<PreferencesControlProps> = ({ preferences, onUpdatePreferences, Shell, contentVariant = 'popup', isEmbed = false }) => {
   const [prefsOpen, setPrefsOpen] = React.useState(false);
-  const openPrefs = () => setPrefsOpen(true);
-  const closePrefs = () => setPrefsOpen(false);
+  const openPrefs = React.useCallback(() => setPrefsOpen(true), []);
+  const closePrefs = React.useCallback(() => setPrefsOpen(false), []);
 
-  const form = (
+  const form = React.useMemo(() => (
     <PreferencesForm
       preferences={preferences}
       onUpdatePreferences={onUpdatePreferences}
@@ -41,7 +44,22 @@ export const PreferencesControl: React.FC<PreferencesControlProps> = ({ preferen
       onClose={closePrefs}
       renderFooterInside={contentVariant !== 'popup'}
     />
-  );
+  ), [preferences, onUpdatePreferences, contentVariant, closePrefs]);
+
+  const shellContent = React.useMemo(() => {
+    if (contentVariant === 'popup') {
+      return (
+        <>
+          {form}
+          <PreferencesFooter onClose={closePrefs} showDivider={true} />
+        </>
+      );
+    }
+    if (contentVariant === 'fullscreen') {
+      return <div className="assistant-modal__scroll-frame">{form}</div>;
+    }
+    return form;
+  }, [contentVariant, form, closePrefs]);
 
   return (
     <>
@@ -51,19 +69,7 @@ export const PreferencesControl: React.FC<PreferencesControlProps> = ({ preferen
         <Shell
           isEmbed={isEmbed}
           onClose={closePrefs}
-          content={
-            contentVariant === 'popup' ? (
-              <>
-                {form}
-                {/* Footer outside content for popup; visually pinned at bottom */}
-                <PreferencesFooter onClose={closePrefs} showDivider={true} />
-              </>
-            ) : contentVariant === 'fullscreen' ? (
-              <div className="assistant-modal__scroll-frame">{form}</div>
-            ) : (
-              form
-            )
-          }
+          content={shellContent}
         />
       )}
     </>

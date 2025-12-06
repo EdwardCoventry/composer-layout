@@ -9,11 +9,11 @@ type FooterNoteProps = {
 };
 
 export const FooterNote: React.FC<FooterNoteProps> = ({ sendState, onNavigate }) => {
-  const handleEmbed = (event: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleEmbed = React.useCallback((event: React.MouseEvent<HTMLAnchorElement>) => {
     if (!onNavigate) return;
     event.preventDefault();
     onNavigate('/embed');
-  };
+  }, [onNavigate]);
 
   return (
     <Footer

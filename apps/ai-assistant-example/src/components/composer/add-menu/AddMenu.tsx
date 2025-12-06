@@ -5,6 +5,8 @@ import {FullscreenAddMenu} from './Fullscreen';
 import {SheetAddMenu} from './Sheet';
 import {ContextAddMenu} from './Context';
 
+const ORDERED_QUICK_MODE_KEYS = ['vision', 'plan', 'brainstorm', 'rewrite', 'organize', 'random'] as const;
+
 export type AddMenuVariant = 'context' | 'sheet' | 'fullscreen';
 
 export type AddMenuProps = {
@@ -92,86 +94,87 @@ export const AddMenu: React.FC<AddMenuProps> = ({
         };
     }, [open, variant, anchorRef]);
 
-    if (!shouldRender) return null;
+    const handlePickCamera = React.useCallback(() => {
+        onPickCamera();
+        onClose();
+    }, [onPickCamera, onClose]);
 
-    const primaryItems = [
-        {
-            key: 'camera', label: 'Take a photo', subLabel: 'Use your camera', icon: <CameraIcon/>, action: () => {
-                onPickCamera();
-                onClose();
-            }
-        },
-        {
-            key: 'gallery',
-            label: 'Choose from gallery',
-            subLabel: 'Choose from files',
-            icon: <GalleryIcon/>,
-            action: () => {
-                onPickGallery();
-                onClose();
-            }
-        }
-    ];
-    const quickModeItems = modes.map((m) => ({
+    const handlePickGallery = React.useCallback(() => {
+        onPickGallery();
+        onClose();
+    }, [onPickGallery, onClose]);
+
+    const handleSelectMode = React.useCallback((modeKey: string) => {
+        onSelectMode(modeKey);
+        onClose();
+    }, [onSelectMode, onClose]);
+
+    const primaryItems = React.useMemo(() => [
+        { key: 'camera', label: 'Take a photo', subLabel: 'Use your camera', icon: <CameraIcon/>, action: handlePickCamera },
+        { key: 'gallery', label: 'Choose from gallery', subLabel: 'Choose from files', icon: <GalleryIcon/>, action: handlePickGallery }
+    ], [handlePickCamera, handlePickGallery]);
+
+    const quickModeItems = React.useMemo(() => modes.map((m) => ({
         key: m.key,
         label: m.tagLine,
         subLabel: m.description || m.heroSubtitle,
         icon: m.emoji,
-        action: () => {
-            onSelectMode(m.key);
-            onClose();
-        }
-    }));
-    const orderedQuickModes = ['vision', 'plan', 'brainstorm', 'rewrite', 'organize', 'random'];
-    const filteredQuickModes = orderedQuickModes
+        action: () => handleSelectMode(m.key)
+    })), [modes, handleSelectMode]);
+
+    const filteredQuickModes = React.useMemo(() => ORDERED_QUICK_MODE_KEYS
         .map((key) => quickModeItems.find((i) => i.key === key))
-        .filter((i): i is NonNullable<typeof i> => i !== undefined);
+        .filter((i): i is NonNullable<typeof i> => i !== undefined), [quickModeItems]);
 
-    // For the bottom sheet (mobile) variant, remove the 'organize' quick mode only
-    const filteredQuickModesForVariant = variant === 'sheet'
-        ? filteredQuickModes.filter((i) => i.key !== 'organize')
-        : filteredQuickModes;
+    const filteredQuickModesForVariant = React.useMemo(() => (
+        variant === 'sheet'
+            ? filteredQuickModes.filter((i) => i.key !== 'organize')
+            : filteredQuickModes
+    ), [variant, filteredQuickModes]);
 
-    const contextMainModes = filteredQuickModesForVariant.slice(0, 3);
-    const contextMoreModes = filteredQuickModesForVariant.slice(3);
-    // Gap between the More row and the submenu when opened to the left
-    // not sure exactly where this value is offset from
-    //
-    const submenuGap = 24;
+    const contextMainModes = React.useMemo(() => filteredQuickModesForVariant.slice(0, 3), [filteredQuickModesForVariant]);
+    const contextMoreModes = React.useMemo(() => filteredQuickModesForVariant.slice(3), [filteredQuickModesForVariant]);
+    const submenuGap = 32;
 
-    const RowWrap: React.FC<{ children: React.ReactNode; key?: string }> = ({children}) => (
-        variant === 'context' ? <div className="assistant-add__row-wrap">{children}</div> : <>{children}</>
-    );
+    const RowWrap = React.useMemo(() => {
+        const Component: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+            variant === 'context' ? <div className="assistant-add__row-wrap">{children}</div> : <>{children}</>
+        );
+        Component.displayName = 'AddMenuRowWrap';
+        return Component;
+    }, [variant]);
 
-    const renderRow = (item: {
+    const renderRow = React.useCallback((item: {
         key: string;
         label: string;
         subLabel?: string;
         icon: React.ReactNode;
         action: () => void
     }, kind: 'primary' | 'mode') => (
-        // Apply key to the top-level element returned in the map to satisfy React's list key requirement
         <RowWrap key={item.key}>
             <button type="button" className="assistant-add__row" data-kind={kind} onClick={item.action}>
                 <span className="assistant-add__row-icon" aria-hidden>{item.icon}</span>
                 <span className="assistant-add__row-text">
-          <span className="assistant-add__row-title">{item.label}</span>
+                    <span className="assistant-add__row-title">{item.label}</span>
                     {item.subLabel ? <span className="assistant-add__row-sub">{item.subLabel}</span> : null}
-        </span>
+                </span>
             </button>
         </RowWrap>
-    );
+    ), [RowWrap]);
 
-    const handleMoreMouseLeave: React.MouseEventHandler<HTMLDivElement> = (e) => {
+    const handleMoreMouseLeave = React.useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         const next = e.relatedTarget as Node | null;
         const container = moreRowRef.current;
         if (!container || !next || !container.contains(next)) {
-            // Only clear hover; keep pinned state
             setHoverActive(false);
         }
-    };
+    }, []);
 
-    const renderMoreRow = () => (
+    const toggleSubmenuPinned = React.useCallback(() => {
+        setSubmenuPinned((v) => !v);
+    }, []);
+
+    const renderMoreRow = React.useCallback(() => (
         <RowWrap>
             <div
                 ref={moreRowRef}
@@ -183,46 +186,31 @@ export const AddMenu: React.FC<AddMenuProps> = ({
                 <div
                     className="assistant-add__row assistant-add__row--more"
                     data-kind="mode"
-                    onClick={() => setSubmenuPinned((v) => !v)}
+                    onClick={toggleSubmenuPinned}
                     role="button"
                     aria-expanded={hoverActive || submenuPinned}
                     aria-haspopup="menu"
                     tabIndex={0}
                 >
                     <span className="assistant-add__row-icon assistant-add__row-icon--more" aria-hidden>···</span>
-                    <span className="assistant-add__row-text"><span
-                        className="assistant-add__row-title">More</span></span>
+                    <span className="assistant-add__row-text"><span className="assistant-add__row-title">More</span></span>
                     <span className="assistant-add__row-arrow" aria-hidden>›</span>
                 </div>
                 {(hoverActive || submenuPinned) && (
                     <>
-                        {/* Buffer on the LEFT side to bridge the small gap when submenu opens entirely to the left */}
                         <div
                             className="assistant-add__submenu-buffer"
                             aria-hidden
-                            style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: -submenuGap,
-                                width: submenuGap,
-                                height: '100%',
-                                pointerEvents: 'auto'
-                            }}
+                            style={{ position: 'absolute', top: 0, left: -submenuGap, width: submenuGap, height: '100%', pointerEvents: 'auto' }}
                         />
                         <div
                             className="assistant-add__submenu"
-                            style={{
-                                position: 'absolute',
-                                top: 0,
-                                right: `calc(100% - var(--assistant-add-pad-x) + var(--border-width) + ${submenuGap}px)`
-                            }}
+                            style={{ position: 'absolute', top: 0, right: `calc(100% - var(--assistant-add-pad-x) + var(--border-width) + ${submenuGap}px)` }}
                         >
                             {contextMoreModes.map((item) => (
-                                <button key={item.key} type="button" className="assistant-add__row" data-kind="mode"
-                                        onClick={item.action}>
+                                <button key={item.key} type="button" className="assistant-add__row" data-kind="mode" onClick={item.action}>
                                     <span className="assistant-add__row-icon" aria-hidden>{item.icon}</span>
-                                    <span className="assistant-add__row-text"><span
-                                        className="assistant-add__row-title">{item.label}</span></span>
+                                    <span className="assistant-add__row-text"><span className="assistant-add__row-title">{item.label}</span></span>
                                 </button>
                             ))}
                         </div>
@@ -230,7 +218,7 @@ export const AddMenu: React.FC<AddMenuProps> = ({
                 )}
             </div>
         </RowWrap>
-    );
+    ), [RowWrap, handleMoreMouseLeave, toggleSubmenuPinned, hoverActive, submenuPinned, contextMoreModes, submenuGap]);
 
     const content = (
         <div className={`assistant-add__content${variant === 'sheet' ? ' assistant-add__content--no-top-pad' : ''}`} ref={panelRef}>
@@ -240,20 +228,20 @@ export const AddMenu: React.FC<AddMenuProps> = ({
             <div className="assistant-add__section">
                 <div className="assistant-add__label">QUICK MODES</div>
                 {variant === 'fullscreen' ? (
-                    <div
-                        className="assistant-add__quick-grid">{filteredQuickModesForVariant.map((item) => renderRow(item, 'mode'))}</div>
+                    <div className="assistant-add__quick-grid">{filteredQuickModesForVariant.map((item) => renderRow(item, 'mode'))}</div>
                 ) : variant === 'context' ? (
                     <div className="assistant-add__list">
                         {contextMainModes.map((item) => renderRow(item, 'mode'))}
                         {contextMoreModes.length > 0 && renderMoreRow()}
                     </div>
                 ) : (
-                    <div
-                        className="assistant-add__list">{filteredQuickModesForVariant.map((item) => renderRow(item, 'mode'))}</div>
+                    <div className="assistant-add__list">{filteredQuickModesForVariant.map((item) => renderRow(item, 'mode'))}</div>
                 )}
             </div>
         </div>
     );
+
+    if (!shouldRender) return null;
 
     if (variant === 'fullscreen') {
         return <FullscreenAddMenu content={content} onClose={onClose}/>;

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSafeTimeout } from 'ui/hooks/useSafeTimeout';
 import type {
   AssistantAnswer,
   AssistantHistoryEntry,
@@ -14,6 +15,18 @@ import {
   buildAnswer,
   readFileAsImage
 } from './assistantData';
+
+const DEFAULT_PREFERENCES: AssistantPreferences = {
+  tone: 'Friendly',
+  detail: 'Balanced',
+  includeSources: true,
+  toneNotes: '',
+  detailNotes: '',
+  allergies: { tags: [], notes: '' },
+  dietary: { tags: [], notes: '' },
+  personalization: { tags: [], notes: '' },
+  servings: { value: null, notes: '' }
+};
 
 type UseAssistantExperienceResult = {
   heroTitle: string;
@@ -46,36 +59,25 @@ type UseAssistantExperienceResult = {
 
 export function useAssistantExperience(): UseAssistantExperienceResult {
   const [selectedModeKey, setSelectedModeKey] = React.useState<string>('');
+  const [text, setText] = React.useState('');
+  const [images, setImages] = React.useState<AssistantImage[]>([]);
+  const [preferences, setPreferences] = React.useState<AssistantPreferences>(DEFAULT_PREFERENCES);
+  const [stage, setStage] = React.useState<'compose' | 'answer'>('compose');
+  const [sendState, setSendState] = React.useState<SendState>('idle');
+  const [answer, setAnswer] = React.useState<AssistantAnswer | null>(null);
+  const [error, setError] = React.useState('');
   const selectedMode = React.useMemo(
     () => ASSISTANT_MODES.find((mode) => mode.key === selectedModeKey) ?? null,
     [selectedModeKey]
   );
   const effectiveMode = selectedMode ?? ASSISTANT_MODES[0];
-  const [text, setText] = React.useState('');
-  const [images, setImages] = React.useState<AssistantImage[]>([]);
-  const [preferences, setPreferences] = React.useState<AssistantPreferences>({
-    tone: 'Friendly',
-    detail: 'Balanced',
-    includeSources: true,
-    toneNotes: '',
-    detailNotes: '',
-    allergies: { tags: [], notes: '' },
-    dietary: { tags: [], notes: '' },
-    personalization: { tags: [], notes: '' },
-    servings: { value: null, notes: '' }
-  });
-  const [stage, setStage] = React.useState<'compose' | 'answer'>('compose');
-  const [sendState, setSendState] = React.useState<SendState>('idle');
-  const [answer, setAnswer] = React.useState<AssistantAnswer | null>(null);
-  const [error, setError] = React.useState('');
-  const sendTimerRef = React.useRef<number | null>(null);
+  const { setTimeout: setSendTimeout, clearTimeout: clearSendTimeout } = useSafeTimeout();
 
-  React.useEffect(() => {
-    return () => {
-      if (sendTimerRef.current !== null) {
-        window.clearTimeout(sendTimerRef.current);
-      }
-    };
+  const resetForCompose = React.useCallback(() => {
+    setStage('compose');
+    setSendState('idle');
+    setAnswer(null);
+    setError('');
   }, []);
 
   const heroTitle = selectedMode ? selectedMode.heroTitle : DEFAULT_HERO.title;
@@ -85,11 +87,9 @@ export function useAssistantExperience(): UseAssistantExperienceResult {
     (modeKey: string) => {
       const willSelect = selectedModeKey === modeKey ? '' : modeKey;
       setSelectedModeKey(willSelect);
-      setError('');
-      setSendState('idle');
-      setStage('compose');
+      resetForCompose();
     },
-    [selectedModeKey]
+    [resetForCompose, selectedModeKey]
   );
 
   const handleFilesSelected = React.useCallback(
@@ -127,37 +127,26 @@ export function useAssistantExperience(): UseAssistantExperienceResult {
 
     setError('');
     setSendState('sending');
-    if (sendTimerRef.current !== null) {
-      window.clearTimeout(sendTimerRef.current);
-    }
-    // Step 1: 'sending' to 'sent'
-    sendTimerRef.current = window.setTimeout(() => {
+    clearSendTimeout();
+    setSendTimeout(() => {
       setSendState('sent');
-      // Step 2: 'sent' to 'answer'
-      sendTimerRef.current = window.setTimeout(() => {
+      setSendTimeout(() => {
         setAnswer(buildAnswer(selectedMode ?? effectiveMode, trimmed, preferences, images));
         setStage('answer');
-        sendTimerRef.current = null;
-      }, 2000); // 2 seconds for 'sent' state
-    }, 2000); // 2 seconds for 'sending' state
-  }, [effectiveMode, images, preferences, selectedMode, sendState, text]);
+      }, 2000);
+    }, 2000);
+  }, [effectiveMode, images, preferences, selectedMode, sendState, text, clearSendTimeout, setSendTimeout]);
 
   const handleRestart = React.useCallback(() => {
-    setStage('compose');
-    setSendState('idle');
-    setAnswer(null);
-    setError('');
-  }, []);
+    resetForCompose();
+  }, [resetForCompose]);
 
   const handleSelectHistoryEntry = React.useCallback((entry: AssistantHistoryEntry) => {
-    setStage('compose');
-    setSendState('idle');
-    setAnswer(null);
-    setError('');
+    resetForCompose();
     setImages([]);
     setSelectedModeKey(entry.modeKey ?? '');
     setText(entry.prompt);
-  }, []);
+  }, [resetForCompose]);
 
   const updatePreferences = React.useCallback((prefs: Partial<AssistantPreferences>) => {
     setPreferences((prev) => ({ ...prev, ...prefs }));

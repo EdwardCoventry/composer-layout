@@ -1,7 +1,7 @@
 import React from 'react';
 import { PreferencesShell } from './PreferencesShell';
 
-export const PreferencesModal: React.FC<{
+const PreferencesModalInner: React.FC<{
     content: React.ReactNode;
     onClose: () => void;
     isEmbed?: boolean;
@@ -10,3 +10,6 @@ export const PreferencesModal: React.FC<{
     {content}
   </PreferencesShell>
 );
+
+export const PreferencesModal = React.memo(PreferencesModalInner);
+PreferencesModal.displayName = 'PreferencesModal';

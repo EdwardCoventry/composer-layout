@@ -5,10 +5,9 @@ type HeaderWidgetProps = {
   onToggleComposer: () => void;
 };
 
-export const HeaderWidget: React.FC<HeaderWidgetProps> = ({
-  showComposerPanel,
-  onToggleComposer,
-}) => {
+export const HeaderWidget: React.FC<HeaderWidgetProps> = ({ showComposerPanel, onToggleComposer }) => {
+  const handleToggle = React.useCallback(() => onToggleComposer(), [onToggleComposer]);
+
   return (
     <div className="widget-surface widget-surface--header">
       <div className="header-widget__inner">
@@ -17,7 +16,7 @@ export const HeaderWidget: React.FC<HeaderWidgetProps> = ({
           <span className="header-widget__subtitle">Responsive content + composer demo</span>
         </div>
         <div className="header-widget__actions">
-          <button type="button" className="header-widget__toggle" onClick={onToggleComposer}>
+          <button type="button" className="header-widget__toggle" onClick={handleToggle}>
             {showComposerPanel ? 'Hide composer' : 'Show composer'}
           </button>
         </div>

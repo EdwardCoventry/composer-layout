@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { AssistantPreferences } from '../../types';
 import { TagInput } from '../TagInput';
 
 type TagPreferenceKey = 'allergies' | 'dietary' | 'personalization';
 
-const ChipRow: React.FC<{
+type ChipRowProps = {
   options: { value: string; label: string }[];
   value: string;
   onSelect: (value: string) => void;
-}> = ({ options, value, onSelect }) => (
+};
+
+const ChipRow = React.memo(({ options, value, onSelect }: ChipRowProps) => (
   <div className="assistant-chip-row">
     {options.map((opt) => (
       <button
@@ -22,7 +24,8 @@ const ChipRow: React.FC<{
       </button>
     ))}
   </div>
-);
+));
+ChipRow.displayName = 'ChipRow';
 
 export type PreferencesFormProps = {
   preferences: AssistantPreferences;
@@ -39,7 +42,7 @@ export const PreferencesForm: React.FC<PreferencesFormProps> = ({
   onClose,
   renderFooterInside = contentVariant !== 'popup',
 }) => {
-  const updateTags = (key: TagPreferenceKey, tag: string) => {
+  const updateTags = useCallback((key: TagPreferenceKey, tag: string) => {
     const current = preferences[key]?.tags || [];
     if (current.includes(tag)) return;
     onUpdatePreferences({
@@ -48,9 +51,9 @@ export const PreferencesForm: React.FC<PreferencesFormProps> = ({
         tags: [...current, tag],
       },
     });
-  };
+  }, [preferences, onUpdatePreferences]);
 
-  const removeTag = (key: TagPreferenceKey, tag: string) => {
+  const removeTag = useCallback((key: TagPreferenceKey, tag: string) => {
     const current = preferences[key]?.tags || [];
     onUpdatePreferences({
       [key]: {
@@ -58,16 +61,44 @@ export const PreferencesForm: React.FC<PreferencesFormProps> = ({
         tags: current.filter((t: string) => t !== tag),
       },
     });
-  };
+  }, [preferences, onUpdatePreferences]);
 
-  const updateNotes = (key: TagPreferenceKey, notes: string) => {
+  const updateNotes = useCallback((key: TagPreferenceKey, notes: string) => {
     onUpdatePreferences({
       [key]: {
         ...(preferences[key] || { tags: [] }),
         notes,
       },
     });
-  };
+  }, [preferences, onUpdatePreferences]);
+
+  const toneOptions = useMemo(() => ([
+    { value: 'Friendly', label: 'Friendly' },
+    { value: 'Neutral', label: 'Neutral' },
+    { value: 'Direct', label: 'Direct' },
+  ]), []);
+
+  const detailOptions = useMemo(() => ([
+    { value: 'Brief', label: 'Brief' },
+    { value: 'Balanced', label: 'Balanced' },
+    { value: 'Deep', label: 'Deep' },
+  ]), []);
+
+  const handleToneSelect = useCallback((tone: string) => {
+    onUpdatePreferences({ tone: tone as AssistantPreferences['tone'] });
+  }, [onUpdatePreferences]);
+
+  const handleDetailSelect = useCallback((detail: string) => {
+    onUpdatePreferences({ detail: detail as AssistantPreferences['detail'] });
+  }, [onUpdatePreferences]);
+
+  const handleToneNotesChange = useCallback((value: string) => {
+    onUpdatePreferences({ toneNotes: value });
+  }, [onUpdatePreferences]);
+
+  const handleDetailNotesChange = useCallback((value: string) => {
+    onUpdatePreferences({ detailNotes: value });
+  }, [onUpdatePreferences]);
 
   return (
     <>
@@ -181,22 +212,16 @@ export const PreferencesForm: React.FC<PreferencesFormProps> = ({
             <div className="assistant-pref-form__section">
               <div className="assistant-pref-form__label">Tone</div>
               <ChipRow
-                options={[
-                  { value: 'Friendly', label: 'Friendly' },
-                  { value: 'Neutral', label: 'Neutral' },
-                  { value: 'Direct', label: 'Direct' },
-                ]}
+                options={toneOptions}
                 value={preferences.tone}
-                onSelect={(tone) =>
-                  onUpdatePreferences({ tone: tone as AssistantPreferences['tone'] })
-                }
+                onSelect={handleToneSelect}
               />
               <textarea
                 className="assistant-pref-textarea"
                 placeholder="Tone notes (optional)"
                 value={preferences.toneNotes || ''}
                 onChange={(e) =>
-                  onUpdatePreferences({ toneNotes: e.target.value })
+                  handleToneNotesChange(e.target.value)
                 }
               />
             </div>
@@ -204,24 +229,16 @@ export const PreferencesForm: React.FC<PreferencesFormProps> = ({
             <div className="assistant-pref-form__section">
               <div className="assistant-pref-form__label">Detail</div>
               <ChipRow
-                options={[
-                  { value: 'Brief', label: 'Brief' },
-                  { value: 'Balanced', label: 'Balanced' },
-                  { value: 'Deep', label: 'Deep' },
-                ]}
+                options={detailOptions}
                 value={preferences.detail}
-                onSelect={(detail) =>
-                  onUpdatePreferences({
-                    detail: detail as AssistantPreferences['detail'],
-                  })
-                }
+                onSelect={handleDetailSelect}
               />
               <textarea
                 className="assistant-pref-textarea"
                 placeholder="Detail notes (optional)"
                 value={preferences.detailNotes || ''}
                 onChange={(e) =>
-                  onUpdatePreferences({ detailNotes: e.target.value })
+                  handleDetailNotesChange(e.target.value)
                 }
               />
             </div>

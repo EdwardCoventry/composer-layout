@@ -43,14 +43,27 @@ export const ComposerPanel: React.FC<ComposerPanelProps> = ({ mode, modes, text,
     (defaultRequiresSomeInput && !trimmedText && images.length === 0);
   const placeholder = mode?.placeholder || 'Tell the assistant what you need.';
 
-  const openUpload = () => fileInputRef.current?.click();
-  const openCamera = () => cameraInputRef.current?.click();
+  const openUpload = React.useCallback(() => fileInputRef.current?.click(), []);
+  const openCamera = React.useCallback(() => cameraInputRef.current?.click(), []);
 
   const [addMenuOpen, setAddMenuOpen] = React.useState(false);
-  const addVariant: AddMenuVariant = isEmbed ? 'fullscreen' : isMobile ? 'sheet' : 'context';
+  const addVariant: AddMenuVariant = React.useMemo(() => (isEmbed ? 'fullscreen' : isMobile ? 'sheet' : 'context'), [isEmbed, isMobile]);
   // Use fullscreen preferences on embed and mobile; popup on desktop
-  const PrefShell = (isEmbed || isMobile) ? PreferencesFullscreen : PreferencesPopup;
-  const contentVariant = (isEmbed || isMobile) ? 'fullscreen' : 'popup';
+  const PrefShell = React.useMemo(() => ((isEmbed || isMobile) ? PreferencesFullscreen : PreferencesPopup), [isEmbed, isMobile]);
+  const contentVariant = React.useMemo(() => ((isEmbed || isMobile) ? 'fullscreen' : 'popup'), [isEmbed, isMobile]);
+
+  const handleAddAttachment = React.useCallback(() => setAddMenuOpen(true), []);
+  const handleCloseAddMenu = React.useCallback(() => setAddMenuOpen(false), []);
+
+  const handleUploadChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) onFilesSelected(e.target.files, 'upload');
+    e.target.value = '';
+  }, [onFilesSelected]);
+
+  const handleCameraChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) onFilesSelected(e.target.files, 'camera');
+    e.target.value = '';
+  }, [onFilesSelected]);
 
   return (
     <div className="assistant-composer" data-mobile={isMobile}>
@@ -59,13 +72,13 @@ export const ComposerPanel: React.FC<ComposerPanelProps> = ({ mode, modes, text,
 
         <PhotoPicker requiresImages={requiresImages} images={images} showWhenOptional={showImagesSection} openCamera={openCamera} openUpload={openUpload} onRemoveImage={onRemoveImage} />
 
-        <ComposeInputCard mode={mode} text={text} placeholder={placeholder} sendState={sendState} error={error} disableStart={disableStart} isMobile={isMobile} addButtonRef={addButtonRef} onTextChange={onTextChange} onStart={onStart} onClearMode={onClearMode} onAddAttachment={() => setAddMenuOpen(true)} />
+        <ComposeInputCard mode={mode} text={text} placeholder={placeholder} sendState={sendState} error={error} disableStart={disableStart} isMobile={isMobile} addButtonRef={addButtonRef} onTextChange={onTextChange} onStart={onStart} onClearMode={onClearMode} onAddAttachment={handleAddAttachment} />
       </div>
 
-      <input ref={fileInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={(e) => { if (e.target.files) onFilesSelected(e.target.files, 'upload'); e.target.value = ''; }} />
-      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" multiple style={{ display: 'none' }} onChange={(e) => { if (e.target.files) onFilesSelected(e.target.files, 'camera'); e.target.value = ''; }} />
+      <input ref={fileInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleUploadChange} />
+      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" multiple style={{ display: 'none' }} onChange={handleCameraChange} />
 
-      <AddMenu open={addMenuOpen} variant={addVariant} anchorRef={addButtonRef} modes={modes} onClose={() => setAddMenuOpen(false)} onSelectMode={onSelectMode} onPickCamera={openCamera} onPickGallery={openUpload} />
+      <AddMenu open={addMenuOpen} variant={addVariant} anchorRef={addButtonRef} modes={modes} onClose={handleCloseAddMenu} onSelectMode={onSelectMode} onPickCamera={openCamera} onPickGallery={openUpload} />
     </div>
   );
 };

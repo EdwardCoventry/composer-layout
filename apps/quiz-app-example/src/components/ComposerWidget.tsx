@@ -1,6 +1,7 @@
 import React from 'react';
-
-export type ComposerSizingPreset = 'auto' | 'vhFraction';
+import { OptionsIcon, SendIcon, CheckIcon } from './ComposerIcons';
+import { ComposerOptionsGrid } from './ComposerOptionsGrid';
+import { useSafeTimeout } from 'ui/hooks/useSafeTimeout';
 
 type ComposerWidgetProps = {
   isMobile: boolean;
@@ -12,63 +13,6 @@ type ComposerWidgetProps = {
 
 type SendState = 'idle' | 'sending' | 'sent';
 type AnswerSource = 'card' | 'input' | null;
-
-const OptionsIcon: React.FC<{ isMobile: boolean }> = ({ isMobile }) => {
-  const viewBoxSize = isMobile ? 28 : 24;
-  const cols = isMobile ? 1 : 2;
-  const rows = isMobile ? 3 : 2;
-  const gap = isMobile ? 2 : 3.5;
-  const desiredWidth = isMobile ? 18 : 24;
-  const desiredHeight = isMobile ? 24 : 16;
-  const strokeWidth = 2;
-  const maxSize = viewBoxSize - strokeWidth;
-  const targetWidth = Math.min(desiredWidth, maxSize);
-  const targetHeight = Math.min(desiredHeight, maxSize);
-  const cellWidth = (targetWidth - gap * (cols - 1)) / cols;
-  const cellHeight = (targetHeight - gap * (rows - 1)) / rows;
-  const x = (viewBoxSize - targetWidth) / 2;
-  const y = (viewBoxSize - targetHeight) / 2;
-
-  const strokeProps = {
-    stroke: 'currentColor',
-    strokeWidth,
-    strokeLinecap: 'round' as const,
-    strokeLinejoin: 'round' as const,
-  };
-
-  const cells = Array.from({ length: rows * cols }, (_, idx) => {
-    const col = idx % cols;
-    const row = Math.floor(idx / cols);
-    const cellX = x + col * (cellWidth + gap);
-    const cellY = y + row * (cellHeight + gap);
-    return <rect key={idx} x={cellX} y={cellY} width={cellWidth} height={cellHeight} rx={1.5} fill="none" {...strokeProps} />;
-  });
-
-  return (
-    <svg viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`} role="img" aria-hidden focusable="false">
-      {cells}
-    </svg>
-  );
-};
-
-const SendIcon = () => (
-  <svg viewBox="0 0 24 24" role="img" aria-hidden focusable="false">
-    <path
-      d="M4.5 12L4 5l16 7-16 7 .5-7L14 12 4.5 12Z"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      fill="none"
-    />
-  </svg>
-);
-
-const CheckIcon = () => (
-  <svg viewBox="0 0 24 24" role="img" aria-hidden focusable="false">
-    <path d="M5.5 12.5L10 17l8.5-10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
 
 export const ComposerWidget: React.FC<ComposerWidgetProps> = ({
   isMobile,
@@ -88,49 +32,35 @@ export const ComposerWidget: React.FC<ComposerWidgetProps> = ({
   const [answeredBy, setAnsweredBy] = React.useState<AnswerSource>(null);
   const [selectedOption, setSelectedOption] = React.useState<string | null>(null);
   const [inputValue, setInputValue] = React.useState('');
-  const sendTimerRef = React.useRef<number | null>(null);
+  const { setTimeout: setSendTimeout, clearTimeout: clearSendTimeout } = useSafeTimeout();
   const inputRef = React.useRef<HTMLTextAreaElement | null>(null);
   const MIN_INPUT_HEIGHT = 44;
   const MAX_INPUT_HEIGHT = 160;
 
-  React.useEffect(() => {
-    return () => {
-      if (sendTimerRef.current !== null) {
-        window.clearTimeout(sendTimerRef.current);
-      }
-    };
-  }, []);
-
   const beginSend = React.useCallback((source: Exclude<AnswerSource, null>) => {
     if (sendState === 'sending') return;
 
-    if (sendTimerRef.current !== null) {
-      window.clearTimeout(sendTimerRef.current);
-    }
-
+    clearSendTimeout();
     setSendState('sending');
     setAnsweredBy(source);
-
-    const delayMs = 3000;
-    sendTimerRef.current = window.setTimeout(() => {
+    setSendTimeout(() => {
       setSendState('sent');
-      sendTimerRef.current = null;
-    }, delayMs);
-  }, [sendState]);
+    }, 3000);
+  }, [sendState, clearSendTimeout, setSendTimeout]);
 
-  const handleSendClick = () => {
+  const handleSendClick = React.useCallback(() => {
     if (sendState === 'sending' || answeredBy) return;
     if (!inputValue.trim()) return;
 
     beginSend('input');
     setInputValue('');
-  };
+  }, [sendState, answeredBy, inputValue, beginSend]);
 
-  const handleOptionSelect = (option: string) => {
+  const handleOptionSelect = React.useCallback((option: string) => {
     if (answeredBy || sendState === 'sending') return;
     setSelectedOption(option);
     beginSend('card');
-  };
+  }, [answeredBy, sendState, beginSend]);
 
   React.useEffect(() => {
     const el = inputRef.current;
@@ -147,7 +77,7 @@ export const ComposerWidget: React.FC<ComposerWidgetProps> = ({
     }
   }, [isMobile]);
 
-  const renderSendIcon = () => {
+  const renderSendIcon = React.useCallback(() => {
     const visualState = answeredBy === 'card' ? 'idle' : sendState;
     if (visualState === 'sending') {
       return <span className="composer-widget__send-spinner" aria-hidden />;
@@ -156,15 +86,21 @@ export const ComposerWidget: React.FC<ComposerWidgetProps> = ({
       return <CheckIcon />;
     }
     return <SendIcon />;
-  };
+  }, [answeredBy, sendState]);
+
+  const handleInputKeyDown = React.useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendClick();
+    }
+  }, [handleSendClick]);
 
   const hasAnswered = answeredBy !== null;
   const buttonVisualState: SendState = answeredBy === 'card' ? 'idle' : sendState;
   const sendLabel =
     answeredBy === 'card' ? 'Send' : sendState === 'sending' ? 'Sending...' : hasAnswered ? 'Sent' : 'Send';
   const optionsToggleLabel = isOptionsOpen ? 'Hide options' : 'Show options';
-  const handleOptionsToggle = () => onToggleOptions();
-  const options = React.useMemo(() => ['Option One', 'Option Two', 'Option Three', 'Option Four'], []);
+  const handleOptionsToggle = React.useCallback(() => onToggleOptions(), [onToggleOptions]);
   const inputPlaceholder =
     answeredBy === 'card' && selectedOption ? selectedOption : hasAnswered ? 'Answer sent' : 'Type here...';
   const inputDisabled = hasAnswered;
@@ -178,39 +114,15 @@ export const ComposerWidget: React.FC<ComposerWidgetProps> = ({
       data-answered-by={answeredBy ?? 'none'}
     >
       <div className="composer-widget__middle">
-        <div
-          className={`composer-widget__options-grid${isOptionsOpen ? ' is-open' : ''}`}
-          data-testid="options-grid"
-          style={optionsMaxHeightValue ? ({ '--options-max-height': optionsMaxHeightValue } as React.CSSProperties) : undefined}
-        >
-          {options.map((option) => {
-            const isSelected = selectedOption === option;
-            const isCardSending = isSelected && answeredBy === 'card' && sendState === 'sending';
-            const isCardSent = isSelected && answeredBy === 'card' && sendState === 'sent';
-            return (
-              <button
-                key={option}
-                type="button"
-                className="composer-widget__option"
-                onClick={() => handleOptionSelect(option)}
-                data-selected={isSelected}
-                disabled={cardsDisabled}
-              >
-                {isSelected && (
-                  <span className="composer-widget__option-pill" data-state={isCardSending ? 'sending' : 'sent'}>
-                    {isCardSending ? (
-                      <span className="composer-widget__send-spinner" aria-hidden />
-                    ) : (
-                      <CheckIcon />
-                    )}
-                    <span>{isCardSending ? 'Sending...' : isCardSent ? 'Sent' : 'Sending...'}</span>
-                  </span>
-                )}
-                <span className="composer-widget__option-label">{option}</span>
-              </button>
-            );
-          })}
-        </div>
+        <ComposerOptionsGrid
+          isOpen={isOptionsOpen}
+          optionsMaxHeightValue={optionsMaxHeightValue}
+          answeredBy={answeredBy}
+          sendState={sendState}
+          selectedOption={selectedOption}
+          cardsDisabled={cardsDisabled}
+          onSelectOption={handleOptionSelect}
+        />
 
         <div className="composer-widget__inputs">
           <div className="composer-widget__input-row">
@@ -232,6 +144,8 @@ export const ComposerWidget: React.FC<ComposerWidgetProps> = ({
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               disabled={inputDisabled}
+              onKeyDown={handleInputKeyDown}
+              enterKeyHint={isMobile ? 'send' : undefined}
             />
             <button
               type="button"

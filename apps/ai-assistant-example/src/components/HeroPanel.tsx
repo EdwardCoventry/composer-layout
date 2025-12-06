@@ -55,11 +55,17 @@ export const HeroPanel: React.FC<HeroPanelProps> = ({
   hideModes = false,
   variant = 'embed',
 }) => {
+  const handleSelectMode = React.useCallback(
+    (modeKey: string) => onSelectMode(modeKey),
+    [onSelectMode]
+  );
+  const className = React.useMemo(
+    () => `assistant-hero${variant === 'fill' ? ' assistant-hero--fill' : ''}`,
+    [variant]
+  );
+
   return (
-    <div
-      className={`assistant-hero${variant === 'fill' ? ' assistant-hero--fill' : ''}`}
-      // Optionally, you can add style={{ flex: variant === 'fill' ? 1 : undefined }}
-    >
+    <div className={className}>
       <div className="assistant-hero__content">
         {!hideTitleSubtitle && (
           <>
@@ -72,7 +78,7 @@ export const HeroPanel: React.FC<HeroPanelProps> = ({
           <ModeTagsPanel
             modes={modes}
             selectedModeKey={selectedModeKey}
-            onSelectMode={onSelectMode}
+            onSelectMode={handleSelectMode}
           />
         )}
       </div>

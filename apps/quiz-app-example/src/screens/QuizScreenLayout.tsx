@@ -24,17 +24,15 @@ export const QuizScreenLayout: React.FC = () => {
     keyboardThreshold
   });
 
-  // Give the options-open state more vertical headroom on mobile to avoid an inner scrollbar.
-  const mobileComposerMaxFraction = isMobile && isOptionsOpen ? 0.75 : 0.6;
+  const mobileComposerMaxFraction = React.useMemo(() => (isMobile && isOptionsOpen ? 0.75 : 0.6), [isMobile, isOptionsOpen]);
 
   const composerHeightMode: ComposerHeightMode | undefined = React.useMemo(() => {
     if (isMobile) return { type: 'content', maxFraction: mobileComposerMaxFraction };
     return { type: 'fraction', fraction: 0.5, minPx: 200 };
   }, [isMobile, mobileComposerMaxFraction]);
 
-  const sizingLabel = isMobile ? 'Sizing: Auto (content)' : 'Sizing: Viewport fraction';
-
-  const optionsMaxHeight = isMobile ? 'none' : 'min(70vh, 420px)';
+  const sizingLabel = React.useMemo(() => (isMobile ? 'Sizing: Auto (content)' : 'Sizing: Viewport fraction'), [isMobile]);
+  const optionsMaxHeight = React.useMemo(() => (isMobile ? 'none' : 'min(70vh, 420px)'), [isMobile]);
 
   const handleToggleOptions = React.useCallback(() => {
     setIsOptionsOpen((open) => {
@@ -46,9 +44,11 @@ export const QuizScreenLayout: React.FC = () => {
     });
   }, [prepareToOpenOptions]);
 
+  const toggleComposer = React.useCallback(() => setShowComposerPanel((v) => !v), []);
+
   return (
     <LayoutFrame
-      header={<HeaderWidget showComposerPanel={showComposerPanel} onToggleComposer={() => setShowComposerPanel((v) => !v)} />}
+      header={<HeaderWidget showComposerPanel={showComposerPanel} onToggleComposer={toggleComposer} />}
       contentPanel={<ContentWidget isMobile={isMobile} />}
       composerPanel={
         <ComposerWidget

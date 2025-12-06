@@ -8,12 +8,15 @@ export const SheetAddMenu: React.FC<{
     content: React.ReactNode;
     onClose: () => void;
 }> = ({open, content, onClose}) => {
-    const snapPoints = [0, SHEET_PEEK_FRACTION, 1];
+    const snapPoints = React.useMemo(() => [0, SHEET_PEEK_FRACTION, 1], []);
+    const handleSheetClose = React.useCallback(() => {
+        onClose();
+    }, [onClose]);
 
     return (
         <Sheet
             isOpen={open}
-            onClose={onClose}
+            onClose={handleSheetClose}
             detent="content"          // <- key change
             snapPoints={snapPoints}   // 0 = closed, 0.4 = peek, 1 = max content height
             initialSnap={1}
@@ -40,7 +43,7 @@ export const SheetAddMenu: React.FC<{
             </Sheet.Container>
             <Sheet.Backdrop
                 className="assistant-sheet-backdrop"
-                onTap={onClose}
+                onTap={handleSheetClose}
             />
         </Sheet>
     );

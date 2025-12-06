@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "jsx": "react-jsx",
+    "baseUrl": "./src",
+    "types": ["vitest", "node"]
+  },
+  "include": ["src"]
+}
+

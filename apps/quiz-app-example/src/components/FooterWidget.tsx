@@ -6,14 +6,15 @@ type FooterWidgetProps = {
 };
 
 export const FooterWidget: React.FC<FooterWidgetProps> = ({ sizingLabel }) => {
+  const rightEl = React.useMemo(
+    () =>
+      sizingLabel ? (
+        <div className="footer-widget__sizing">{sizingLabel}</div>
+      ) : null,
+    [sizingLabel]
+  );
+
   return (
-    <Footer
-      className="footer-widget"
-      rightElement={
-        sizingLabel ? (
-          <div className="footer-widget__sizing">{sizingLabel}</div>
-        ) : null
-      }
-    />
+    <Footer className="footer-widget" rightElement={rightEl} />
   );
 };

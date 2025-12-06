@@ -10,6 +10,26 @@ export type PreferencesShellInnerProps = {
   ariaLabel?: string;
 };
 
+const useEscapeClose = (onClose: () => void) => {
+  React.useEffect(() => {
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [onClose]);
+};
+
+const useBodyScrollLock = () => {
+  React.useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
+};
+
 /**
  * Low-level overlay shell that handles:
  * - backdrop
@@ -23,20 +43,8 @@ export const PreferencesShell: React.FC<PreferencesShellInnerProps> = ({
   isEmbed,
   ariaLabel = 'Edit preferences',
 }) => {
-  React.useEffect(() => {
-    const handleKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleKey);
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      window.removeEventListener('keydown', handleKey);
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [onClose]);
+  useEscapeClose(onClose);
+  useBodyScrollLock();
 
   const embedAttr = isEmbed ? 'true' : 'false';
 

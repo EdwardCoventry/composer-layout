@@ -8,27 +8,28 @@ type HistoryPanelProps = {
   onSelect: (entry: AssistantHistoryEntry) => void;
 };
 
-const ClockIcon = () => (
+const ClockIcon: React.FC = React.memo(() => (
   <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden focusable="false">
     <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="2" fill="none" />
     <path d="M12 8v4l2.5 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
   </svg>
-);
+));
+ClockIcon.displayName = 'ClockIcon';
+
+// Tiny local helper to group entries by label without changing behavior
+function groupByLabel(items: AssistantHistoryEntry[]) {
+  const map = new Map<string, AssistantHistoryEntry[]>();
+  for (const entry of items) {
+    const key = entry.groupLabel || 'Earlier';
+    if (!map.has(key)) map.set(key, []);
+    map.get(key)!.push(entry);
+  }
+  return Array.from(map.entries());
+}
 
 export const HistoryPanel: React.FC<HistoryPanelProps> = ({ open, items, onClose, onSelect }) => {
   const hasItems = items.length > 0;
-  const groupedItems = React.useMemo(() => {
-    if (!hasItems) return [];
-    const map = new Map<string, AssistantHistoryEntry[]>();
-    items.forEach((entry) => {
-      const key = entry.groupLabel || 'Earlier';
-      if (!map.has(key)) {
-        map.set(key, []);
-      }
-      map.get(key)!.push(entry);
-    });
-    return Array.from(map.entries());
-  }, [hasItems, items]);
+  const groupedItems = React.useMemo(() => (hasItems ? groupByLabel(items) : []), [hasItems, items]);
 
   if (!open) return null;
 

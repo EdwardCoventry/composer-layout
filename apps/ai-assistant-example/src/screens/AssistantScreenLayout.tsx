@@ -1,227 +1,213 @@
 import React from 'react';
-import { LayoutFrame, type ComposerHeightMode, useViewportCategory } from 'composer-layout';
-import { AssistantHeader } from '../components/AssistantHeader';
-import { HeroPanel } from '../components/HeroPanel';
-import { ComposerPanel } from '../components/ComposerPanel';
-import { ResultPanel } from '../components/ResultPanel';
-import { FooterNote } from '../components/FooterNote';
-import { HistoryPanel } from '../components/HistoryPanel';
-import { useAssistantExperience } from './useAssistantExperience';
-import type { AssistantHistoryEntry } from '../components/types';
+import {type ComposerHeightMode, LayoutFrame, useViewportCategory} from 'composer-layout';
+import {AssistantHeader} from '../components';
+import {HeroPanel} from '../components';
+import {ComposerPanel} from '../components';
+import {ResultPanel} from '../components';
+import {FooterNote} from '../components';
+import {HistoryPanel} from '../components';
+import {useAssistantExperience} from './useAssistantExperience';
+import type {AssistantHistoryEntry} from '../components/types';
+import {useToast} from 'ui/hooks/useToast';
 
 type AssistantScreenLayoutProps = {
-  onNavigate?: (path: string) => void;
+    onNavigate?: (path: string) => void;
 };
 
-export const AssistantScreenLayout: React.FC<AssistantScreenLayoutProps> = ({ onNavigate }) => {
-  const { isMobile } = useViewportCategory();
-  const {
-    heroTitle,
-    heroSubtitle,
-    modes,
-    historyItems,
-    selectedMode,
-    selectedModeKey,
-    text,
-    images,
-    preferences,
-    stage,
-    sendState,
-    answer,
-    error,
-    handleModeSelect,
-    handleFilesSelected,
-    handleRemoveImage,
-    handleStart,
-    handleRestart,
-    handleSelectHistoryEntry,
-    updatePreferences,
-    setText,
-    setError,
-    clearMode
-  } = useAssistantExperience();
-  const [historyOpen, setHistoryOpen] = React.useState(false);
-  const [toast, setToast] = React.useState('');
-  const toastTimerRef = React.useRef<number | null>(null);
+export const AssistantScreenLayout: React.FC<AssistantScreenLayoutProps> = ({onNavigate}) => {
+    const {isMobile} = useViewportCategory();
+    const {
+        heroTitle,
+        heroSubtitle,
+        modes,
+        historyItems,
+        selectedMode,
+        selectedModeKey,
+        text,
+        images,
+        preferences,
+        stage,
+        sendState,
+        answer,
+        error,
+        handleModeSelect,
+        handleFilesSelected,
+        handleRemoveImage,
+        handleStart,
+        handleRestart,
+        handleSelectHistoryEntry,
+        updatePreferences,
+        setText,
+        setError,
+        clearMode
+    } = useAssistantExperience();
+    const [historyOpen, setHistoryOpen] = React.useState(false);
+    const {toast, showToast} = useToast(2200);
 
-  React.useEffect(() => {
-    return () => {
-      if (toastTimerRef.current !== null) {
-        window.clearTimeout(toastTimerRef.current);
-      }
-    };
-  }, []);
+    React.useEffect(() => {
+        if (!historyOpen) return undefined;
 
-  React.useEffect(() => {
-    if (!historyOpen) return undefined;
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                setHistoryOpen(false);
+            }
+        };
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setHistoryOpen(false);
-      }
-    };
+        window.addEventListener('keydown', handleKeyDown);
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
 
-    window.addEventListener('keydown', handleKeyDown);
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [historyOpen]);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            document.body.style.overflow = previousOverflow;
+        };
+    }, [historyOpen]);
 
     const composerHeightMode: ComposerHeightMode | undefined = React.useMemo(() => {
         if (isMobile) {
-            return { type: 'content', maxFraction: 0.72 };
+            return {type: 'content', maxFraction: 0.72};
         }
         // Desktop: use a fixed fraction without allowAutoHeight to avoid hug-to-content behavior
-        return { type: 'fraction', fraction: 0.48, minPx: 260 };
+        return {type: 'fraction', fraction: 0.48, minPx: 260};
     }, [isMobile]);
 
-  const handleCloseHistory = React.useCallback(() => {
-    setHistoryOpen(false);
-  }, []);
+    const handleCloseHistory = React.useCallback(() => {
+        setHistoryOpen(false);
+    }, []);
 
-  const handleToggleHistory = React.useCallback(() => {
-    if (historyOpen) {
-      handleCloseHistory();
-      return;
-    }
-    setHistoryOpen(true);
-  }, [handleCloseHistory, historyOpen]);
+    const handleToggleHistory = React.useCallback(() => {
+        if (historyOpen) {
+            handleCloseHistory();
+            return;
+        }
+        setHistoryOpen(true);
+    }, [handleCloseHistory, historyOpen]);
 
-  const showToast = React.useCallback((message: string) => {
-    setToast(message);
-    if (toastTimerRef.current !== null) {
-      window.clearTimeout(toastTimerRef.current);
-    }
-    toastTimerRef.current = window.setTimeout(() => {
-      setToast('');
-      toastTimerRef.current = null;
-    }, 2200);
-  }, []);
+    const handleShare = React.useCallback(async () => {
+        if (typeof window === 'undefined' || typeof navigator === 'undefined') return;
 
-  const handleShare = React.useCallback(async () => {
-    if (typeof window === 'undefined' || typeof navigator === 'undefined') return;
+        const shareData: ShareData = {
+            title: 'AI Assistant',
+            text: 'Try this AI assistant',
+            url: window.location.href
+        };
 
-    const shareData: ShareData = {
-      title: 'AI Assistant',
-      text: 'Try this AI assistant',
-      url: window.location.href
-    };
+        if (navigator.share) {
+            try {
+                await navigator.share(shareData);
+                return;
+            } catch (err) {
+                if ((err as DOMException)?.name === 'AbortError') return;
+            }
+        }
 
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-        return;
-      } catch (err) {
-        if ((err as DOMException)?.name === 'AbortError') return;
-      }
-    }
+        if (navigator.clipboard) {
+            try {
+                await navigator.clipboard.writeText(shareData.url ?? '');
+                showToast('Link copied');
+                return;
+            } catch {
+                showToast('Copy not available');
+                return;
+            }
+        }
 
-    if (navigator.clipboard) {
-      try {
-        await navigator.clipboard.writeText(shareData.url ?? '');
-        showToast('Link copied');
-        return;
-      } catch {
         showToast('Copy not available');
-        return;
-      }
-    }
+    }, [showToast]);
 
-    showToast('Copy not available');
-  }, [showToast]);
-
-  const handleHistorySelection = React.useCallback(
-    (entry: AssistantHistoryEntry) => {
-      handleCloseHistory();
-      handleSelectHistoryEntry(entry);
-    },
-    [handleCloseHistory, handleSelectHistoryEntry]
-  );
-
-  const contentBody =
-    stage === 'answer' ? (
-      <ResultPanel
-        answer={answer}
-        selectedMode={selectedMode}
-        preferences={preferences}
-        images={images}
-        text={text}
-        onRestart={handleRestart}
-      />
-    ) : (
-      <HeroPanel
-        modes={modes}
-        selectedModeKey={selectedModeKey}
-        onSelectMode={handleModeSelect}
-        heroTitle={heroTitle}
-        heroSubtitle={heroSubtitle}
-        variant="fill"
-      />
+    const handleHistorySelection = React.useCallback(
+        (entry: AssistantHistoryEntry) => {
+            handleCloseHistory();
+            handleSelectHistoryEntry(entry);
+        },
+        [handleCloseHistory, handleSelectHistoryEntry]
     );
 
-  return (
-    <LayoutFrame
-      header={
-        <AssistantHeader
-          historyOpen={historyOpen}
-          onToggleHistory={handleToggleHistory}
-          onShare={handleShare}
-          onHomeClick={() => {
-            if (stage === 'answer') {
-              handleRestart();
-            } else if (typeof window !== 'undefined' && window.location.pathname !== '/') {
-              if (onNavigate) {
+    const contentBody = React.useMemo(() => (
+        stage === 'answer' ? (
+            <ResultPanel
+                answer={answer}
+                selectedMode={selectedMode}
+                preferences={preferences}
+                images={images}
+                text={text}
+                onRestart={handleRestart}
+            />
+        ) : (
+            <HeroPanel
+                modes={modes}
+                selectedModeKey={selectedModeKey}
+                onSelectMode={handleModeSelect}
+                heroTitle={heroTitle}
+                heroSubtitle={heroSubtitle}
+                variant="fill"
+            />
+        )
+    ), [stage, answer, selectedMode, preferences, images, text, handleRestart, modes, selectedModeKey, handleModeSelect, heroTitle, heroSubtitle]);
+
+    const handleHomeClick = React.useCallback(() => {
+        if (stage === 'answer') {
+            handleRestart();
+        } else if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+            if (onNavigate) {
                 onNavigate('/');
-              }
             }
-          }}
+        }
+    }, [stage, handleRestart, onNavigate]);
+
+    const handleTextChange = React.useCallback((value: string) => {
+        setError('');
+        setText(value);
+    }, [setError, setText]);
+
+    return (
+        <LayoutFrame
+            header={
+                <AssistantHeader
+                    historyOpen={historyOpen}
+                    onToggleHistory={handleToggleHistory}
+                    onShare={handleShare}
+                    onHomeClick={handleHomeClick}
+                />
+            }
+            contentPanel={
+                <div className="assistant-content-shell">
+                    <div className="assistant-content">
+                        {contentBody}
+                    </div>
+                    {toast && <div className="assistant-toast">{toast}</div>}
+                    <HistoryPanel
+                        open={historyOpen}
+                        items={historyItems}
+                        onClose={handleCloseHistory}
+                        onSelect={handleHistorySelection}
+                    />
+                </div>
+            }
+            composerPanel={
+                <ComposerPanel
+                    mode={selectedMode}
+                    modes={modes}
+                    text={text}
+                    images={images}
+                    preferences={preferences}
+                    sendState={sendState}
+                    error={error}
+                    isMobile={isMobile}
+                    isEmbed={false}
+                    onTextChange={handleTextChange}
+                    onFilesSelected={handleFilesSelected}
+                    onRemoveImage={handleRemoveImage}
+                    onUpdatePreferences={updatePreferences}
+                    onStart={handleStart}
+                    onClearMode={clearMode}
+                    onSelectMode={handleModeSelect}
+                />
+            }
+            showComposerPanel={stage === 'compose'}
+            composerHeightMode={composerHeightMode}
+            overlayPadContentPanel
+            footer={<FooterNote sendState={sendState} onNavigate={onNavigate}/>}
         />
-      }
-      contentPanel={
-        <div className="assistant-content-shell">
-          <div className="assistant-content">
-            {contentBody}
-          </div>
-          {toast && <div className="assistant-toast">{toast}</div>}
-          <HistoryPanel
-            open={historyOpen}
-            items={historyItems}
-            onClose={handleCloseHistory}
-            onSelect={handleHistorySelection}
-          />
-        </div>
-      }
-      composerPanel={
-        <ComposerPanel
-          mode={selectedMode}
-          modes={modes}
-          text={text}
-          images={images}
-          preferences={preferences}
-          sendState={sendState}
-          error={error}
-          isMobile={isMobile}
-          isEmbed={false}
-          onTextChange={(value) => {
-            setError('');
-            setText(value);
-          }}
-          onFilesSelected={handleFilesSelected}
-          onRemoveImage={handleRemoveImage}
-          onUpdatePreferences={updatePreferences}
-          onStart={handleStart}
-          onClearMode={clearMode}
-          onSelectMode={handleModeSelect}
-        />
-      }
-      showComposerPanel={stage === 'compose'}
-      composerHeightMode={composerHeightMode}
-      overlayPadContentPanel
-      footer={<FooterNote sendState={sendState} onNavigate={onNavigate} />}
-    />
-  );
+    );
 };

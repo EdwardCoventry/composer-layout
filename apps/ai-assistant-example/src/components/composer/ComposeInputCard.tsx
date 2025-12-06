@@ -22,18 +22,52 @@ type ComposeInputCardProps = {
   onAddAttachment: () => void;
 };
 
+// Inline tick icon for 'sent' state
+const TickIcon: React.FC = React.memo(() => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden focusable="false">
+    <circle cx="10" cy="10" r="10" fill="currentColor" />
+    <path d="M6 10.5L9 13.5L14 8.5" stroke="#111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+  </svg>
+));
+TickIcon.displayName = 'TickIcon';
+
 export const ComposeInputCard: React.FC<ComposeInputCardProps> = ({ mode, text, placeholder, sendState, error, disableStart, isMobile, addButtonRef, showInlinePhotos = false, photosCount = 0, photosRequired = false, onPickCamera, onPickGallery, onTextChange, onStart, onClearMode, onAddAttachment }) => {
   const isSending = sendState === 'sending';
   const isSent = sendState === 'sent';
-  const buttonLabel = isSending ? 'Working...' : isSent ? 'Sent' : 'Start';
+  const buttonLabel = React.useMemo(() => (isSending ? 'Working...' : isSent ? 'Sent' : 'Start'), [isSending, isSent]);
 
-  // Inline tick icon for 'sent' state
-  const TickIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden focusable="false">
-      <circle cx="10" cy="10" r="10" fill="currentColor" />
-      <path d="M6 10.5L9 13.5L14 8.5" stroke="#111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-    </svg>
-  );
+  const handleTextareaChange = React.useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    onTextChange(e.target.value);
+  }, [onTextChange]);
+
+  const handleTextareaKeyDown = React.useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!disableStart && !isSending) {
+        onStart();
+      }
+    }
+  }, [disableStart, isSending, onStart]);
+
+  const handleAddAttachment = React.useCallback(() => {
+    onAddAttachment();
+  }, [onAddAttachment]);
+
+  const handleSendClick = React.useCallback(() => {
+    onStart();
+  }, [onStart]);
+
+  const handleClearMode = React.useCallback(() => {
+    onClearMode();
+  }, [onClearMode]);
+
+  const handlePickCamera = React.useCallback(() => {
+    onPickCamera?.();
+  }, [onPickCamera]);
+
+  const handlePickGallery = React.useCallback(() => {
+    onPickGallery?.();
+  }, [onPickGallery]);
 
   return (
     <div className="assistant-compose-card">
@@ -41,7 +75,7 @@ export const ComposeInputCard: React.FC<ComposeInputCardProps> = ({ mode, text, 
         <div className="assistant-mode-tag">
           <span className="assistant-mode-tag__emoji" aria-hidden>{mode.emoji}</span>
           <span className="assistant-mode-tag__label">{mode.tagLine}</span>
-          <button type="button" className="assistant-mode-tag__clear" onClick={onClearMode} aria-label="Clear selected mode">×</button>
+          <button type="button" className="assistant-mode-tag__clear" onClick={handleClearMode} aria-label="Clear selected mode">×</button>
         </div>
       ) : null}
 
@@ -53,11 +87,11 @@ export const ComposeInputCard: React.FC<ComposeInputCardProps> = ({ mode, text, 
             {photosRequired && photosCount === 0 ? (<span className="assistant-photos-card__required">Required</span>) : null}
           </div>
           <div className="assistant-inline-photos__actions">
-            <button type="button" className="assistant-photos-card__action assistant-inline-photos__action" onClick={onPickCamera} disabled={false}>
+            <button type="button" className="assistant-photos-card__action assistant-inline-photos__action" onClick={handlePickCamera} disabled={false}>
               <CameraIcon />
               <span>Camera</span>
             </button>
-            <button type="button" className="assistant-photos-card__action assistant-inline-photos__action" onClick={onPickGallery} disabled={false}>
+            <button type="button" className="assistant-photos-card__action assistant-inline-photos__action" onClick={handlePickGallery} disabled={false}>
               <GalleryIcon />
               <span>Gallery</span>
             </button>
@@ -71,23 +105,15 @@ export const ComposeInputCard: React.FC<ComposeInputCardProps> = ({ mode, text, 
             className="assistant-input assistant-input--row"
             placeholder={placeholder}
             value={text}
-            onChange={(e) => onTextChange(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                // Enter sends; Shift+Enter makes a newline
-                e.preventDefault();
-                if (!disableStart && !isSending) {
-                  onStart();
-                }
-              }
-            }}
+            onChange={handleTextareaChange}
+            onKeyDown={handleTextareaKeyDown}
             disabled={isSending}
             rows={isMobile ? 3 : 2}
             enterKeyHint="send"
           />
           <div className="assistant-input-buttons">
-            <button type="button" className="assistant-plus-btn" aria-label="Add attachment or quick option" ref={addButtonRef} onClick={() => { onAddAttachment(); }}>+</button>
-            <button type="button" className="assistant-send-btn" data-state={sendState} onClick={onStart} disabled={disableStart}>
+            <button type="button" className="assistant-plus-btn" aria-label="Add attachment or quick option" ref={addButtonRef} onClick={handleAddAttachment}>+</button>
+            <button type="button" className="assistant-send-btn" data-state={sendState} onClick={handleSendClick} disabled={disableStart}>
               {isSent ? <TickIcon /> : <SendIcon />}
               {buttonLabel}
             </button>

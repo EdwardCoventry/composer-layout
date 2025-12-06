@@ -7,20 +7,22 @@ type AssistantHeaderProps = {
   onHomeClick?: () => void;
 };
 
-const MenuIcon = () => (
+const MenuIcon: React.FC = React.memo(() => (
   <svg viewBox="0 0 24 24" role="img" aria-hidden focusable="false">
     <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
-);
+));
+MenuIcon.displayName = 'MenuIcon';
 
-const ShareIcon = () => (
+const ShareIcon: React.FC = React.memo(() => (
   <svg viewBox="0 0 24 24" role="img" aria-hidden focusable="false">
     <path d="M9 12.5 15 8m-6 4.5 6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
     <circle cx="7" cy="12" r="2" stroke="currentColor" strokeWidth="2" fill="none" />
     <circle cx="17" cy="7" r="2" stroke="currentColor" strokeWidth="2" fill="none" />
     <circle cx="17" cy="17" r="2" stroke="currentColor" strokeWidth="2" fill="none" />
   </svg>
-);
+));
+ShareIcon.displayName = 'ShareIcon';
 
 export const AssistantHeader: React.FC<AssistantHeaderProps> = ({ historyOpen, onToggleHistory, onShare, onHomeClick }) => {
   return (

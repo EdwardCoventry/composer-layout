@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 
 export interface PreviewFrameProps {
   appPath: string;
@@ -83,14 +83,17 @@ const PreviewFrame: React.FC<PreviewFrameProps> = ({
     };
   }, [baseWidth]);
 
+  const handleLoad = useCallback(() => setLoaded(true), []);
+  const frameClassName = useMemo(() => [
+    'preview-frame',
+    loaded ? 'preview-frame--loaded' : '',
+    className || '',
+  ].join(' '), [loaded, className]);
+
   return (
     <div
       ref={wrapperRef}
-      className={[
-        'preview-frame',
-        loaded ? 'preview-frame--loaded' : '',
-        className || '',
-      ].join(' ')}
+      className={frameClassName}
       aria-hidden
     >
       <div
@@ -102,12 +105,12 @@ const PreviewFrame: React.FC<PreviewFrameProps> = ({
         <iframe
           className="preview-frame__iframe"
           src={appPath}
-          title={`${title} – preview`}
+          title={`${title} \u2013 preview`}
           loading="lazy"
           sandbox="allow-same-origin allow-scripts"
           tabIndex={-1}
           aria-hidden="true"
-          onLoad={() => setLoaded(true)}
+          onLoad={handleLoad}
         />
       </div>
 

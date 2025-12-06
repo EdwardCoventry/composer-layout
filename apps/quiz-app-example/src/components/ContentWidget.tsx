@@ -9,7 +9,7 @@ export const ContentWidget: React.FC<ContentWidgetProps> = ({ isMobile }) => {
 
   return (
     <div className={`content-widget ${containerAlignmentClass}`} data-testid="content-widget">
-      <div className="widget-surface widget-surface--content content-widget__card" style={{ textAlign: 'left' }}>
+      <div className="widget-surface widget-surface--content content-widget__card content-widget__card--left">
         <span className="badge">Content preview</span>
         <h1 className="line-clamp line-clamp-4 content-widget__title">
           This is the content widget title
@@ -24,4 +24,3 @@ export const ContentWidget: React.FC<ContentWidgetProps> = ({ isMobile }) => {
     </div>
   );
 };
-

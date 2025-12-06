@@ -3,19 +3,6 @@ import { render } from '@testing-library/react';
 import { describe, test, expect } from 'vitest';
 import { QuizScreenLayout } from '../screens/QuizScreenLayout';
 
-if (typeof window !== 'undefined' && !window.matchMedia) {
-  (window as any).matchMedia = (query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    addListener: () => {},
-    removeListener: () => {},
-    dispatchEvent: () => false,
-  });
-}
-
 describe('ContentWidget text alignment', () => {
   function setViewport(width: number) {
     Object.defineProperty(window, 'innerWidth', { value: width, configurable: true });

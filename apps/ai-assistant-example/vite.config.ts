@@ -4,6 +4,7 @@ import path from 'path';
 
 const composerSrc = path.resolve(__dirname, '../../packages/composer-layout/src');
 const commonComponents = path.resolve(__dirname, '../common/components');
+const uiSrc = path.resolve(__dirname, '../../packages/ui/src');
 
 export default defineConfig({
   base: '/ai-assistant-example/',
@@ -12,7 +13,7 @@ export default defineConfig({
     port: 3002,
     strictPort: true,
     fs: {
-      allow: [composerSrc, commonComponents],
+      allow: [composerSrc, commonComponents, uiSrc],
     },
   },
   resolve: {
@@ -20,6 +21,7 @@ export default defineConfig({
       // Point the example app at the source of composer-layout for live edits
       'composer-layout': composerSrc,
       '@common': commonComponents,
+      'ui': uiSrc,
     },
   },
   test: {

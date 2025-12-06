@@ -1,6 +1,7 @@
 import React from 'react';
 import { AssistantScreenLayout } from './screens/AssistantScreenLayout';
 import { AssistantEmbedLayout } from './screens/AssistantEmbedLayout';
+import { useApplyColorSchemeTheme } from 'ui/hooks/useApplyColorSchemeTheme';
 
 export default function App() {
   const [route, setRoute] = React.useState<'home' | 'embed'>(() => {
@@ -8,30 +9,7 @@ export default function App() {
     return window.location.pathname.startsWith('/embed') ? 'embed' : 'home';
   });
 
-  React.useEffect(() => {
-    if (typeof window === 'undefined' || typeof document === 'undefined') return;
-
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const applyTheme = () => {
-      document.documentElement.dataset.theme = mediaQuery.matches ? 'dark' : 'light';
-    };
-
-    applyTheme();
-
-    if (typeof mediaQuery.addEventListener === 'function') {
-      mediaQuery.addEventListener('change', applyTheme);
-    } else {
-      mediaQuery.addListener(applyTheme);
-    }
-
-    return () => {
-      if (typeof mediaQuery.removeEventListener === 'function') {
-        mediaQuery.removeEventListener('change', applyTheme);
-      } else {
-        mediaQuery.removeListener(applyTheme);
-      }
-    };
-  }, []);
+  useApplyColorSchemeTheme();
 
   React.useEffect(() => {
     if (typeof window === 'undefined') return;

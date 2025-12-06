@@ -5,7 +5,9 @@
     "baseUrl": ".",
     "paths": {
       "composer-layout": ["../../packages/composer-layout/src"],
-      "composer-layout/*": ["../../packages/composer-layout/src/*"]
+      "composer-layout/*": ["../../packages/composer-layout/src/*"],
+      "ui/*": ["../../packages/ui/src/*"],
+      "ui": ["../../packages/ui/src"]
     },
     "resolveJsonModule": true
   },
