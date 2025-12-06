@@ -9,7 +9,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "composer-layout": "0.0.2",
+    "composer-layout": "0.0.3",
     "example-styles": "*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
