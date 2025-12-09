@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.5
+- Keep `LayoutFrame` pinned to the viewport by using `height`/`maxHeight` of `100dvh` so the content panel remains the only scrollable area.
+
 ## 0.0.4
 - Republish the package to surface the latest composer layout fixes.
 
