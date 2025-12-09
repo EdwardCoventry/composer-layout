@@ -82,7 +82,8 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
   const hasComposerPanel = !!composerPanel && showComposerPanel;
   const hasFooter = !!footer;
   const isOverlay = isMobile && keyboardOpen && hasComposerPanel;
-  const footerHidden = hideComposerFooter;
+  // Hide footer when explicitly requested or when the keyboard forces overlay mode on mobile
+  const footerHidden = hideComposerFooter || isOverlay;
 
   // Only resolve styles if we have a composer panel & height mode
   const inlineComposerStyle = useMemo(() => (
@@ -122,7 +123,7 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
   const contentExtraPadding = overlayPadContentPanel && isOverlay && computedHeightForPadding ? computedHeightForPadding : 0;
 
   return (
-    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }} data-role="layout-frame" data-overlay={isOverlay ? 'true' : 'false'}>
+    <div style={{ height: '100dvh', maxHeight: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }} data-role="layout-frame" data-overlay={isOverlay ? 'true' : 'false'}>
       <header style={{ flex: '0 0 auto' }} data-role="header">{header}</header>
 
       {/* Main semantic region as content panel */}

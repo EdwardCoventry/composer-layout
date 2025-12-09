@@ -16,9 +16,10 @@ export const QuizScreenLayout: React.FC = () => {
   const keyboardThreshold = 150;
 
   const [isOptionsOpen, setIsOptionsOpen] = React.useState(false);
+  const [isInputFocused, setIsInputFocused] = React.useState(false);
   const closeOptions = React.useCallback(() => setIsOptionsOpen(false), []);
 
-  const { prepareToOpenOptions, handleInputFocus } = useKeyboardOptionsSync({
+  const { prepareToOpenOptions, handleInputFocus, dismissKeyboard } = useKeyboardOptionsSync({
     isOptionsOpen,
     onRequestCloseOptions: closeOptions,
     keyboardThreshold
@@ -36,13 +37,17 @@ export const QuizScreenLayout: React.FC = () => {
 
   const handleToggleOptions = React.useCallback(() => {
     setIsOptionsOpen((open) => {
-      const next = !open;
-      if (next) {
-        prepareToOpenOptions();
+      if (open) return false;
+      // On mobile, force blur so footer hides and options stay open even if keyboard is minimized
+      if (isMobile) {
+        dismissKeyboard();
+        setIsInputFocused(false);
       }
-      return next;
+      // Also run standard keyboard/options sync behavior
+      prepareToOpenOptions();
+      return true;
     });
-  }, [prepareToOpenOptions]);
+  }, [isMobile, dismissKeyboard, prepareToOpenOptions]);
 
   const toggleComposer = React.useCallback(() => setShowComposerPanel((v) => !v), []);
 
@@ -57,6 +62,7 @@ export const QuizScreenLayout: React.FC = () => {
           onToggleOptions={handleToggleOptions}
           optionsMaxHeight={optionsMaxHeight}
           onInputFocus={handleInputFocus}
+          onInputFocusChange={setIsInputFocused}
         />
       }
       showComposerPanel={showComposerPanel}
@@ -64,7 +70,7 @@ export const QuizScreenLayout: React.FC = () => {
       footer={<FooterWidget sizingLabel={sizingLabel} />}
       overlayPadContentPanel
       keyboardThreshold={keyboardThreshold}
-      hideComposerFooter={isMobile && isOptionsOpen}
+      hideComposerFooter={isMobile && (isOptionsOpen || isInputFocused)}
     />
   );
 };

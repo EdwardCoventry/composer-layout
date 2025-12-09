@@ -206,9 +206,16 @@
 
 .quiz-root .composer-widget__middle { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; gap: var(--space-sm); }
 
-.quiz-root .composer-widget__options-grid { display: none; flex: 1 1 auto; min-height: 0; gap: var(--space-sm); overflow-y: auto; background: none; border: none; border-radius: 0; max-height: 400px; width: 100%; align-self: center; }
+.quiz-root .composer-widget__options-grid { display: none; flex: 1 1 auto; min-height: 0; gap: var(--space-sm); overflow-y: auto; background: none; border: none; border-radius: 0; max-height: var(--options-max-height, none); width: 100%; align-self: center; padding: 0; }
 
 .quiz-root .composer-widget__options-grid.is-open { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(2, 1fr); }
+
+/* Mobile-first: ensure single column when runtime marks composer as mobile */
+.quiz-root .composer-widget[data-mobile="true"] .composer-widget__options-grid.is-open {
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  grid-auto-flow: row;
+}
 
 .quiz-root .composer-widget__option { position: relative; background: var(--surface-default); border: var(--border-width) solid var(--border-strong); padding: var(--space-md); border-radius: var(--radius-md); min-height: 60px; color: var(--text-primary); font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: border-color 0.14s ease, border-width 0.1s ease, background 0.14s ease, color 0.14s ease, transform 0.12s ease, box-shadow 0.12s ease; }
 
@@ -223,42 +230,34 @@
 .quiz-root .composer-widget__option-pill svg { width: 14px; height: 14px; }
 
 .quiz-root .composer-widget__inputs { display: flex; flex-direction: column; gap: var(--space-xs); flex: 0 0 auto; padding: 0; max-width: 960px; width: 100%; align-self: center; margin: 0; }
-
+.quiz-root .composer-widget__inputs--stacked { gap: var(--space-sm); }
 .quiz-root .composer-widget__input-row { display: flex; align-items: flex-end; gap: var(--space-md); min-width: 0; }
+.quiz-root .composer-widget__input-row--full { width: 100%; }
+.quiz-root .composer-widget__input-row--actions { width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-sm); align-items: stretch; }
 
-.quiz-root .composer-widget__input { font-size: 1.2rem; flex: 1 1 auto; width: auto; height: auto; min-height: 44px; max-height: 160px; min-width: 0; padding-block: 10px; line-height: 1.1; overflow-y: hidden; resize: none; caret-color: var(--border-strong); }
-
+.quiz-root .composer-widget__input { font-size: 1.2rem; flex: 1 1 auto; width: auto; height: auto; min-height: 52px; max-height: 220px; min-width: 0; padding-block: 12px; line-height: 1.2; overflow-y: hidden; resize: none; caret-color: var(--border-strong); }
+.quiz-root .composer-widget__input--compact { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-height: 52px; min-height: 52px; line-height: 1.2; padding-block: 12px; }
+.quiz-root .composer-widget__input--single { height: 52px; max-height: none; }
 .quiz-root .composer-widget__input::placeholder { font-size: 1.05rem; font-weight: 500; }
-
 .quiz-root .composer-widget__input:hover:not([disabled]) { background: var(--surface-muted); }
-
 .quiz-root .composer-widget__input[disabled] { border-color: var(--border-subtle); background: var(--surface-disabled); color: var(--text-muted); cursor: not-allowed; }
-
 .quiz-root .composer-widget__input[disabled]::placeholder { color: var(--text-muted); }
 
 .quiz-root .composer-widget__icon-btn,
-.quiz-root .composer-widget__send-btn { border: var(--border-width) solid var(--border-strong); background: var(--surface-default); color: var(--text-primary); border-radius: var(--radius-sm); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-xxs); font-weight: 700; letter-spacing: 0.02em; }
+.quiz-root .composer-widget__send-btn { border: var(--border-width) solid var(--border-strong); background: var(--surface-default); color: var(--text-primary); border-radius: var(--radius-sm); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-xxs); font-weight: 700; letter-spacing: 0.02em; transition: background 0.12s ease, transform 0.06s ease, box-shadow 0.12s ease; }
 
-/* Button sizing: match one-line input height (44px) */
-.quiz-root .composer-widget__icon-btn {
-  --composer-btn-size: 44px;
-  width: var(--composer-btn-size);
-  height: var(--composer-btn-size);
-  flex: 0 0 auto;
-}
-
+.quiz-root .composer-widget__icon-btn { width: 44px; min-width: 44px; height: 44px; }
+.quiz-root .composer-widget__icon-btn--square { width: 52px; min-width: 52px; height: 52px; }
+.quiz-root .composer-widget__icon-btn--wide { width: 100%; min-width: 0; height: 52px; justify-content: center; gap: var(--space-xs); }
+.quiz-root .composer-widget__icon-label { font-size: 14px; font-weight: 700; letter-spacing: 0.01em; }
 .quiz-root .composer-widget__icon-btn svg { width: 18px; height: 18px; }
 
-.quiz-root .composer-widget__send-btn {
-  --composer-input-height: 44px;
-  height: var(--composer-input-height);
-  padding-inline: 16px; /* rectangular shape */
-  min-width: 0;
-}
+.quiz-root .composer-widget__send-btn { padding: 0 var(--space-md); height: 44px; min-height: 44px; gap: var(--space-xs); }
+.quiz-root .composer-widget__send-btn--tall { height: 52px; min-height: 52px; }
+.quiz-root .composer-widget__send-btn--wide { width: 100%; min-width: 0; height: 52px; justify-content: center; }
 
-/* Merged hover rule */
 .quiz-root .composer-widget__icon-btn:hover,
-.quiz-root .composer-widget__send-btn:hover { background: var(--surface-muted); transform: translateY(-1px); box-shadow: 0 4px 12px rgb(0 0 0 / 25%); }
+.quiz-root .composer-widget__send-btn:hover { background: var(--surface-muted); transform: translateY(-1px); box-shadow: 0 3px 0 0 var(--border-strong); }
 
 .quiz-root .composer-widget__send-btn[disabled] {
   cursor: not-allowed;
@@ -285,6 +284,7 @@
 .quiz-root .composer-widget__icon-btn:active,
 .quiz-root .composer-widget__send-btn:active {
   background: var(--surface-strong);
+  color: var(--surface-default);
   transform: translateY(1px);
 }
 
@@ -354,7 +354,7 @@
    Responsive
 ------------------------------------------------------- */
 
-@media (width <= 768px) {
+@media (max-width: 768px) {
   .content-widget__card {
     padding: var(--space-md);
     max-width: none;
@@ -364,6 +364,7 @@
   .composer-widget__options-grid.is-open {
     grid-template-columns: 1fr;
     grid-template-rows: repeat(4, 1fr);
+    grid-auto-flow: row;
   }
 
   .composer-widget__inputs {
