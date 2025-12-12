@@ -81,6 +81,39 @@ describe('Overlay behavior for composer BottomRegion', () => {
   });
 });
 
+describe('Overlay padding for content panel', () => {
+  const originalVV = (window as any).visualViewport;
+  afterEach(() => { (window as any).visualViewport = originalVV; });
+
+  function mockVisualViewport(height: number) {
+    (window as any).visualViewport = { height, addEventListener: () => {}, removeEventListener: () => {} };
+  }
+
+  test('applies bottom padding equal to composer height in overlay', () => {
+    Object.defineProperty(window, 'innerWidth', { value: 500, configurable: true });
+    Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true });
+    mockVisualViewport(600);
+    const mode: ComposerHeightMode = { type: 'fraction', fraction: 0.25 };
+
+    const { container } = render(<LayoutFrame {...baseProps(mode)} />);
+    const content = container.querySelector('[data-role="content-panel"]') as HTMLElement;
+    expect(content.dataset.contentOverlayPad).toBe('150');
+    expect(content.style.paddingBottom).toBe('150px');
+  });
+
+  test('omits bottom padding when overlay is inactive', () => {
+    Object.defineProperty(window, 'innerWidth', { value: 1200, configurable: true });
+    Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true });
+    (window as any).visualViewport = undefined;
+    const mode: ComposerHeightMode = { type: 'fraction', fraction: 0.25 };
+
+    const { container } = render(<LayoutFrame {...baseProps(mode)} />);
+    const content = container.querySelector('[data-role="content-panel"]') as HTMLElement;
+    expect(content.dataset.contentOverlayPad).toBe('0');
+    expect(content.style.paddingBottom).toBe('');
+  });
+});
+
 describe('Layout structure ordering with composer BottomRegion', () => {
   test('inline mode ordering: header, content-wrapper, bottom-region', () => {
     const mode: ComposerHeightMode = { type: 'fraction', fraction: 0.3 };
