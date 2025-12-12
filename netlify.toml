@@ -8,12 +8,6 @@ NPM_FLAGS = "--include=optional"
 
 [[redirects]]
 from = "/apps/composer-layout"
-to = "/apps/composer-layout/"
-status = 301
-force = true
-
-[[redirects]]
-from = "/apps/composer-layout/"
 to = "/"
 status = 200
 force = true
