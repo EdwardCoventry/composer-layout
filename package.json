@@ -1,7 +1,7 @@
 {
   "name": "composer-layout-root",
   "private": true,
-  "version": "0.0.2",
+  "version": "0.0.6",
   "engines": {
     "node": ">=20.19.0"
   },
@@ -23,7 +23,8 @@
     "lint:css:report:json": "powershell -NoLogo -NoProfile -Command \"$ErrorActionPreference='Continue'; New-Item -ItemType Directory -Force -Path .reports | Out-Null; stylelint '**/*.css' --allow-empty-input --formatter json > .reports/stylelint.json\"",
     "lint:css:report:node": "node scripts/stylelint-report.js",
     "typecheck": "tsc -b --noEmit",
-    "check": "npm run lint && npm run typecheck"
+    "check": "npm run lint && npm run typecheck",
+    "publish:composer-layout": "npm run check && npm run build --workspace packages/composer-layout && npm run test --workspace packages/composer-layout && npm publish --workspace packages/composer-layout"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",

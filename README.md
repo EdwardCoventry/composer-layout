@@ -1,10 +1,10 @@
 # Composer Layout
 
-Responsive two-panel layout primitives for chat-style UIs. It keeps a content panel and a composer panel aligned on every screen size: on mobile the composer sits at the bottom and takes the minimum space it needs, and on desktop the composer holds a fixed fraction of the viewport so the conversation stays visible.
+Responsive two-panel layout primitives for chat-style UIs. It keeps a content panel and a composer panel aligned on every screen size: on mobile the composer sits at the bottom and takes the minimum space it needs, and on desktop the composer holds a fixed fraction of the viewport.
 
 Live examples:
 - AI assistant: https://edwardcoventry.com/apps/composer-layout/ai-assistant/
-- Quiz flow: https://edwardcoventry.com/apps/composer-layout/quiz/
+- Quiz: https://edwardcoventry.com/apps/composer-layout/quiz/
 
 ## Install
 ```
