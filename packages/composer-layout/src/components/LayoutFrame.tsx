@@ -78,6 +78,10 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
 }) => {
   const { isMobile } = useViewportCategory();
   const keyboardOpen = useKeyboardOpen(keyboardThreshold);
+  const [viewportHeight, setViewportHeight] = useState(() => {
+    if (typeof window === 'undefined') return 0;
+    return window.visualViewport?.height || window.innerHeight;
+  });
 
   const hasComposerPanel = !!composerPanel && showComposerPanel;
   const hasFooter = !!footer;
@@ -98,7 +102,29 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
   const composerPanelRef = useRef<HTMLDivElement | null>(null);
   const composerContentRef = useRef<HTMLDivElement | null>(null);
   const footerRef = useRef<HTMLDivElement | null>(null);
-  const viewportHeight = typeof window !== 'undefined' ? (window.visualViewport?.height || window.innerHeight) : 0;
+
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') return;
+    const vv = window.visualViewport;
+    const onResize = () => {
+      setViewportHeight(vv?.height || window.innerHeight);
+    };
+    if (vv) {
+      vv.addEventListener('resize', onResize);
+      vv.addEventListener('scroll', onResize);
+    }
+    window.addEventListener('resize', onResize);
+    window.addEventListener('orientationchange', onResize);
+    onResize();
+    return () => {
+      if (vv) {
+        vv.removeEventListener('resize', onResize);
+        vv.removeEventListener('scroll', onResize);
+      }
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('orientationchange', onResize);
+    };
+  }, []);
 
   // Single effect for measurement / resize observer (overlay padding)
   useLayoutEffect(() => {
