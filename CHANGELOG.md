@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.6
+- Refresh metadata and docs for the 0.0.6 release.
+
 ## 0.0.5
 - Keep `LayoutFrame` pinned to the viewport by using `height`/`maxHeight` of `100dvh` so the content panel remains the only scrollable area.
 

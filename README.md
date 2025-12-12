@@ -70,5 +70,5 @@ Helpful hooks:
 
 ## Publish and releases
 - Manual publish (from `packages/composer-layout`): `npm publish --access public` (requires login and `npm run build` first).
-- Automated releases: push a tag like `v0.0.2` to trigger `.github/workflows/release.yml` (runs `npm ci`, `npm test`, then `npm publish --access public` with `NODE_AUTH_TOKEN` from `NPM_TOKEN`).
+- Automated releases: push a tag like `v0.0.6` to trigger `.github/workflows/release.yml` (runs `npm ci`, `npm test`, then `npm publish --access public` with `NODE_AUTH_TOKEN` from `NPM_TOKEN`).
 - Versioning flow: `npm version patch|minor|major --workspaces --no-git-tag-version`, commit, then push with a git tag for the release workflow.
