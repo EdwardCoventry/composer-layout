@@ -17,9 +17,17 @@ const rewriteRootImports = (html: string, appDir: string, appBase: string) => {
     .replace(new RegExp(`(src|href)=(["'])/public/`, 'g'), (_match, attr, quote) => `${attr}=${quote}${publicPrefix}`);
 };
 
-const proxiedAppPattern = new RegExp('^/(quiz-app-example|ai-assistant-example)(/.*)?$');
+const appAliases: Record<string, string> = {
+  'quiz-app-example': 'quiz-app-example',
+  'quiz': 'quiz-app-example',
+  'ai-assistant-example': 'ai-assistant-example',
+  'ai-assistant': 'ai-assistant-example',
+};
+
+const proxiedAppPattern = new RegExp(`^/(${Object.keys(appAliases).join('|')})(/.*)?$`);
 
 export default defineConfig({
+  base: './',
   plugins: [
     react(),
     {
@@ -31,7 +39,8 @@ export default defineConfig({
 
           const match = proxiedAppPattern.exec(urlPath);
           if (match) {
-            const appName = match[1];
+            const appKey = match[1];
+            const appName = appAliases[appKey] || appKey;
 
              // Map the URL to the file system path
              // url is like /quiz-app-example/foo.js
@@ -43,7 +52,7 @@ export default defineConfig({
               targetPath += 'index.html';
             } else if (!path.extname(targetPath)) {
                // Naive check for no extension -> directory -> index.html
-               if (targetPath === `/${appName}`) {
+               if (targetPath === `/${appKey}`) {
                  targetPath += '/index.html';
                }
             }
@@ -55,7 +64,7 @@ export default defineConfig({
                 
                 try {
                   let html = fs.readFileSync(indexPath, 'utf-8');
-                  html = rewriteRootImports(html, appDir, `/${appName}/`);
+                  html = rewriteRootImports(html, appDir, `/${appKey}/`);
                   res.statusCode = 200;
                   res.setHeader('Content-Type', 'text/html');
                   server.transformIndexHtml(req.url, html)

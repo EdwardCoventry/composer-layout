@@ -1668,20 +1668,6 @@
     border-radius: 0;
 }
 
-/*!* border layer, stacked under the content, doesn't affect layout *!*/
-/*.assistant-history__panel::before {*/
-/*    content: "";*/
-/*    position: absolute;*/
-/*    inset: 0;*/
-/*    border: var(--border-width) solid var(--border-strong);*/
-/*    border-radius: inherit;*/
-/*    pointer-events: none;*/
-/*    !* optional: put it below content if you use z-index elsewhere *!*/
-/*    z-index: 0;*/
-/*}*/
-
-
-
 /* make sure children render above the border layer */
 .assistant-history__panel > * {
     position: relative;
@@ -1781,7 +1767,7 @@
 .assistant-history__inline-error {
     display: inline-flex;
     align-items: center;
-    gap:  var(--space-sm);
+    gap: var(--space-sm);
     border: var(--border-width) dashed var(--border-strong);
     border-radius: var(--radius-md);
     padding: 10px 12px;

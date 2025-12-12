@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 export function useViewportCategory(mobileMaxWidth: number = 768) {
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth <= mobileMaxWidth;
+  });
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const update = () => setIsMobile(window.innerWidth <= mobileMaxWidth);

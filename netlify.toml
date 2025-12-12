@@ -5,3 +5,57 @@ publish = "apps/showcase/dist"
 [build.environment]
 NODE_VERSION = "22.18.0"
 NPM_FLAGS = "--include=optional"
+
+[[redirects]]
+from = "/apps/composer-layout"
+to = "https://composer-layout.netlify.app/"
+status = 200
+force = true
+
+[[redirects]]
+from = "/apps/composer-layout/"
+to = "https://composer-layout.netlify.app/"
+status = 200
+force = true
+
+[[redirects]]
+from = "/apps/composer-layout/*"
+to = "https://composer-layout.netlify.app/:splat"
+status = 200
+force = true
+
+[[redirects]]
+from = "/ai-assistant"
+to = "/ai-assistant-example/"
+status = 200
+force = true
+
+[[redirects]]
+from = "/ai-assistant/"
+to = "/ai-assistant-example/"
+status = 200
+force = true
+
+[[redirects]]
+from = "/ai-assistant/*"
+to = "/ai-assistant-example/:splat"
+status = 200
+force = true
+
+[[redirects]]
+from = "/quiz"
+to = "/quiz-app-example/"
+status = 200
+force = true
+
+[[redirects]]
+from = "/quiz/"
+to = "/quiz-app-example/"
+status = 200
+force = true
+
+[[redirects]]
+from = "/quiz/*"
+to = "/quiz-app-example/:splat"
+status = 200
+force = true
