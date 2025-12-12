@@ -7,7 +7,7 @@ const commonComponents = path.resolve(__dirname, '../common/components');
 const uiSrc = path.resolve(__dirname, '../../packages/ui/src');
 
 export default defineConfig({
-  base: '/quiz-app-example/',
+  base: './',
   build: {
     outDir: 'dist',
     rollupOptions: {
