@@ -8,26 +8,26 @@ NPM_FLAGS = "--include=optional"
 
 [[redirects]]
 from = "/apps/composer-layout"
-to = "/apps/composer-layout/"
-status = 301
+to = "https://composer-layout.netlify.app/"
+status = 200
 force = true
 
 [[redirects]]
 from = "/apps/composer-layout/"
-to = "/"
+to = "https://composer-layout.netlify.app/"
 status = 200
 force = true
 
 [[redirects]]
 from = "/apps/composer-layout/*"
-to = "/:splat"
+to = "https://composer-layout.netlify.app/:splat"
 status = 200
 force = true
 
 [[redirects]]
 from = "/ai-assistant"
-to = "/ai-assistant/"
-status = 301
+to = "/ai-assistant-example/"
+status = 200
 force = true
 
 [[redirects]]
@@ -44,8 +44,8 @@ force = true
 
 [[redirects]]
 from = "/quiz"
-to = "/quiz/"
-status = 301
+to = "/quiz-app-example/"
+status = 200
 force = true
 
 [[redirects]]
