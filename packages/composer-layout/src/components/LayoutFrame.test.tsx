@@ -1,8 +1,11 @@
 import React from 'react';
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { render } from '@testing-library/react';
 import { LayoutFrame } from './LayoutFrame';
 import { ComposerHeightMode } from '../types/layout';
+
+let mockKeyboardOpen = false;
+vi.mock('../hooks/useKeyboardOpen', () => ({ useKeyboardOpen: () => mockKeyboardOpen }));
 
 if (!window.matchMedia) {
   window.matchMedia = (query: string) => ({
@@ -16,6 +19,10 @@ if (!window.matchMedia) {
     dispatchEvent: () => false
   });
 }
+
+beforeEach(() => {
+  mockKeyboardOpen = false;
+});
 
 function baseProps(mode: ComposerHeightMode) {
   return {
@@ -40,7 +47,7 @@ describe('LayoutFrame composer height modes', () => {
     const region = container.querySelector('[data-role="bottom-region"]') as HTMLElement;
     expect(region).toBeTruthy();
     expect(region.dataset.mode).toBe('inline');
-    expect(region.style.height).toBe('400px');
+    expect(region.style.height).toBe('40vh');
   });
 
   test('fraction mode with allowAutoHeight applies auto height and minHeight', () => {
@@ -78,6 +85,7 @@ describe('Overlay behavior for composer BottomRegion', () => {
     Object.defineProperty(window, 'innerWidth', { value: 500, configurable: true });
     Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true });
     mockVisualViewport(600);
+    mockKeyboardOpen = true;
     const mode: ComposerHeightMode = { type: 'fraction', fraction: 0.3 };
     const { container } = render(<LayoutFrame {...baseProps(mode)} />);
     const region = container.querySelector('[data-role="bottom-region"]') as HTMLElement;
@@ -110,6 +118,7 @@ describe('Overlay padding for content panel', () => {
     Object.defineProperty(window, 'innerWidth', { value: 500, configurable: true });
     Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true });
     mockVisualViewport(600);
+    mockKeyboardOpen = true;
     const mode: ComposerHeightMode = { type: 'fraction', fraction: 0.25 };
 
     const { container } = render(<LayoutFrame {...baseProps(mode)} />);

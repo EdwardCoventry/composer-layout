@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.10
+- Bump package version to republish the latest `composer-layout` build to npm.
+
 ## 0.0.9
 - Add `lockComposerPosition` to keep the composer fixed on mobile even when the keyboard is closed, avoiding focus loss on some WebKit builds.
 - Harden `useKeyboardOpen` with visualViewport baselines and a focus-based fallback for coarse pointers so keyboard overlay stays accurate on iOS/Safari.
