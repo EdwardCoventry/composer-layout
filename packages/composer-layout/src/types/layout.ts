@@ -17,8 +17,12 @@ export interface LayoutFrameProps {
   overlayPadContentPanel?: boolean;
   keyboardThreshold?: number;
   /**
+   * Keep the composer region fixed on mobile even when the keyboard is closed.
+   * This avoids focus loss on some WebKit builds when switching layout modes.
+   */
+  lockComposerPosition?: boolean;
+  /**
    * If true, the footer inside the composer region is hidden (e.g. on mobile when an options grid is open).
    */
   hideComposerFooter?: boolean;
 }
-

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.9
+- Add `lockComposerPosition` to keep the composer fixed on mobile even when the keyboard is closed, avoiding focus loss on some WebKit builds.
+- Harden `useKeyboardOpen` with visualViewport baselines and a focus-based fallback for coarse pointers so keyboard overlay stays accurate on iOS/Safari.
+- Refresh docs to cover the new composer locking option and the keyboard detection behavior.
+
 ## 0.0.6
 - Refresh metadata and docs for the 0.0.6 release.
 

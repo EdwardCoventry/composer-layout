@@ -1,7 +1,7 @@
 {
   "name": "composer-layout-root",
   "private": true,
-  "version": "0.0.6",
+  "version": "0.0.9",
   "engines": {
     "node": ">=20.19.0"
   },

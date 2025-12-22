@@ -74,6 +74,7 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
   footer,
   overlayPadContentPanel = false,
   keyboardThreshold = 150,
+  lockComposerPosition = false,
   hideComposerFooter = false
 }) => {
   const { isMobile } = useViewportCategory();
@@ -85,9 +86,11 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
 
   const hasComposerPanel = !!composerPanel && showComposerPanel;
   const hasFooter = !!footer;
-  const isOverlay = isMobile && keyboardOpen && hasComposerPanel;
+  const overlayActive = isMobile && keyboardOpen && hasComposerPanel;
+  const lockPositionActive = lockComposerPosition && isMobile && hasComposerPanel;
+  const shouldFixComposer = overlayActive || lockPositionActive;
   // Hide footer when explicitly requested or when the keyboard forces overlay mode on mobile
-  const footerHidden = hideComposerFooter || isOverlay;
+  const footerHidden = hideComposerFooter || overlayActive;
 
   // Only resolve styles if we have a composer panel & height mode
   const inlineComposerStyle = useMemo(() => (
@@ -96,6 +99,21 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
   const overlayComposerStyle = useMemo(() => (
     hasComposerPanel && composerHeightMode ? getComposerRegionStyle(composerHeightMode, 'overlay') : {}
   ), [hasComposerPanel, composerHeightMode]);
+  const bottomRegionStyle = useMemo(() => {
+    if (!hasComposerPanel) return {};
+    if (shouldFixComposer) {
+      return {
+        position: 'fixed',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 20,
+        boxSizing: 'border-box',
+        ...overlayComposerStyle
+      };
+    }
+    return { ...inlineComposerStyle, boxSizing: 'border-box' };
+  }, [hasComposerPanel, shouldFixComposer, inlineComposerStyle, overlayComposerStyle]);
 
   const bottomRef = useRef<HTMLElement | null>(null);
   const [measuredBottomHeight, setMeasuredBottomHeight] = useState<number | undefined>();
@@ -128,7 +146,7 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
 
   // Single effect for measurement / resize observer (overlay padding)
   useLayoutEffect(() => {
-    if (!isOverlay || !hasComposerPanel) return;
+    if (!shouldFixComposer || !hasComposerPanel) return;
     if (!bottomRef.current) return;
     // Initial measure
     setMeasuredBottomHeight(bottomRef.current.getBoundingClientRect().height);
@@ -138,7 +156,7 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
       ro.observe(bottomRef.current);
       return () => ro.disconnect();
     }
-  }, [isOverlay, hasComposerPanel, composerHeightMode]);
+  }, [shouldFixComposer, hasComposerPanel, composerHeightMode]);
 
   const baseComposerHeight = hasComposerPanel && composerHeightMode
     ? computeComposerPixelHeight(composerHeightMode, viewportHeight)
@@ -146,10 +164,11 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
   const computedHeightForPadding = hasComposerPanel
     ? (baseComposerHeight ?? measuredBottomHeight)
     : undefined;
-  const contentExtraPadding = overlayPadContentPanel && isOverlay && computedHeightForPadding ? computedHeightForPadding : 0;
+  const contentExtraPadding = overlayPadContentPanel && shouldFixComposer && computedHeightForPadding ? computedHeightForPadding : 0;
 
   return (
-    <div style={{ height: '100dvh', maxHeight: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }} data-role="layout-frame" data-overlay={isOverlay ? 'true' : 'false'}>
+    // Avoid forcing visualViewport px height here; it breaks content panel sizing on WebKit.
+    <div style={{ height: '100dvh', maxHeight: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }} data-role="layout-frame" data-overlay={overlayActive ? 'true' : 'false'}>
       <header style={{ flex: '0 0 auto' }} data-role="header">{header}</header>
 
       {/* Main semantic region as content panel */}
@@ -159,50 +178,13 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
         </section>
       </main>
 
-      {hasComposerPanel && !isOverlay && (
+      {hasComposerPanel && (
         <section
           ref={bottomRef}
-          style={{
-            ...inlineComposerStyle,
-            boxSizing: 'border-box'
-          }}
+          style={bottomRegionStyle}
           data-role="bottom-region"
-          data-mode="inline"
-          aria-label="Composer Region"
-        >
-          <div style={bottomRegionInnerStyle} data-role="bottom-region-inner">
-            <div
-              ref={composerPanelRef}
-              style={composerScrollAreaStyle}
-              data-role="composer-panel"
-              aria-label="Composer Panel"
-            >
-              <div ref={composerContentRef} style={composerContentWrapperStyle} data-role="composer-panel-content">
-                {composerPanel}
-              </div>
-            </div>
-            {hasFooter && !footerHidden && (
-              <div ref={footerRef} style={bottomFooterStyle} data-role="footer">{footer}</div>
-            )}
-          </div>
-        </section>
-      )}
-
-      {hasComposerPanel && isOverlay && (
-        <section
-          ref={bottomRef}
-          style={{
-            position: 'fixed',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 20,
-            boxSizing: 'border-box',
-            ...overlayComposerStyle
-          }}
-          data-role="bottom-region"
-          data-mode="overlay"
-          aria-label="Composer Region (Overlay)"
+          data-mode={overlayActive ? 'overlay' : 'inline'}
+          aria-label={overlayActive ? 'Composer Region (Overlay)' : 'Composer Region'}
         >
           <div style={bottomRegionInnerStyle} data-role="bottom-region-inner">
             <div

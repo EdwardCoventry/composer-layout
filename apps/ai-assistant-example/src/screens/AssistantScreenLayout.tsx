@@ -65,7 +65,7 @@ export const AssistantScreenLayout: React.FC<AssistantScreenLayoutProps> = ({onN
 
     const composerHeightMode: ComposerHeightMode | undefined = React.useMemo(() => {
         if (isMobile) {
-            return {type: 'content', maxFraction: 0.72};
+            return {type: 'content', maxFraction: 1.0};
         }
         // Desktop: use a fixed fraction without allowAutoHeight to avoid hug-to-content behavior
         return {type: 'fraction', fraction: 0.48, minPx: 260};
@@ -207,6 +207,7 @@ export const AssistantScreenLayout: React.FC<AssistantScreenLayoutProps> = ({onN
             showComposerPanel={stage === 'compose'}
             composerHeightMode={composerHeightMode}
             overlayPadContentPanel
+            lockComposerPosition={isMobile}
             footer={<FooterNote sendState={sendState} onNavigate={onNavigate}/>}
         />
     );

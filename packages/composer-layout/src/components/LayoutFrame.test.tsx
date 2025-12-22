@@ -1,5 +1,5 @@
 import React from 'react';
-import { afterEach, describe, expect, test } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { render } from '@testing-library/react';
 import { LayoutFrame } from './LayoutFrame';
 import { ComposerHeightMode } from '../types/layout';
@@ -30,13 +30,17 @@ function baseProps(mode: ComposerHeightMode) {
 }
 
 describe('LayoutFrame composer height modes', () => {
-  test('fraction mode applies fixed vh height on bottom-region', () => {
+  beforeEach(() => {
+    Object.defineProperty(window, 'innerHeight', { value: 1000, configurable: true });
+  });
+
+  test('fraction mode applies fixed pixel height on bottom-region', () => {
     const mode: ComposerHeightMode = { type: 'fraction', fraction: 0.4, minPx: 200 };
     const { container } = render(<LayoutFrame {...baseProps(mode)} />);
     const region = container.querySelector('[data-role="bottom-region"]') as HTMLElement;
     expect(region).toBeTruthy();
     expect(region.dataset.mode).toBe('inline');
-    expect(region.style.height).toBe('40vh');
+    expect(region.style.height).toBe('400px');
   });
 
   test('fraction mode with allowAutoHeight applies auto height and minHeight', () => {
@@ -46,7 +50,7 @@ describe('LayoutFrame composer height modes', () => {
     expect(region).toBeTruthy();
     expect(region.dataset.mode).toBe('inline');
     expect(region.style.height).toBe('auto');
-    // Note: JSDOM may not support max() in style properties, so we skip verifying minHeight value
+    // minHeight depends on viewport sizing, so we skip verifying it here.
   });
 
   test('calculated mode applies pixel height on bottom-region', () => {
@@ -78,6 +82,19 @@ describe('Overlay behavior for composer BottomRegion', () => {
     const { container } = render(<LayoutFrame {...baseProps(mode)} />);
     const region = container.querySelector('[data-role="bottom-region"]') as HTMLElement;
     expect(region.dataset.mode).toBe('overlay');
+  });
+
+  test('lockComposerPosition keeps bottom-region fixed without keyboard overlay', () => {
+    Object.defineProperty(window, 'innerWidth', { value: 500, configurable: true });
+    Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true });
+    (window as any).visualViewport = undefined;
+    const mode: ComposerHeightMode = { type: 'fraction', fraction: 0.3 };
+    const { container } = render(
+      <LayoutFrame {...baseProps(mode)} lockComposerPosition />
+    );
+    const region = container.querySelector('[data-role="bottom-region"]') as HTMLElement;
+    expect(region.dataset.mode).toBe('inline');
+    expect(region.style.position).toBe('fixed');
   });
 });
 

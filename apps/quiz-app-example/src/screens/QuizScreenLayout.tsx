@@ -71,6 +71,7 @@ export const QuizScreenLayout: React.FC = () => {
       overlayPadContentPanel
       keyboardThreshold={keyboardThreshold}
       hideComposerFooter={isMobile && (isOptionsOpen || isInputFocused)}
+      lockComposerPosition={isMobile}
     />
   );
 };

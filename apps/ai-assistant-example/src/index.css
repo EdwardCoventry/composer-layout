@@ -4,6 +4,18 @@
    AI Assistant Example
 ------------------------------------------------------- */
 
+:root {
+    --assistant-viewport-height: 100vh;
+    --assistant-viewport-90: 90vh;
+}
+
+@supports (height: 100dvh) {
+    :root {
+        --assistant-viewport-height: 100dvh;
+        --assistant-viewport-90: 90dvh;
+    }
+}
+
 .assistant-content-shell {
     position: relative;
     min-height: 100%;
@@ -457,7 +469,7 @@
 
     .assistant-modal__body {
         /* Account for container padding so the body never touches the viewport edges */
-        max-height: calc(100vh - 2 * var(--assistant-mobile-gap));
+        max-height: calc(var(--assistant-viewport-height) - 2 * var(--assistant-mobile-gap));
     }
 
     .assistant-pref-form__row {
@@ -902,7 +914,7 @@
     flex-direction: column;
     gap: 0;
     box-shadow: 0 12px 0 0 var(--border-strong);
-    max-height: calc(100vh - 2 * var(--assistant-mobile-gap));
+    max-height: calc(var(--assistant-viewport-height) - 2 * var(--assistant-mobile-gap));
     --assistant-sheet-pad-x: clamp(var(--space-md), 4vw, 28px);
 }
 
@@ -912,13 +924,13 @@
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     box-shadow: 0 -2px 0 0 var(--border-strong);
     margin: 0 auto;
-    max-height: 90vh;
+    max-height: var(--assistant-viewport-90);
     transform: translateY(0);
 }
 
 .assistant-modal__body[data-variant="fullscreen"] {
     width: 100%;
-    height: 100dvh;
+    height: var(--assistant-viewport-height);
     max-width: none;
     max-height: none;
     border-radius: 0;
@@ -973,6 +985,7 @@
 .assistant-modal__content {
     flex: 1 1 auto;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     padding: var(--space-xs) 0 0 0;
 }
 
@@ -1105,7 +1118,7 @@
     background: var(--surface-default);
     box-shadow: 0 10px 36px rgb(0 0 0 / 28%), 0 6px 0 0 var(--border-strong);
     overflow: hidden;
-    max-height: calc(100vh - 32px);
+    max-height: calc(var(--assistant-viewport-height) - 32px);
     display: flex;
     flex-direction: column;
     opacity: 0;
@@ -1122,7 +1135,7 @@
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     box-shadow: none;
     overflow: hidden;
-    max-height: 90vh;
+    max-height: var(--assistant-viewport-90);
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -1153,8 +1166,9 @@
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     padding: 0;
-    min-height: 100vh;
+    min-height: var(--assistant-viewport-height);
     height: 100%;
 }
 
@@ -1506,6 +1520,7 @@
 .assistant-add__fullscreen-body {
     flex: 1 1 auto;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     padding: 0;
 }
 
@@ -1750,6 +1765,7 @@
 .assistant-history__body {
     flex: 1 1 auto;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     padding: clamp(24px, 4vw, 32px) var(--shell-gutter) clamp(var(--space-xl), 5vw, 40px);
     display: flex;
     flex-direction: column;
@@ -2090,7 +2106,7 @@
 }
 
 .assistant-embed-shell {
-    min-height: 100vh;
+    min-height: var(--assistant-viewport-height);
     background: var(--page-bg);
     padding: 0;
     display: flex;
@@ -2177,7 +2193,7 @@
 }
 
 .assistant-embed-stack[data-single="true"] {
-    min-height: 100vh;
+    min-height: var(--assistant-viewport-height);
     justify-content: center;
 }
 
@@ -2336,6 +2352,7 @@
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .assistant-modal[data-variant="popup"][data-embed="false"] {
@@ -2347,7 +2364,7 @@
 
 /* Constrain popup body height to viewport minus margins */
 .assistant-modal__body[data-variant="popup"][data-embed="false"] {
-    max-height: calc(100dvh - 2 * var(--assistant-popup-gap-y));
+    max-height: calc(var(--assistant-viewport-height) - 2 * var(--assistant-popup-gap-y));
 }
 
 /* Ensure internal scrolling happens within content area, not body/page */
