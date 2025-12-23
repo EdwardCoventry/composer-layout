@@ -10,6 +10,7 @@ Live examples:
 ```
 npm install composer-layout
 ```
+Current package version: 0.0.11 (see CHANGELOG in the repo root).
 Peer deps: `react` and `react-dom` (React 19).
 
 ## Quick usage
@@ -48,8 +49,8 @@ Composer sizing modes:
 - `calculated`: `{ type: 'calculated', getHeight: () => number, maxFraction?: number }`
 
 Keyboard + composer behavior:
-- The mobile overlay activates when `useKeyboardOpen` detects a viewport height drop greater than the `keyboardThreshold` (default 150px).
-- A focus-based fallback keeps overlay reliable on coarse pointers (e.g., iOS Safari) when visual viewport events are flaky.
+- The mobile overlay activates when `useKeyboardOpen` (powered by `use-detect-keyboard-open`) reports a keyboard height above `keyboardThreshold` (default 300px).
+- `useKeyboardOpen` is gated on text-entry focus to avoid false positives from browser chrome changes; blurring a text field clears the open state.
 - When overlay is active—or when `lockComposerPosition` is set—the composer is fixed to the bottom and the content panel can opt into matching bottom padding via `overlayPadContentPanel`.
 
 ## Example apps (in this repo)

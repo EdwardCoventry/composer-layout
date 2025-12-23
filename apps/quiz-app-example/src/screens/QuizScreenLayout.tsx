@@ -13,16 +13,14 @@ import { FooterWidget } from '../components/FooterWidget';
 export const QuizScreenLayout: React.FC = () => {
   const { isMobile } = useViewportCategory();
   const [showComposerPanel, setShowComposerPanel] = React.useState(true);
-  const keyboardThreshold = 150;
 
   const [isOptionsOpen, setIsOptionsOpen] = React.useState(false);
-  const [isInputFocused, setIsInputFocused] = React.useState(false);
+  const [footerHidden, setFooterHidden] = React.useState(false);
   const closeOptions = React.useCallback(() => setIsOptionsOpen(false), []);
 
-  const { prepareToOpenOptions, handleInputFocus, dismissKeyboard } = useKeyboardOptionsSync({
+  const { keyboardOpen, prepareToOpenOptions, handleInputFocus, dismissKeyboard } = useKeyboardOptionsSync({
     isOptionsOpen,
-    onRequestCloseOptions: closeOptions,
-    keyboardThreshold
+    onRequestCloseOptions: closeOptions
   });
 
   const mobileComposerMaxFraction = React.useMemo(() => (isMobile && isOptionsOpen ? 0.75 : 0.6), [isMobile, isOptionsOpen]);
@@ -38,10 +36,9 @@ export const QuizScreenLayout: React.FC = () => {
   const handleToggleOptions = React.useCallback(() => {
     setIsOptionsOpen((open) => {
       if (open) return false;
-      // On mobile, force blur so footer hides and options stay open even if keyboard is minimized
+      // On mobile, force blur so options stay open even if keyboard is minimized.
       if (isMobile) {
         dismissKeyboard();
-        setIsInputFocused(false);
       }
       // Also run standard keyboard/options sync behavior
       prepareToOpenOptions();
@@ -50,6 +47,14 @@ export const QuizScreenLayout: React.FC = () => {
   }, [isMobile, dismissKeyboard, prepareToOpenOptions]);
 
   const toggleComposer = React.useCallback(() => setShowComposerPanel((v) => !v), []);
+
+  React.useEffect(() => {
+    setFooterHidden(keyboardOpen);
+  }, [keyboardOpen]);
+
+  const handleInputFocusChange = React.useCallback((focused: boolean) => {
+    setFooterHidden(focused);
+  }, []);
 
   return (
     <LayoutFrame
@@ -62,15 +67,14 @@ export const QuizScreenLayout: React.FC = () => {
           onToggleOptions={handleToggleOptions}
           optionsMaxHeight={optionsMaxHeight}
           onInputFocus={handleInputFocus}
-          onInputFocusChange={setIsInputFocused}
+          onInputFocusChange={handleInputFocusChange}
         />
       }
       showComposerPanel={showComposerPanel}
       composerHeightMode={composerHeightMode}
       footer={<FooterWidget sizingLabel={sizingLabel} />}
       overlayPadContentPanel
-      keyboardThreshold={keyboardThreshold}
-      hideComposerFooter={isMobile && (isOptionsOpen || isInputFocused)}
+      hideComposerFooter={isMobile && (isOptionsOpen || footerHidden)}
       lockComposerPosition={isMobile}
     />
   );

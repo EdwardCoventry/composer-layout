@@ -1,6 +1,6 @@
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { LayoutFrame } from './LayoutFrame';
 import { ComposerHeightMode } from '../types/layout';
 
@@ -103,6 +103,28 @@ describe('Overlay behavior for composer BottomRegion', () => {
     const region = container.querySelector('[data-role="bottom-region"]') as HTMLElement;
     expect(region.dataset.mode).toBe('inline');
     expect(region.style.position).toBe('fixed');
+  });
+});
+
+describe('Footer visibility recovery on keyboard close', () => {
+  test('shows footer after keyboard closes even if hideComposerFooter stays true', async () => {
+    Object.defineProperty(window, 'innerWidth', { value: 500, configurable: true });
+    Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true });
+    (window as any).visualViewport = undefined;
+    mockKeyboardOpen = true;
+    const mode: ComposerHeightMode = { type: 'fraction', fraction: 0.3 };
+    const { container, rerender } = render(
+      <LayoutFrame {...baseProps(mode)} hideComposerFooter />
+    );
+
+    expect(container.querySelector('[data-role="footer"]')).toBeNull();
+
+    await act(async () => {
+      mockKeyboardOpen = false;
+      rerender(<LayoutFrame {...baseProps(mode)} hideComposerFooter />);
+    });
+
+    expect(container.querySelector('[data-role="footer"]')).toBeTruthy();
   });
 });
 

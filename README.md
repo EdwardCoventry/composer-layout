@@ -10,6 +10,7 @@ Live examples:
 ```
 npm install composer-layout
 ```
+Current package version: 0.0.11 (see CHANGELOG).
 Peer deps: `react` and `react-dom` (React 19).
 
 ## Core ideas
@@ -47,7 +48,7 @@ Composer sizing modes:
 
 Helpful hooks:
 - `useViewportCategory`: gives `isMobile`, `isDesktop`, and breakpoint info.
-- `useKeyboardOpen`: detects virtual keyboard height changes to keep the composer visible.
+- `useKeyboardOpen`: detects virtual keyboard height changes (powered by `use-detect-keyboard-open`, gated on text-entry focus).
 - `useIsMobile`: simple media-query-backed boolean.
 - `useKeyboardOptionsSync`: keep option trays aligned with keyboard visibility and focus.
 

@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.11
+- Bump package version and refresh README guidance for the latest publish.
+
 ## 0.0.10
 - Bump package version to republish the latest `composer-layout` build to npm.
 

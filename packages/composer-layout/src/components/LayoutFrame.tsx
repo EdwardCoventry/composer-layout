@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useLayoutEffect, useState } from 'react';
+import React, { useMemo, useRef, useLayoutEffect, useState, useEffect } from 'react';
 import { LayoutFrameProps, ComposerHeightMode, DEFAULT_OVERLAY_CONTENT_MAX_FRACTION } from '../types/layout';
 import { useViewportCategory } from '../hooks/useViewportCategory';
 import { useKeyboardOpen } from '../hooks/useKeyboardOpen';
@@ -73,7 +73,7 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
   composerHeightMode,
   footer,
   overlayPadContentPanel = false,
-  keyboardThreshold = 150,
+  keyboardThreshold = 300,
   lockComposerPosition = false,
   hideComposerFooter = false
 }) => {
@@ -89,8 +89,24 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
   const overlayActive = isMobile && keyboardOpen && hasComposerPanel;
   const lockPositionActive = lockComposerPosition && isMobile && hasComposerPanel;
   const shouldFixComposer = overlayActive || lockPositionActive;
-  // Hide footer when explicitly requested or when the keyboard forces overlay mode on mobile
-  const footerHidden = hideComposerFooter || overlayActive;
+  const prevKeyboardOpenRef = useRef(keyboardOpen);
+  const [forceFooterVisible, setForceFooterVisible] = useState(false);
+
+  useEffect(() => {
+    const wasOpen = prevKeyboardOpenRef.current;
+    if (!hideComposerFooter) {
+      setForceFooterVisible(false);
+    } else if (wasOpen && !keyboardOpen) {
+      setForceFooterVisible(true);
+    } else if (keyboardOpen) {
+      setForceFooterVisible(false);
+    }
+    prevKeyboardOpenRef.current = keyboardOpen;
+  }, [keyboardOpen, hideComposerFooter]);
+
+  // Hide footer when explicitly requested or when the keyboard forces overlay mode on mobile.
+  // If the keyboard reports a close transition while the footer is hidden, force it visible.
+  const footerHidden = (hideComposerFooter || overlayActive) && !forceFooterVisible;
 
   // Only resolve styles if we have a composer panel & height mode
   const inlineComposerStyle = useMemo(() => (

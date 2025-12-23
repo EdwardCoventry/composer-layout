@@ -5,7 +5,7 @@
     "outDir": "dist",
     "jsx": "react-jsx",
     "baseUrl": "./src",
-    "types": ["vitest", "node"]
+    "types": ["vitest/globals", "node"]
   },
   "include": ["src"]
 }

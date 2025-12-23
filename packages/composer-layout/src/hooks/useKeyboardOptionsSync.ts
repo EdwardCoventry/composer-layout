@@ -12,7 +12,7 @@ export interface KeyboardOptionsSyncConfig {
    */
   onRequestCloseOptions: () => void;
   /**
-   * Optional override for the keyboard open threshold (pixel diff on visualViewport).
+   * Optional override for the keyboard open threshold (minimum keyboard height).
    */
   keyboardThreshold?: number;
   /**

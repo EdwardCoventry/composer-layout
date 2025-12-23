@@ -1,6 +1,6 @@
 {
   "name": "composer-layout",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "private": false,
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
@@ -12,6 +12,9 @@
   "scripts": {
     "build": "vite build && tsc -p tsconfig.build.json",
     "test": "vitest run"
+  },
+  "dependencies": {
+    "use-detect-keyboard-open": "^0.4.0"
   },
   "peerDependencies": {
     "react": "^19.0.0",
