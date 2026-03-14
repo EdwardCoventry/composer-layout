@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- Add repository/package metadata and public-repo release notes ahead of making the GitHub repository public.
+- Add README coverage for the chat-messages example and align example app package versions with `composer-layout@0.0.12`.
 
 ## 0.0.12
 - Add `contentPanelMode="chat-message"` to `LayoutFrame` so chat transcripts can use page-owned scrolling with a sticky header and sticky composer.

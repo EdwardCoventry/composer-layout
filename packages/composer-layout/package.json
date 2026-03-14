@@ -2,9 +2,27 @@
   "name": "composer-layout",
   "version": "0.0.12",
   "private": false,
+  "description": "Responsive two-panel layout primitives for chat-style React UIs.",
+  "license": "UNLICENSED",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EdwardCoventry/composer-layout.git",
+    "directory": "packages/composer-layout"
+  },
+  "homepage": "https://github.com/EdwardCoventry/composer-layout#readme",
+  "bugs": {
+    "url": "https://github.com/EdwardCoventry/composer-layout/issues"
+  },
+  "keywords": [
+    "react",
+    "layout",
+    "composer",
+    "chat",
+    "responsive"
+  ],
   "files": [
     "dist"
   ],

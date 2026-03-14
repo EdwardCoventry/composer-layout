@@ -2,6 +2,8 @@
 
 Responsive two-panel layout primitives for chat-style UIs. It keeps a content panel and a composer panel aligned on every screen size: on mobile the composer sits at the bottom and only takes the space it needs, and on desktop the composer holds a fixed fraction of the viewport.
 
+Repository: https://github.com/EdwardCoventry/composer-layout
+
 Live examples:
 - Chat messages: https://edwardcoventry.com/apps/composer-layout/chat-messages/
 - AI assistant: https://edwardcoventry.com/apps/composer-layout/ai-assistant/
@@ -65,3 +67,5 @@ Keyboard + composer behavior:
 - Build: `npm run build --workspace composer-layout`
 - Test: `npm run test --workspace composer-layout`
 - Full release validation from the repo root: `npm run check && npm run test --workspace composer-layout && npm run build`
+- Release automation uses npm trusted publishing from GitHub Actions via `.github/workflows/release.yml`.
+- Licensing note: the package metadata is currently `UNLICENSED` until an open-source license is chosen.
