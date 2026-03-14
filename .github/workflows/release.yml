@@ -25,6 +25,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install Linux Rollup native package
+        if: runner.os == 'Linux' && runner.arch == 'X64'
+        run: npm install @rollup/rollup-linux-x64-gnu --no-save
+
       - name: Check
         run: npm run check
 
