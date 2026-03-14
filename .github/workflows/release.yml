@@ -5,6 +5,10 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -15,19 +19,20 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Test
-        run: npm test
+      - name: Check
+        run: npm run check
 
-      - name: Build package
-        run: npm run build --workspace composer-layout
+      - name: Test composer-layout
+        run: npm run test --workspace composer-layout
+
+      - name: Build
+        run: npm run build
 
       - name: Publish to npm
         run: npm publish --workspace composer-layout --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
