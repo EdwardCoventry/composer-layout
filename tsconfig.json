@@ -6,6 +6,7 @@
     { "path": "./packages/ui" },
     { "path": "./apps/quiz-app-example" },
     { "path": "./apps/ai-assistant-example" },
+    { "path": "./apps/chat-messages-example" },
     { "path": "./apps/common" }
   ]
 }

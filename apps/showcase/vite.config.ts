@@ -18,6 +18,8 @@ const rewriteRootImports = (html: string, appDir: string, appBase: string) => {
 };
 
 const appAliases: Record<string, string> = {
+  'chat-messages-example': 'chat-messages-example',
+  'chat-messages': 'chat-messages-example',
   'quiz-app-example': 'quiz-app-example',
   'quiz': 'quiz-app-example',
   'ai-assistant-example': 'ai-assistant-example',

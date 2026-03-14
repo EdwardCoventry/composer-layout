@@ -92,7 +92,7 @@ export function useKeyboardOpen(threshold: number = 300): boolean {
 
   const hasViewport = typeof window !== 'undefined' && !!window.visualViewport;
   const openByViewport = hasViewport ? maxViewportHeight - viewportHeight > threshold : false;
-  const openByDetector = !!detectedOpen;
+  const openByDetector = !hasViewport && !!detectedOpen;
 
   if (!textFocused) return false;
   return openByViewport || openByDetector;

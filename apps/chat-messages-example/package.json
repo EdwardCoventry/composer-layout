@@ -1,0 +1,24 @@
+{
+  "name": "chat-messages-example",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "composer-layout": "0.0.12",
+    "example-styles": "*",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "ui": "*"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^7.2.4"
+  }
+}

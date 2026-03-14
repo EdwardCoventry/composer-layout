@@ -205,6 +205,41 @@ describe('Content panel scroll fallback', () => {
     const content = container.querySelector('[data-role="content-panel"]') as HTMLElement;
     expect(content.style.overflowY).toBe('auto');
   });
+
+  test('chat message mode switches to page scroll with sticky header and composer', () => {
+    Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true });
+    const mode: ComposerHeightMode = { type: 'content', maxFraction: 0.45 };
+    const { container } = render(<LayoutFrame {...baseProps(mode)} contentPanelMode="chat-message" />);
+    const root = container.querySelector('[data-role="layout-frame"]') as HTMLElement;
+    const header = container.querySelector('[data-role="header"]') as HTMLElement;
+    const content = container.querySelector('[data-role="content-panel"]') as HTMLElement;
+    const region = container.querySelector('[data-role="bottom-region"]') as HTMLElement;
+
+    expect(root.style.height).toBe('');
+    expect(root.style.minHeight).toBe('100dvh');
+    expect(root.style.overflow).toBe('visible');
+    expect(root.dataset.contentMode).toBe('chat-message');
+
+    expect(header.style.position).toBe('sticky');
+    expect(header.style.top).toBe('0px');
+
+    expect(content.style.overflow).toBe('visible');
+    expect(content.style.overflowY).toBe('');
+    expect(content.dataset.contentMode).toBe('chat-message');
+
+    expect(region.dataset.mode).toBe('sticky');
+    expect(region.style.position).toBe('sticky');
+    expect(region.style.bottom).toBe('0px');
+  });
+
+  test('chat message mode applies bottom padding when overlay padding is enabled', () => {
+    Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true });
+    const mode: ComposerHeightMode = { type: 'fraction', fraction: 0.25 };
+    const { container } = render(<LayoutFrame {...baseProps(mode)} contentPanelMode="chat-message" />);
+    const content = container.querySelector('[data-role="content-panel"]') as HTMLElement;
+    expect(content.dataset.contentOverlayPad).toBe('200');
+    expect(content.style.paddingBottom).toBe('200px');
+  });
 });
 
 describe('Optional composerHeightMode handling', () => {

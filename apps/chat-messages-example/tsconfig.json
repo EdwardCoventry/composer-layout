@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "resolveJsonModule": true,
+    "paths": {
+      "composer-layout": ["../../packages/composer-layout/src"],
+      "composer-layout/*": ["../../packages/composer-layout/src/*"],
+      "@common/*": ["../common/components/*"],
+      "ui/*": ["../../packages/ui/src/*"],
+      "ui": ["../../packages/ui/src"]
+    }
+  },
+  "include": ["src", "vite.config.ts"]
+}

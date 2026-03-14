@@ -7,6 +7,8 @@ export type ComposerHeightMode =
   | { type: 'content'; maxFraction?: number }
   | { type: 'calculated'; getHeight: () => number; maxFraction?: number };
 
+export type ContentPanelMode = 'default' | 'chat-message';
+
 export interface LayoutFrameProps {
   header: React.ReactNode;
   contentPanel: React.ReactNode;
@@ -25,4 +27,10 @@ export interface LayoutFrameProps {
    * If true, the footer inside the composer region is hidden (e.g. on mobile when an options grid is open).
    */
   hideComposerFooter?: boolean;
+  /**
+   * Switch the layout between the default internal-scroll panel and a chat-message mode
+   * that pins the header to the top, the composer to the bottom, and lets the page own
+   * the vertical scrollbar.
+   */
+  contentPanelMode?: ContentPanelMode;
 }

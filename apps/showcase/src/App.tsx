@@ -38,11 +38,13 @@ const App = () => {
     // In a real scenario, we might fetch this, but here we import it.
     // Use type assertion if the JSON import structure isn't strictly typed in TS yet.
     const loadedApps = (registryData as unknown as { apps: AppEntry[] }).apps || [];
-    // Sort so AI Assistant is first, Quiz App second
+    const sortOrder: Record<string, number> = {
+      'chat-messages-example': 0,
+      'ai-assistant-example': 1,
+      'quiz-app-example': 2,
+    };
     const sortedApps = [...loadedApps].sort((a, b) => {
-      if (a.name === 'ai-assistant-example') return -1;
-      if (b.name === 'ai-assistant-example') return 1;
-      return 0;
+      return (sortOrder[a.name] ?? 99) - (sortOrder[b.name] ?? 99);
     });
     setApps(sortedApps);
   }, []);

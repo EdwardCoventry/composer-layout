@@ -75,7 +75,8 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
   overlayPadContentPanel = false,
   keyboardThreshold = 300,
   lockComposerPosition = false,
-  hideComposerFooter = false
+  hideComposerFooter = false,
+  contentPanelMode = 'default'
 }) => {
   const { isMobile } = useViewportCategory();
   const keyboardOpen = useKeyboardOpen(keyboardThreshold);
@@ -87,6 +88,7 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
   const hasComposerPanel = !!composerPanel && showComposerPanel;
   const hasFooter = !!footer;
   const overlayActive = isMobile && keyboardOpen && hasComposerPanel;
+  const chatMessageMode = contentPanelMode === 'chat-message';
   const lockPositionActive = lockComposerPosition && isMobile && hasComposerPanel;
   const shouldFixComposer = overlayActive || lockPositionActive;
   const prevKeyboardOpenRef = useRef(keyboardOpen);
@@ -128,8 +130,17 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
         ...overlayComposerStyle
       };
     }
+    if (chatMessageMode) {
+      return {
+        ...inlineComposerStyle,
+        position: 'sticky',
+        bottom: 0,
+        zIndex: 20,
+        boxSizing: 'border-box'
+      };
+    }
     return { ...inlineComposerStyle, boxSizing: 'border-box' };
-  }, [hasComposerPanel, shouldFixComposer, inlineComposerStyle, overlayComposerStyle]);
+  }, [chatMessageMode, hasComposerPanel, shouldFixComposer, inlineComposerStyle, overlayComposerStyle]);
 
   const bottomRef = useRef<HTMLElement | null>(null);
   const [measuredBottomHeight, setMeasuredBottomHeight] = useState<number | undefined>();
@@ -180,16 +191,46 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
   const computedHeightForPadding = hasComposerPanel
     ? (baseComposerHeight ?? measuredBottomHeight)
     : undefined;
-  const contentExtraPadding = overlayPadContentPanel && shouldFixComposer && computedHeightForPadding ? computedHeightForPadding : 0;
+  const contentExtraPadding = overlayPadContentPanel && (shouldFixComposer || chatMessageMode) && computedHeightForPadding ? computedHeightForPadding : 0;
+  const layoutFrameStyle: React.CSSProperties = chatMessageMode
+    ? { minHeight: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'visible' }
+    : { height: '100dvh', maxHeight: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' };
+  const headerStyle: React.CSSProperties = chatMessageMode
+    ? { flex: '0 0 auto', position: 'sticky', top: 0, zIndex: 30 }
+    : { flex: '0 0 auto' };
+  const contentWrapperStyle: React.CSSProperties = chatMessageMode
+    ? { flex: '1 1 auto', minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'visible' }
+    : { flex: '1 1 auto', minHeight: 0, display: 'flex', flexDirection: 'column' };
+  const contentPanelStyle: React.CSSProperties = chatMessageMode
+    ? {
+        flex: '1 1 auto',
+        minHeight: 0,
+        overflow: 'visible',
+        boxSizing: 'border-box',
+        position: 'relative',
+        paddingBottom: contentExtraPadding ? `${contentExtraPadding}px` : undefined,
+        display: 'flex',
+        flexDirection: 'column'
+      }
+    : {
+        flex: '1 1 auto',
+        minHeight: 0,
+        overflowY: 'auto',
+        boxSizing: 'border-box',
+        position: 'relative',
+        paddingBottom: contentExtraPadding ? `${contentExtraPadding}px` : undefined,
+        display: 'flex',
+        flexDirection: 'column'
+      };
+  const bottomRegionMode = overlayActive ? 'overlay' : chatMessageMode ? 'sticky' : 'inline';
 
   return (
-    // Avoid forcing visualViewport px height here; it breaks content panel sizing on WebKit.
-    <div style={{ height: '100dvh', maxHeight: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }} data-role="layout-frame" data-overlay={overlayActive ? 'true' : 'false'}>
-      <header style={{ flex: '0 0 auto' }} data-role="header">{header}</header>
+    <div style={layoutFrameStyle} data-role="layout-frame" data-overlay={overlayActive ? 'true' : 'false'} data-content-mode={contentPanelMode}>
+      <header style={headerStyle} data-role="header">{header}</header>
 
       {/* Main semantic region as content panel */}
-      <main style={{ flex: '1 1 auto', minHeight: 0, display: 'flex', flexDirection: 'column' }} data-role="content-wrapper" aria-label="Content Panel">
-        <section style={{ flex: '1 1 auto', minHeight: 0, overflowY: 'auto', boxSizing: 'border-box', position: 'relative', paddingBottom: contentExtraPadding ? `${contentExtraPadding}px` : undefined, display: 'flex', flexDirection: 'column' }} data-role="content-panel" data-content-overlay-pad={contentExtraPadding ? contentExtraPadding : 0}>
+      <main style={contentWrapperStyle} data-role="content-wrapper" aria-label="Content Panel">
+        <section style={contentPanelStyle} data-role="content-panel" data-content-overlay-pad={contentExtraPadding ? contentExtraPadding : 0} data-content-mode={contentPanelMode}>
           {contentPanel}
         </section>
       </main>
@@ -199,7 +240,7 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
           ref={bottomRef}
           style={bottomRegionStyle}
           data-role="bottom-region"
-          data-mode={overlayActive ? 'overlay' : 'inline'}
+          data-mode={bottomRegionMode}
           aria-label={overlayActive ? 'Composer Region (Overlay)' : 'Composer Region'}
         >
           <div style={bottomRegionInnerStyle} data-role="bottom-region-inner">

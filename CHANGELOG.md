@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+## 0.0.12
+- Add `contentPanelMode="chat-message"` to `LayoutFrame` so chat transcripts can use page-owned scrolling with a sticky header and sticky composer.
+- Add a new `apps/chat-messages-example` wireframe demo that showcases the pinned chat layout with static transcript JSON.
+- Polish the chat-messages example with generic AI chat copy, a history surface, release-style footer treatment, and a compact `/embed` route for embed-layout review.
+- Refresh root/package README guidance and the agent instructions to document the new example and release validation flow.
+
 ## 0.0.11
 - Bump package version and refresh README guidance for the latest publish.
 

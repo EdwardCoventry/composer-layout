@@ -3,6 +3,7 @@
 Responsive two-panel layout primitives for chat-style UIs. It keeps a content panel and a composer panel aligned on every screen size: on mobile the composer sits at the bottom and takes the minimum space it needs, and on desktop the composer holds a fixed fraction of the viewport.
 
 Live examples:
+- Chat messages: https://edwardcoventry.com/apps/composer-layout/chat-messages/
 - AI assistant: https://edwardcoventry.com/apps/composer-layout/ai-assistant/
 - Quiz: https://edwardcoventry.com/apps/composer-layout/quiz/
 
@@ -10,13 +11,14 @@ Live examples:
 ```
 npm install composer-layout
 ```
-Current package version: 0.0.11 (see CHANGELOG).
+Current package version: 0.0.12 (see CHANGELOG).
 Peer deps: `react` and `react-dom` (React 19).
 
 ## Core ideas
 - Two panels by default: content (the scrollable transcript or main surface) and composer (input + actions).
 - Mobile: composer hugs the bottom, growing only as its content needs while avoiding keyboard overlap.
 - Desktop: composer reserves a configurable fraction of the viewport so long content remains visible.
+- Chat-message mode: pin the header to the top and the composer to the bottom while the page owns the vertical scrollbar.
 - Overlay padding: optionally pad the content area so floating headers or toolbars don’t cover messages.
 - Height control: choose between fraction-based, content-based, or custom-calculated composer heights.
 - Responsive helpers: hooks to detect mobile/desktop, viewport changes, and on-screen keyboard height.
@@ -35,6 +37,7 @@ export function ChatScreen() {
       composerPanel={<Composer />}
       footer={<Footer />}
       composerHeightMode={composerHeight}
+      contentPanelMode="chat-message"
       overlayPadContentPanel
     />
   );
@@ -53,6 +56,7 @@ Helpful hooks:
 - `useKeyboardOptionsSync`: keep option trays aligned with keyboard visibility and focus.
 
 ## Example apps (in this repo)
+- Chat messages (`apps/chat-messages-example`): static transcript demo for the `contentPanelMode="chat-message"` path with a sticky header, sticky composer, history panel, release-style footer, and a compact `/embed` variant. Dev: `npm run dev:chat-messages`.
 - AI assistant (`apps/ai-assistant-example`): hero + quick-start chips, preferences/upload, hamburger/share controls, mocked thinking delay. Dev: `npm run dev:assistant`.
 - Quiz (`apps/quiz-app-example`): desktop/mobile layout demo with header/content/composer/footer widgets. Dev: `npm run dev:quiz`.
 
@@ -68,8 +72,9 @@ Helpful hooks:
 - Test all workspaces: `npm test`
 - Dev (quiz) app: `npm run dev` or `npm run dev:quiz` (http://localhost:5173)
 - Dev (assistant) app: `npm run dev:assistant` (http://localhost:5173)
+- Dev (chat messages) app: `npm run dev:chat-messages` (http://localhost:5173, embed at `/embed`)
 
 ## Publish and releases
 - Manual publish (from `packages/composer-layout`): `npm publish --access public` (requires login and `npm run build` first).
 - Automated releases: push a tag like `v0.0.6` to trigger `.github/workflows/release.yml` (runs `npm ci`, `npm test`, then `npm publish --access public` with `NODE_AUTH_TOKEN` from `NPM_TOKEN`).
-- Versioning flow: `npm version patch|minor|major --workspaces --no-git-tag-version`, commit, then push with a git tag for the release workflow.
+- Versioning flow: `npm version patch|minor|major --workspaces --no-git-tag-version`, update `CHANGELOG.md`, both READMEs, and `AGENTS.md`, then commit and push with a git tag for the release workflow.

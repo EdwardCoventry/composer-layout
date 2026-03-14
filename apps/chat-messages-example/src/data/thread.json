@@ -1,0 +1,114 @@
+{
+  "title": "AI chat layout",
+  "subtitle": "Pinned header, pinned composer, page scrollbar",
+  "draftTag": "AI chat",
+  "draftPlaceholder": "Ask AI chat something or start a new conversation",
+  "messages": [
+    {
+      "id": "m-001",
+      "author": "assistant",
+      "label": "AI chat",
+      "timestamp": "09:12",
+      "text": "Maybe AI chat can handle your query. Or it can help you shape a follow-up before you send anything on."
+    },
+    {
+      "id": "m-002",
+      "author": "user",
+      "timestamp": "09:13",
+      "text": "Can you remind me what this example is showing?"
+    },
+    {
+      "id": "m-003",
+      "author": "assistant",
+      "label": "AI chat",
+      "timestamp": "09:13",
+      "text": "This thread is only a layout demo. The header stays pinned to the top, the composer stays pinned to the bottom, and the browser owns the vertical scrollbar."
+    },
+    {
+      "id": "m-004",
+      "author": "assistant",
+      "label": "AI chat",
+      "timestamp": "09:14",
+      "text": "Because the scrollbar belongs to the page, the transcript can travel underneath the composer as you scroll back through older messages."
+    },
+    {
+      "id": "m-005",
+      "author": "user",
+      "timestamp": "09:15",
+      "text": "So the header controls do not move away with the transcript?"
+    },
+    {
+      "id": "m-006",
+      "author": "assistant",
+      "label": "AI chat",
+      "timestamp": "09:15",
+      "text": "Exactly. New chat and History live in the header, and the layout mode keeps that header stuck to the top edge while the content keeps scrolling."
+    },
+    {
+      "id": "m-007",
+      "author": "assistant",
+      "label": "AI chat",
+      "timestamp": "09:16",
+      "text": "The composer also gets bottom padding applied to the transcript, so the latest message can settle above the composer instead of hiding behind it."
+    },
+    {
+      "id": "m-008",
+      "author": "user",
+      "timestamp": "09:17",
+      "text": "And when I scroll up, older messages can still pass behind the composer for that layered chat feel."
+    },
+    {
+      "id": "m-009",
+      "author": "assistant",
+      "label": "AI chat",
+      "timestamp": "09:17",
+      "text": "Right. The layout is doing the pinning. The example transcript is just static JSON so you can focus on whether the shell behaves correctly."
+    },
+    {
+      "id": "m-010",
+      "author": "assistant",
+      "label": "AI chat",
+      "timestamp": "09:18",
+      "text": "That also makes it easier to regression-test: no live model, no request timing, just a deterministic chat history exercising long-scroll behavior."
+    },
+    {
+      "id": "m-011",
+      "author": "user",
+      "timestamp": "09:19",
+      "text": "Good. I just want the underlying layout primitive to own this behavior cleanly."
+    },
+    {
+      "id": "m-012",
+      "author": "assistant",
+      "label": "AI chat",
+      "timestamp": "09:19",
+      "text": "That is the point of this example. If this layout feels correct here, the app layer can inherit it instead of overriding the content panel with one-off CSS."
+    }
+  ],
+  "history": [
+    {
+      "id": "history-001",
+      "title": "AI chat layout",
+      "timestamp": "Today · 09:19",
+      "preview": "Pinned header, pinned composer, page scrollbar"
+    },
+    {
+      "id": "history-002",
+      "title": "Summarize the planning notes",
+      "timestamp": "Today · 08:32",
+      "preview": "Notes about turning a rough brief into a clean action list."
+    },
+    {
+      "id": "history-003",
+      "title": "Draft a release update",
+      "timestamp": "Yesterday · 17:08",
+      "preview": "A quick status update with blockers, highlights, and next steps."
+    },
+    {
+      "id": "history-004",
+      "title": "Review the feedback themes",
+      "timestamp": "Yesterday · 11:41",
+      "preview": "A grouped list of product comments, repeated pain points, and likely follow-ups."
+    }
+  ]
+}

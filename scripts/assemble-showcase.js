@@ -16,6 +16,7 @@ if (!fs.existsSync(showcaseDist)) {
 }
 
 const apps = [
+  { name: 'chat-messages-example', src: 'apps/chat-messages-example/dist', dest: 'apps/showcase/dist/chat-messages-example' },
   { name: 'quiz-app-example', src: 'apps/quiz-app-example/dist', dest: 'apps/showcase/dist/quiz-app-example' },
   { name: 'ai-assistant-example', src: 'apps/ai-assistant-example/dist', dest: 'apps/showcase/dist/ai-assistant-example' }
 ];

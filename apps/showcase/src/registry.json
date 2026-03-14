@@ -1,6 +1,12 @@
 {
   "apps": [
     {
+      "name": "chat-messages-example",
+      "path": "chat-messages/",
+      "title": "Chat Messages",
+      "description": "Pinned header and pinned composer with page-owned scrolling for chat transcripts."
+    },
+    {
       "name": "quiz-app-example",
       "path": "quiz/",
       "title": "Quiz App",

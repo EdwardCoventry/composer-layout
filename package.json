@@ -1,7 +1,7 @@
 {
   "name": "composer-layout-root",
   "private": true,
-  "version": "0.0.11",
+  "version": "0.0.12",
   "engines": {
     "node": ">=20.19.0"
   },
@@ -13,10 +13,11 @@
     "build": "npm run build --workspaces && node scripts/assemble-showcase.js",
     "test": "npm run test --workspaces",
     "dev": "npm run dev:showcase",
-    "dev:all": "concurrently \"npm run dev:showcase\" \"npm run dev:quiz\" \"npm run dev:assistant\"",
+    "dev:all": "concurrently \"npm run dev:showcase\" \"npm run dev:quiz\" \"npm run dev:assistant\" \"npm run dev:chat-messages\"",
     "dev:showcase": "npm run dev --workspace showcase-app --",
     "dev:quiz": "npm run dev --workspace quiz-app-example",
     "dev:assistant": "npm run dev --workspace ai-assistant-example",
+    "dev:chat-messages": "npm run dev --workspace chat-messages-example",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:css": "stylelint \"**/*.css\"",
     "lint:css:report": "powershell -NoLogo -NoProfile -Command \"$ErrorActionPreference='Continue'; New-Item -ItemType Directory -Force -Path .reports | Out-Null; stylelint '**/*.css' --no-color --formatter verbose | Tee-Object -FilePath .reports/stylelint.txt\"",
