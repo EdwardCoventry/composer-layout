@@ -68,4 +68,4 @@ Keyboard + composer behavior:
 - Test: `npm run test --workspace composer-layout`
 - Full release validation from the repo root: `npm run check && npm run test --workspace composer-layout && npm run build`
 - Release automation uses npm trusted publishing from GitHub Actions via `.github/workflows/release.yml`.
-- Licensing note: the package metadata is currently `UNLICENSED` until an open-source license is chosen.
+- License: MIT. See the repository `LICENSE` file.

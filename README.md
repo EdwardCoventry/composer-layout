@@ -81,4 +81,4 @@ Helpful hooks:
 - Automated releases: push a tag like `v0.0.12` to trigger `.github/workflows/release.yml`. The workflow uses npm trusted publishing with GitHub OIDC, so it no longer needs an `NPM_TOKEN`.
 - GitHub Actions billing: on GitHub's current billing rules, standard GitHub-hosted runners are free for public repositories. Private repositories consume your account's Actions quota and can be blocked by billing limits.
 - Versioning flow: `npm version patch|minor|major --workspaces --no-git-tag-version`, update `CHANGELOG.md`, both READMEs, and `AGENTS.md`, then commit and push with a git tag for the release workflow.
-- Licensing note: the repository is public, but the package metadata is currently marked `UNLICENSED` until you decide on an open-source license.
+- License: MIT. See [LICENSE](C:/Users/Edward/Code/js-packages/composer-layout/LICENSE).

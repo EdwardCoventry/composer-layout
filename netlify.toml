@@ -19,6 +19,24 @@ status = 200
 force = true
 
 [[redirects]]
+from = "/chat-messages"
+to = "/chat-messages-example/"
+status = 200
+force = true
+
+[[redirects]]
+from = "/chat-messages/"
+to = "/chat-messages-example/"
+status = 200
+force = true
+
+[[redirects]]
+from = "/chat-messages/*"
+to = "/chat-messages-example/:splat"
+status = 200
+force = true
+
+[[redirects]]
 from = "/ai-assistant"
 to = "/ai-assistant-example/"
 status = 200
