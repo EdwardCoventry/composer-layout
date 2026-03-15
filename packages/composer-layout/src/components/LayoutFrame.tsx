@@ -76,7 +76,8 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
   keyboardThreshold = 300,
   lockComposerPosition = false,
   hideComposerFooter = false,
-  contentPanelMode = 'default'
+  contentPanelMode = 'default',
+  headerBehavior
 }) => {
   const { isMobile } = useViewportCategory();
   const keyboardOpen = useKeyboardOpen(keyboardThreshold);
@@ -87,12 +88,28 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
 
   const hasComposerPanel = !!composerPanel && showComposerPanel;
   const hasFooter = !!footer;
+  const hasHeader = !!header;
   const overlayActive = isMobile && keyboardOpen && hasComposerPanel;
   const chatMessageMode = contentPanelMode === 'chat-message';
   const lockPositionActive = lockComposerPosition && isMobile && hasComposerPanel;
   const shouldFixComposer = overlayActive || lockPositionActive;
+  const resolvedHeaderBehavior = useMemo(() => {
+    const pinned = headerBehavior?.pinned ?? chatMessageMode;
+    const floating = Boolean(headerBehavior?.floating);
+    const snap = floating && Boolean(headerBehavior?.snap);
+    return {
+      pinned,
+      floating,
+      snap,
+      collapsedHeight: headerBehavior?.collapsedHeight
+    };
+  }, [chatMessageMode, headerBehavior]);
   const prevKeyboardOpenRef = useRef(keyboardOpen);
   const [forceFooterVisible, setForceFooterVisible] = useState(false);
+  const headerContentRef = useRef<HTMLDivElement | null>(null);
+  const [measuredHeaderHeight, setMeasuredHeaderHeight] = useState(0);
+  const [headerOffset, setHeaderOffset] = useState(0);
+  const lastScrollYRef = useRef(0);
 
   useEffect(() => {
     const wasOpen = prevKeyboardOpenRef.current;
@@ -171,6 +188,116 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
     };
   }, []);
 
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined' || !chatMessageMode || !hasHeader) return;
+
+    const node = headerContentRef.current;
+    if (!node) return;
+
+    const measureHeader = () => {
+      setMeasuredHeaderHeight(node.getBoundingClientRect().height);
+    };
+
+    measureHeader();
+    window.addEventListener('resize', measureHeader);
+    window.addEventListener('orientationchange', measureHeader);
+
+    if (typeof ResizeObserver === 'undefined') {
+      return () => {
+        window.removeEventListener('resize', measureHeader);
+        window.removeEventListener('orientationchange', measureHeader);
+      };
+    }
+
+    const ro = new ResizeObserver(() => measureHeader());
+    ro.observe(node);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measureHeader);
+      window.removeEventListener('orientationchange', measureHeader);
+    };
+  }, [chatMessageMode, hasHeader, header]);
+
+  const collapsedHeaderHeight = useMemo(() => {
+    if (!chatMessageMode || !hasHeader || !resolvedHeaderBehavior.pinned) return 0;
+    if (resolvedHeaderBehavior.collapsedHeight == null) return measuredHeaderHeight;
+    return Math.max(0, Math.min(resolvedHeaderBehavior.collapsedHeight, measuredHeaderHeight));
+  }, [
+    chatMessageMode,
+    hasHeader,
+    measuredHeaderHeight,
+    resolvedHeaderBehavior.collapsedHeight,
+    resolvedHeaderBehavior.pinned
+  ]);
+  const canCollapsePinnedHeader =
+    chatMessageMode &&
+    hasHeader &&
+    resolvedHeaderBehavior.pinned &&
+    resolvedHeaderBehavior.collapsedHeight != null &&
+    measuredHeaderHeight > collapsedHeaderHeight;
+  const canFloatHeader =
+    chatMessageMode &&
+    hasHeader &&
+    resolvedHeaderBehavior.floating &&
+    measuredHeaderHeight > 0;
+  const headerHideDistance = Math.max(0, measuredHeaderHeight - collapsedHeaderHeight);
+  const usesDynamicHeader = (canFloatHeader || canCollapsePinnedHeader) && headerHideDistance > 0;
+
+  useEffect(() => {
+    setHeaderOffset((current) => Math.min(current, headerHideDistance));
+  }, [headerHideDistance]);
+
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') return;
+    lastScrollYRef.current = Math.max(0, window.scrollY || window.pageYOffset || 0);
+
+    if (!usesDynamicHeader) {
+      setHeaderOffset(0);
+      return;
+    }
+
+    const updateHeaderOffset = () => {
+      const nextScrollY = Math.max(0, window.scrollY || window.pageYOffset || 0);
+      const delta = nextScrollY - lastScrollYRef.current;
+      lastScrollYRef.current = nextScrollY;
+
+      setHeaderOffset((current) => {
+        if (nextScrollY <= 0 || headerHideDistance <= 0) return 0;
+
+        if (resolvedHeaderBehavior.floating) {
+          if (resolvedHeaderBehavior.snap && delta < 0) {
+            return 0;
+          }
+          if (delta > 0) {
+            return Math.min(headerHideDistance, current + delta);
+          }
+          if (delta < 0) {
+            return Math.max(0, current + delta);
+          }
+          return current;
+        }
+
+        if (canCollapsePinnedHeader) {
+          return Math.min(headerHideDistance, nextScrollY);
+        }
+
+        return current;
+      });
+    };
+
+    updateHeaderOffset();
+    window.addEventListener('scroll', updateHeaderOffset, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', updateHeaderOffset);
+    };
+  }, [
+    canCollapsePinnedHeader,
+    headerHideDistance,
+    resolvedHeaderBehavior.floating,
+    resolvedHeaderBehavior.snap,
+    usesDynamicHeader
+  ]);
+
   // Single effect for measurement / resize observer (overlay padding)
   useLayoutEffect(() => {
     if (!shouldFixComposer || !hasComposerPanel) return;
@@ -195,9 +322,30 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
   const layoutFrameStyle: React.CSSProperties = chatMessageMode
     ? { minHeight: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'visible' }
     : { height: '100dvh', maxHeight: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' };
+  const visibleHeaderHeight = usesDynamicHeader
+    ? Math.max(resolvedHeaderBehavior.pinned ? collapsedHeaderHeight : 0, measuredHeaderHeight - headerOffset)
+    : measuredHeaderHeight;
   const headerStyle: React.CSSProperties = chatMessageMode
-    ? { flex: '0 0 auto', position: 'sticky', top: 0, zIndex: 30 }
+    ? usesDynamicHeader
+      ? {
+          flex: '0 0 auto',
+          position: 'sticky',
+          top: 0,
+          zIndex: 30,
+          height: `${visibleHeaderHeight}px`,
+          overflow: 'hidden',
+          boxSizing: 'border-box'
+        }
+      : resolvedHeaderBehavior.pinned
+        ? { flex: '0 0 auto', position: 'sticky', top: 0, zIndex: 30 }
+        : { flex: '0 0 auto' }
     : { flex: '0 0 auto' };
+  const headerContentStyle: React.CSSProperties | undefined = usesDynamicHeader
+    ? {
+        transform: `translateY(-${headerOffset}px)`,
+        transition: resolvedHeaderBehavior.snap ? 'transform 160ms ease' : undefined
+      }
+    : undefined;
   const contentWrapperStyle: React.CSSProperties = chatMessageMode
     ? { flex: '1 1 auto', minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'visible' }
     : { flex: '1 1 auto', minHeight: 0, display: 'flex', flexDirection: 'column' };
@@ -223,10 +371,38 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
         flexDirection: 'column'
       };
   const bottomRegionMode = overlayActive ? 'overlay' : chatMessageMode ? 'sticky' : 'inline';
+  const headerMode = chatMessageMode
+    ? usesDynamicHeader
+      ? resolvedHeaderBehavior.pinned
+        ? resolvedHeaderBehavior.floating
+          ? resolvedHeaderBehavior.snap
+            ? 'pinned-floating-snap'
+            : 'pinned-floating'
+          : 'pinned-collapse'
+        : resolvedHeaderBehavior.snap
+          ? 'floating-snap'
+          : 'floating'
+      : resolvedHeaderBehavior.pinned
+        ? 'sticky'
+        : 'scroll'
+    : 'inline';
 
   return (
     <div style={layoutFrameStyle} data-role="layout-frame" data-overlay={overlayActive ? 'true' : 'false'} data-content-mode={contentPanelMode}>
-      <header style={headerStyle} data-role="header">{header}</header>
+      {hasHeader ? (
+        <header
+          style={headerStyle}
+          data-role="header"
+          data-mode={headerMode}
+          data-pinned={resolvedHeaderBehavior.pinned ? 'true' : 'false'}
+          data-floating={resolvedHeaderBehavior.floating ? 'true' : 'false'}
+          data-snap={resolvedHeaderBehavior.snap ? 'true' : 'false'}
+        >
+          <div ref={headerContentRef} style={headerContentStyle} data-role="header-content">
+            {header}
+          </div>
+        </header>
+      ) : null}
 
       {/* Main semantic region as content panel */}
       <main style={contentWrapperStyle} data-role="content-wrapper" aria-label="Content Panel">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutFrame, type ComposerHeightMode } from 'composer-layout';
+import { LayoutFrame, type ComposerHeightMode, type HeaderBehavior } from 'composer-layout';
 import { useApplyColorSchemeTheme } from 'ui/hooks/useApplyColorSchemeTheme';
 import threadData from './data/thread.json';
 
@@ -28,6 +28,45 @@ type HistoryItem = {
 };
 
 type ChatRoute = 'home' | 'embed';
+type HeaderModePresetId = 'sticky' | 'floating' | 'snap' | 'collapsed' | 'collapsed-floating';
+
+const HEADER_MODE_PRESETS: Array<{
+  id: HeaderModePresetId;
+  label: string;
+  description: string;
+  behavior: HeaderBehavior;
+}> = [
+  {
+    id: 'sticky',
+    label: 'Sticky',
+    description: 'Default pinned header',
+    behavior: { pinned: true }
+  },
+  {
+    id: 'floating',
+    label: 'Floating',
+    description: 'Scrolls away, reappears on reverse scroll',
+    behavior: { pinned: false, floating: true }
+  },
+  {
+    id: 'snap',
+    label: 'Snap',
+    description: 'Floating header that snaps fully back',
+    behavior: { pinned: false, floating: true, snap: true }
+  },
+  {
+    id: 'collapsed',
+    label: 'Collapsed',
+    description: 'Pinned header that collapses to a sliver',
+    behavior: { pinned: true, collapsedHeight: 64 }
+  },
+  {
+    id: 'collapsed-floating',
+    label: 'Sliver float',
+    description: 'Collapsed pinned header that floats back open',
+    behavior: { pinned: true, floating: true, collapsedHeight: 64 }
+  }
+];
 
 const thread = threadData as ThreadData;
 
@@ -81,7 +120,16 @@ function ChatHeader({
   subtitle,
   historyOpen,
   onToggleHistory,
-}: Pick<ThreadData, 'title' | 'subtitle'> & { historyOpen: boolean; onToggleHistory: () => void }) {
+  selectedHeaderMode,
+  onSelectHeaderMode,
+  showHeaderModes,
+}: Pick<ThreadData, 'title' | 'subtitle'> & {
+  historyOpen: boolean;
+  onToggleHistory: () => void;
+  selectedHeaderMode: HeaderModePresetId;
+  onSelectHeaderMode: (mode: HeaderModePresetId) => void;
+  showHeaderModes: boolean;
+}) {
   return (
     <div className="chat-wireframe-header">
       <div className="chat-wireframe-header__inner">
@@ -107,6 +155,28 @@ function ChatHeader({
           </button>
         </div>
       </div>
+      {showHeaderModes ? (
+        <div className="chat-wireframe-header__mode-strip">
+          <div className="chat-wireframe-header__mode-strip-inner">
+            <span className="chat-wireframe-header__mode-label">Header mode</span>
+            <div className="chat-wireframe-header__mode-list" role="group" aria-label="Header scroll behavior">
+              {HEADER_MODE_PRESETS.map((preset) => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  className="chat-wireframe-header__mode-button"
+                  data-active={preset.id === selectedHeaderMode}
+                  data-testid={`header-mode-${preset.id}`}
+                  onClick={() => onSelectHeaderMode(preset.id)}
+                  title={preset.description}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -252,11 +322,16 @@ export default function App() {
   });
   const [historyOpen, setHistoryOpen] = React.useState(false);
   const [selectedHistoryId, setSelectedHistoryId] = React.useState(() => thread.history[0]?.id ?? '');
+  const [headerMode, setHeaderMode] = React.useState<HeaderModePresetId>('sticky');
 
   const composerHeightMode = React.useMemo<ComposerHeightMode>(() => ({ type: 'content', maxFraction: 0.4 }), []);
   const selectedHistory = React.useMemo(
     () => thread.history.find((item) => item.id === selectedHistoryId) ?? thread.history[0],
     [selectedHistoryId]
+  );
+  const selectedHeaderPreset = React.useMemo(
+    () => HEADER_MODE_PRESETS.find((preset) => preset.id === headerMode) ?? HEADER_MODE_PRESETS[0],
+    [headerMode]
   );
   const embedHref = typeof window === 'undefined' ? '/embed' : getEmbedPath(window.location.pathname);
 
@@ -301,9 +376,16 @@ export default function App() {
   const header = (
     <ChatHeader
       title={thread.title}
-      subtitle={route === 'embed' ? 'Embedded AI chat layout' : selectedHistory?.title ?? thread.subtitle}
+      subtitle={
+        route === 'embed'
+          ? 'Embedded AI chat layout'
+          : `${selectedHistory?.title ?? thread.subtitle} · ${selectedHeaderPreset.description}`
+      }
       historyOpen={historyOpen}
       onToggleHistory={() => setHistoryOpen((current) => !current)}
+      selectedHeaderMode={headerMode}
+      onSelectHeaderMode={setHeaderMode}
+      showHeaderModes={route === 'home'}
     />
   );
 
@@ -353,6 +435,7 @@ export default function App() {
         composerHeightMode={composerHeightMode}
         contentPanelMode="chat-message"
         overlayPadContentPanel
+        headerBehavior={selectedHeaderPreset.behavior}
       />
     </div>
   );

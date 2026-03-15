@@ -1,6 +1,6 @@
 export { LayoutFrame } from './components/LayoutFrame';
 
-export type { LayoutFrameProps, ComposerHeightMode, ContentPanelMode } from './types/layout';
+export type { LayoutFrameProps, ComposerHeightMode, ContentPanelMode, HeaderBehavior } from './types/layout';
 export { DEFAULT_OVERLAY_CONTENT_MAX_FRACTION } from './types/layout';
 
 export { useViewportCategory } from './hooks/useViewportCategory';

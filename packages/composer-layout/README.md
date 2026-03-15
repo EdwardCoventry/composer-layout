@@ -13,7 +13,7 @@ Live examples:
 ```
 npm install composer-layout
 ```
-Current package version: 0.0.12 (see CHANGELOG in the repo root).
+Current package version: 0.0.13 (see CHANGELOG in the repo root).
 Peer deps: `react` and `react-dom` (React 19).
 
 ## Quick usage
@@ -33,6 +33,7 @@ export function Screen() {
       contentPanelMode="chat-message"
       overlayPadContentPanel
       lockComposerPosition
+      headerBehavior={{ pinned: true, floating: true, collapsedHeight: 64 }}
     />
   );
 }
@@ -43,6 +44,7 @@ What it does:
 - Mobile: composer hugs the bottom and grows only as its content needs, with keyboard avoidance.
 - Desktop: composer reserves a configurable fraction of the viewport so the transcript stays visible.
 - Chat-message mode: `contentPanelMode="chat-message"` switches the frame to page-owned scrolling with a sticky header and sticky composer.
+- Header behavior overrides: `headerBehavior` can make the chat header scroll away, float back, snap open, or collapse to a pinned sliver.
 - Overlay padding: optional content padding so floating headers/toolbars don’t cover messages.
 - Optional mobile locking: `lockComposerPosition` keeps the composer fixed even when the keyboard is closed to avoid focus loss on some WebKit builds.
 - Height control: choose fraction-based, content-based, or custom-calculated composer heights.
@@ -53,13 +55,19 @@ Composer sizing modes:
 - `content`: `{ type: 'content', maxFraction?: number }` (auto height with optional cap)
 - `calculated`: `{ type: 'calculated', getHeight: () => number, maxFraction?: number }`
 
+Header behavior options:
+- `pinned`: keep the header sticky at the top. Defaults to `true` in chat-message mode.
+- `floating`: hide the header on downward scroll and reveal it on upward scroll.
+- `snap`: with `floating`, fully reopen the header as soon as upward scroll is detected.
+- `collapsedHeight`: leave a pinned sliver visible after collapse.
+
 Keyboard + composer behavior:
 - The mobile overlay activates when `useKeyboardOpen` (powered by `use-detect-keyboard-open`) reports a keyboard height above `keyboardThreshold` (default 300px).
 - `useKeyboardOpen` is gated on text-entry focus to avoid false positives from browser chrome changes; blurring a text field clears the open state.
 - When overlay is active—or when `lockComposerPosition` is set—the composer is fixed to the bottom and the content panel can opt into matching bottom padding via `overlayPadContentPanel`.
 
 ## Example apps (in this repo)
-- `apps/chat-messages-example`: sticky header + sticky composer demo for the new chat-message mode with static transcript JSON, history/footer polish, and a compact `/embed` route. Dev: `npm run dev:chat-messages`.
+- `apps/chat-messages-example`: sticky/floating/snap/sliver header demo for chat-message mode with static transcript JSON, history/footer polish, and a compact `/embed` route. Dev: `npm run dev:chat-messages`.
 - `apps/ai-assistant-example`: assistant layout with hero + quick-start chips, preferences/upload, hamburger/share controls, and a mocked response delay. Dev: `npm run dev:assistant`. Tests: `npm run test --workspace ai-assistant-example`.
 - `apps/quiz-app-example`: header/content/composer/footer flow on desktop and mobile. Dev: `npm run dev:quiz`. Tests: `npm run test --workspace quiz-app-example`.
 

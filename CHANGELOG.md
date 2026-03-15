@@ -1,8 +1,11 @@
 # Changelog
 
 ## Unreleased
-- Add repository/package metadata and public-repo release notes ahead of making the GitHub repository public.
-- Add README coverage for the chat-messages example and align example app package versions with `composer-layout@0.0.12`.
+
+## 0.0.13
+- Add `headerBehavior` to `LayoutFrame` so `contentPanelMode="chat-message"` can opt into scrolling, floating, snapping, or collapsed sliver headers.
+- Extend the `apps/chat-messages-example` demo with switchable header modes that exercise sticky, floating, snap, collapsed, and collapsed-floating chat headers.
+- Add runtime and test coverage for the new header behaviors and refresh the release docs for `composer-layout@0.0.13`.
 
 ## 0.0.12
 - Add `contentPanelMode="chat-message"` to `LayoutFrame` so chat transcripts can use page-owned scrolling with a sticky header and sticky composer.

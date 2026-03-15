@@ -20,8 +20,33 @@ if (!window.matchMedia) {
   });
 }
 
+const originalRequestAnimationFrame = window.requestAnimationFrame;
+const originalCancelAnimationFrame = window.cancelAnimationFrame;
+
 beforeEach(() => {
   mockKeyboardOpen = false;
+  Object.defineProperty(window, 'requestAnimationFrame', {
+    value: (callback: FrameRequestCallback) => {
+      window.queueMicrotask(() => callback(performance.now()));
+      return 1;
+    },
+    configurable: true
+  });
+  Object.defineProperty(window, 'cancelAnimationFrame', {
+    value: () => {},
+    configurable: true
+  });
+});
+
+afterEach(() => {
+  Object.defineProperty(window, 'requestAnimationFrame', {
+    value: originalRequestAnimationFrame,
+    configurable: true
+  });
+  Object.defineProperty(window, 'cancelAnimationFrame', {
+    value: originalCancelAnimationFrame,
+    configurable: true
+  });
 });
 
 function baseProps(mode: ComposerHeightMode) {
@@ -222,6 +247,7 @@ describe('Content panel scroll fallback', () => {
 
     expect(header.style.position).toBe('sticky');
     expect(header.style.top).toBe('0px');
+    expect(header.dataset.mode).toBe('sticky');
 
     expect(content.style.overflow).toBe('visible');
     expect(content.style.overflowY).toBe('');
@@ -239,6 +265,165 @@ describe('Content panel scroll fallback', () => {
     const content = container.querySelector('[data-role="content-panel"]') as HTMLElement;
     expect(content.dataset.contentOverlayPad).toBe('200');
     expect(content.style.paddingBottom).toBe('200px');
+  });
+});
+
+describe('Chat message header behavior', () => {
+  const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect;
+
+  beforeEach(() => {
+    Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true });
+    Object.defineProperty(window, 'scrollY', { value: 0, writable: true, configurable: true });
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function(this: HTMLElement) {
+      if (this.getAttribute('data-role') === 'header-content') {
+        return {
+          x: 0,
+          y: 0,
+          width: 320,
+          height: 96,
+          top: 0,
+          right: 320,
+          bottom: 96,
+          left: 0,
+          toJSON: () => ({})
+        } as DOMRect;
+      }
+
+      return {
+        x: 0,
+        y: 0,
+        width: 320,
+        height: 0,
+        top: 0,
+        right: 320,
+        bottom: 0,
+        left: 0,
+        toJSON: () => ({})
+      } as DOMRect;
+    });
+  });
+
+  afterEach(() => {
+    HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+    vi.restoreAllMocks();
+  });
+
+  test('chat message mode allows the header to scroll away when pinned is false', () => {
+    const mode: ComposerHeightMode = { type: 'content', maxFraction: 0.45 };
+    const { container } = render(
+      <LayoutFrame
+        {...baseProps(mode)}
+        contentPanelMode="chat-message"
+        headerBehavior={{ pinned: false }}
+      />
+    );
+
+    const header = container.querySelector('[data-role="header"]') as HTMLElement;
+    expect(header.style.position).toBe('');
+    expect(header.dataset.mode).toBe('scroll');
+  });
+
+  test('chat message mode collapses a pinned header down to the requested height', async () => {
+    const mode: ComposerHeightMode = { type: 'content', maxFraction: 0.45 };
+    const { container } = render(
+      <LayoutFrame
+        {...baseProps(mode)}
+        contentPanelMode="chat-message"
+        headerBehavior={{ pinned: true, collapsedHeight: 40 }}
+      />
+    );
+
+    const header = container.querySelector('[data-role="header"]') as HTMLElement;
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    act(() => {
+      Object.defineProperty(window, 'scrollY', { value: 80, writable: true, configurable: true });
+      window.dispatchEvent(new Event('scroll'));
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(header.style.position).toBe('sticky');
+    expect(header.style.height).toBe('40px');
+    expect(header.dataset.mode).toBe('pinned-collapse');
+  });
+
+  test('floating header reveals again when scroll direction reverses', async () => {
+    const mode: ComposerHeightMode = { type: 'content', maxFraction: 0.45 };
+    const { container } = render(
+      <LayoutFrame
+        {...baseProps(mode)}
+        contentPanelMode="chat-message"
+        headerBehavior={{ pinned: false, floating: true }}
+      />
+    );
+
+    const header = container.querySelector('[data-role="header"]') as HTMLElement;
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    act(() => {
+      Object.defineProperty(window, 'scrollY', { value: 60, writable: true, configurable: true });
+      window.dispatchEvent(new Event('scroll'));
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+    const hiddenHeight = header.style.height;
+
+    act(() => {
+      Object.defineProperty(window, 'scrollY', { value: 24, writable: true, configurable: true });
+      window.dispatchEvent(new Event('scroll'));
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(header.dataset.mode).toBe('floating');
+    expect(hiddenHeight).toBe('36px');
+    expect(header.style.height).toBe('72px');
+  });
+
+  test('snap header fully returns on reverse scroll', async () => {
+    const mode: ComposerHeightMode = { type: 'content', maxFraction: 0.45 };
+    const { container } = render(
+      <LayoutFrame
+        {...baseProps(mode)}
+        contentPanelMode="chat-message"
+        headerBehavior={{ pinned: false, floating: true, snap: true }}
+      />
+    );
+
+    const header = container.querySelector('[data-role="header"]') as HTMLElement;
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    act(() => {
+      Object.defineProperty(window, 'scrollY', { value: 60, writable: true, configurable: true });
+      window.dispatchEvent(new Event('scroll'));
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    act(() => {
+      Object.defineProperty(window, 'scrollY', { value: 56, writable: true, configurable: true });
+      window.dispatchEvent(new Event('scroll'));
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(header.dataset.mode).toBe('floating-snap');
+    expect(header.style.height).toBe('96px');
   });
 });
 

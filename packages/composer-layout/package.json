@@ -1,6 +1,6 @@
 {
   "name": "composer-layout",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "private": false,
   "description": "Responsive two-panel layout primitives for chat-style React UIs.",
   "license": "MIT",

@@ -13,7 +13,7 @@ Live examples:
 ```
 npm install composer-layout
 ```
-Current package version: 0.0.12 (see CHANGELOG).
+Current package version: 0.0.13 (see CHANGELOG).
 Peer deps: `react` and `react-dom` (React 19).
 
 ## Core ideas
@@ -21,6 +21,7 @@ Peer deps: `react` and `react-dom` (React 19).
 - Mobile: composer hugs the bottom, growing only as its content needs while avoiding keyboard overlap.
 - Desktop: composer reserves a configurable fraction of the viewport so long content remains visible.
 - Chat-message mode: pin the header to the top and the composer to the bottom while the page owns the vertical scrollbar.
+- Header behavior overrides: opt into sticky, floating, snap, collapsed-sliver, or combined pinned-floating headers in chat-message mode.
 - Overlay padding: optionally pad the content area so floating headers or toolbars don’t cover messages.
 - Height control: choose between fraction-based, content-based, or custom-calculated composer heights.
 - Responsive helpers: hooks to detect mobile/desktop, viewport changes, and on-screen keyboard height.
@@ -41,10 +42,17 @@ export function ChatScreen() {
       composerHeightMode={composerHeight}
       contentPanelMode="chat-message"
       overlayPadContentPanel
+      headerBehavior={{ pinned: true, floating: true, collapsedHeight: 64 }}
     />
   );
 }
 ```
+
+Header behavior options in `contentPanelMode="chat-message"`:
+- `pinned`: keep the header sticky at the top. Defaults to `true`.
+- `floating`: hide the header while scrolling down and reveal it on reverse scroll.
+- `snap`: when used with `floating`, fully reopen the header as soon as reverse scroll is detected.
+- `collapsedHeight`: keep a sliver pinned at the top after the header collapses.
 
 Composer sizing modes:
 - `fraction`: lock to a viewport percentage (`fraction`, optional `minPx`).
@@ -58,7 +66,7 @@ Helpful hooks:
 - `useKeyboardOptionsSync`: keep option trays aligned with keyboard visibility and focus.
 
 ## Example apps (in this repo)
-- Chat messages (`apps/chat-messages-example`): static transcript demo for the `contentPanelMode="chat-message"` path with a sticky header, sticky composer, history panel, release-style footer, and a compact `/embed` variant. Dev: `npm run dev:chat-messages`.
+- Chat messages (`apps/chat-messages-example`): static transcript demo for the `contentPanelMode="chat-message"` path with switchable sticky/floating/snap/sliver headers, a sticky composer, history panel, release-style footer, and a compact `/embed` variant. Dev: `npm run dev:chat-messages`.
 - AI assistant (`apps/ai-assistant-example`): hero + quick-start chips, preferences/upload, hamburger/share controls, mocked thinking delay. Dev: `npm run dev:assistant`.
 - Quiz (`apps/quiz-app-example`): desktop/mobile layout demo with header/content/composer/footer widgets. Dev: `npm run dev:quiz`.
 
@@ -78,7 +86,7 @@ Helpful hooks:
 
 ## Publish and releases
 - Manual publish (from `packages/composer-layout`): `npm publish --access public` (requires login and `npm run build` first).
-- Automated releases: push a tag like `v0.0.12` to trigger `.github/workflows/release.yml`. The workflow uses npm trusted publishing with GitHub OIDC, so it no longer needs an `NPM_TOKEN`.
+- Automated releases: push a tag like `v0.0.13` to trigger `.github/workflows/release.yml`. The workflow uses npm trusted publishing with GitHub OIDC, so it no longer needs an `NPM_TOKEN`.
 - GitHub Actions billing: on GitHub's current billing rules, standard GitHub-hosted runners are free for public repositories. Private repositories consume your account's Actions quota and can be blocked by billing limits.
 - Versioning flow: `npm version patch|minor|major --workspaces --no-git-tag-version`, update `CHANGELOG.md`, both READMEs, and `AGENTS.md`, then commit and push with a git tag for the release workflow.
 - License: MIT. See [LICENSE](C:/Users/Edward/Code/js-packages/composer-layout/LICENSE).
