@@ -13,7 +13,7 @@ Live examples:
 ```
 npm install composer-layout
 ```
-Current package version: 0.0.13 (see CHANGELOG in the repo root).
+Current package version: 0.0.14 (see CHANGELOG in the repo root).
 Peer deps: `react` and `react-dom` (React 19).
 
 ## Quick usage
@@ -48,7 +48,7 @@ What it does:
 - Overlay padding: optional content padding so floating headers/toolbars don’t cover messages.
 - Optional mobile locking: `lockComposerPosition` keeps the composer fixed even when the keyboard is closed to avoid focus loss on some WebKit builds.
 - Height control: choose fraction-based, content-based, or custom-calculated composer heights.
-- Hooks for responsive state and keyboard height: `useViewportCategory`, `useKeyboardOpen`, `useIsMobile`, `useKeyboardOptionsSync`.
+- Hooks for responsive state and keyboard height: `useViewportCategory`, `useViewportKeyboardState`, `useKeyboardOpen`, `useIsMobile`, `useKeyboardOptionsSync`.
 
 Composer sizing modes:
 - `fraction`: `{ type: 'fraction', fraction: 0.5, minPx?: number }`
@@ -62,8 +62,9 @@ Header behavior options:
 - `collapsedHeight`: leave a pinned sliver visible after collapse.
 
 Keyboard + composer behavior:
-- The mobile overlay activates when `useKeyboardOpen` (powered by `use-detect-keyboard-open`) reports a keyboard height above `keyboardThreshold` (default 300px).
-- `useKeyboardOpen` is gated on text-entry focus to avoid false positives from browser chrome changes; blurring a text field clears the open state.
+- The mobile overlay activates when `useViewportKeyboardState` reports keyboard activity, including a short settling window while the visual viewport finishes closing.
+- `useKeyboardOpen` remains available as the boolean convenience wrapper, but the underlying viewport model now treats focus as a hint and `VisualViewport` geometry as the source of truth.
+- Fixed and sticky composer regions now use `effectiveBottomInset`, which preserves the last stable closed inset while browser chrome settles so the composer does not dip behind the bottom bar.
 - When overlay is active—or when `lockComposerPosition` is set—the composer is fixed to the bottom and the content panel can opt into matching bottom padding via `overlayPadContentPanel`.
 
 ## Example apps (in this repo)
@@ -77,3 +78,5 @@ Keyboard + composer behavior:
 - Full release validation from the repo root: `npm run check && npm run test --workspace composer-layout && npm run build`
 - Release automation uses npm trusted publishing from GitHub Actions via `.github/workflows/release.yml`.
 - License: MIT. See the repository `LICENSE` file.
+
+Viewport model details live in `docs/viewport-keyboard-model.md`.

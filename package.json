@@ -1,7 +1,7 @@
 {
   "name": "composer-layout-root",
   "private": true,
-  "version": "0.0.13",
+  "version": "0.0.14",
   "engines": {
     "node": ">=20.19.0"
   },
@@ -46,5 +46,8 @@
     "stylelint-config-standard": "^39.0.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.14"
+  },
+  "dependencies": {
+    "edbot": "file:../../edwardcoventry-apps/edbot.edwardcoventry.com"
   }
 }

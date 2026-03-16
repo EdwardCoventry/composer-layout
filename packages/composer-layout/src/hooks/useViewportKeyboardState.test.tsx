@@ -1,7 +1,7 @@
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { useKeyboardOpen } from './useKeyboardOpen';
+import { useViewportKeyboardState, type ViewportKeyboardState } from './useViewportKeyboardState';
 
 class MockVisualViewport {
   height: number;
@@ -30,10 +30,10 @@ class MockVisualViewport {
   }
 }
 
-let latestValue = false;
+let latestState: ViewportKeyboardState | null = null;
 
 const HookProbe: React.FC<{ threshold?: number }> = ({ threshold }) => {
-  latestValue = useKeyboardOpen(threshold);
+  latestState = useViewportKeyboardState(threshold);
   return null;
 };
 
@@ -45,7 +45,7 @@ async function flushViewportFrames() {
   });
 }
 
-describe('useKeyboardOpen', () => {
+describe('useViewportKeyboardState', () => {
   beforeEach(() => {
     vi.useFakeTimers({
       toFake: [
@@ -59,7 +59,7 @@ describe('useKeyboardOpen', () => {
         'clearInterval',
       ],
     });
-    latestValue = false;
+    latestState = null;
     Object.defineProperty(window, 'innerWidth', { value: 400, configurable: true, writable: true });
     Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true, writable: true });
   });
@@ -70,31 +70,17 @@ describe('useKeyboardOpen', () => {
     document.body.innerHTML = '';
   });
 
-  test('returns true when focused and the viewport height drops past the threshold', async () => {
-    const viewport = new MockVisualViewport(800);
+  test('holds the last stable closed inset while the viewport is settling after keyboard close', async () => {
+    const viewport = new MockVisualViewport(768);
     Object.defineProperty(window, 'visualViewport', { value: viewport, configurable: true });
     render(<HookProbe threshold={300} />);
 
-    const input = document.createElement('textarea');
-    document.body.appendChild(input);
-
     act(() => {
-      input.focus();
+      vi.advanceTimersByTime(240);
     });
 
-    act(() => {
-      viewport.height = 400;
-      viewport.dispatch('resize');
-    });
-    await flushViewportFrames();
-
-    expect(latestValue).toBe(true);
-  });
-
-  test('stays true through focusout until the viewport actually restores', async () => {
-    const viewport = new MockVisualViewport(800);
-    Object.defineProperty(window, 'visualViewport', { value: viewport, configurable: true });
-    render(<HookProbe threshold={300} />);
+    expect(latestState?.stableClosedBottomInset).toBe(32);
+    expect(latestState?.effectiveBottomInset).toBe(32);
 
     const input = document.createElement('textarea');
     document.body.appendChild(input);
@@ -106,28 +92,34 @@ describe('useKeyboardOpen', () => {
     });
     await flushViewportFrames();
 
-    expect(latestValue).toBe(true);
+    expect(latestState?.keyboardOpen).toBe(true);
+    expect(latestState?.effectiveBottomInset).toBe(400);
 
     act(() => {
       input.blur();
-    });
-
-    expect(latestValue).toBe(true);
-
-    act(() => {
-      vi.advanceTimersByTime(150);
-    });
-    expect(latestValue).toBe(true);
-
-    act(() => {
-      viewport.height = 800;
+      viewport.height = 790;
       viewport.dispatch('resize');
     });
     await flushViewportFrames();
+
+    expect(latestState?.keyboardOpen).toBe(false);
+    expect(latestState?.settling).toBe(true);
+    expect(latestState?.liveBottomInset).toBe(10);
+    expect(latestState?.effectiveBottomInset).toBe(32);
+
     act(() => {
-      vi.advanceTimersByTime(250);
+      viewport.height = 768;
+      viewport.dispatch('resize');
+    });
+    await flushViewportFrames();
+
+    act(() => {
+      vi.advanceTimersByTime(240);
     });
 
-    expect(latestValue).toBe(false);
+    expect(latestState?.keyboardActive).toBe(false);
+    expect(latestState?.settling).toBe(false);
+    expect(latestState?.stableClosedBottomInset).toBe(32);
+    expect(latestState?.effectiveBottomInset).toBe(32);
   });
 });

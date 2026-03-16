@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.0.14
+- Add `useViewportKeyboardState` as the VisualViewport-first keyboard state owner, with live/stable/effective bottom inset tracking and a short post-blur settling window.
+- Route `LayoutFrame` mobile composer positioning and overlay padding through `effectiveBottomInset` so the composer stays above transient bottom browser chrome while the keyboard closes.
+- Remove the old `use-detect-keyboard-open` dependency and document the new viewport model in the package docs.
+
 ## 0.0.13
 - Add `headerBehavior` to `LayoutFrame` so `contentPanelMode="chat-message"` can opt into scrolling, floating, snapping, or collapsed sliver headers.
 - Extend the `apps/chat-messages-example` demo with switchable header modes that exercise sticky, floating, snap, collapsed, and collapsed-floating chat headers.

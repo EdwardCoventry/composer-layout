@@ -8,7 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "composer-layout": "0.0.13",
+    "composer-layout": "0.0.14",
     "example-styles": "*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

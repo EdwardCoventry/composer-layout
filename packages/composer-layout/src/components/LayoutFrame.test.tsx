@@ -4,8 +4,23 @@ import { act, render } from '@testing-library/react';
 import { LayoutFrame } from './LayoutFrame';
 import { ComposerHeightMode } from '../types/layout';
 
-let mockKeyboardOpen = false;
-vi.mock('../hooks/useKeyboardOpen', () => ({ useKeyboardOpen: () => mockKeyboardOpen }));
+let mockKeyboardState = {
+  effectiveBottomInset: 0,
+  keyboardActive: false,
+  keyboardHeight: 0,
+  keyboardOpen: false,
+  layoutViewportHeight: 800,
+  liveBottomInset: 0,
+  settling: false,
+  stableClosedBottomInset: 0,
+  textEntryFocused: false,
+  viewportShifted: false,
+  visualViewportHeight: 800,
+  visualViewportOffsetTop: 0
+};
+vi.mock('../hooks/useViewportKeyboardState', () => ({
+  useViewportKeyboardState: () => mockKeyboardState
+}));
 
 if (!window.matchMedia) {
   window.matchMedia = (query: string) => ({
@@ -24,7 +39,20 @@ const originalRequestAnimationFrame = window.requestAnimationFrame;
 const originalCancelAnimationFrame = window.cancelAnimationFrame;
 
 beforeEach(() => {
-  mockKeyboardOpen = false;
+  mockKeyboardState = {
+    effectiveBottomInset: 0,
+    keyboardActive: false,
+    keyboardHeight: 0,
+    keyboardOpen: false,
+    layoutViewportHeight: 800,
+    liveBottomInset: 0,
+    settling: false,
+    stableClosedBottomInset: 0,
+    textEntryFocused: false,
+    viewportShifted: false,
+    visualViewportHeight: 800,
+    visualViewportOffsetTop: 0
+  };
   Object.defineProperty(window, 'requestAnimationFrame', {
     value: (callback: FrameRequestCallback) => {
       window.queueMicrotask(() => callback(performance.now()));
@@ -101,16 +129,15 @@ describe('LayoutFrame composer height modes', () => {
 });
 
 describe('Overlay behavior for composer BottomRegion', () => {
-  const originalVV = (window as any).visualViewport;
-  afterEach(() => { (window as any).visualViewport = originalVV; });
-  function mockVisualViewport(height: number) {
-    (window as any).visualViewport = { height, addEventListener: () => {}, removeEventListener: () => {} };
-  }
   test('overlay activates when heuristic triggered and composer present', () => {
     Object.defineProperty(window, 'innerWidth', { value: 500, configurable: true });
     Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true });
-    mockVisualViewport(600);
-    mockKeyboardOpen = true;
+    mockKeyboardState = {
+      ...mockKeyboardState,
+      keyboardActive: true,
+      keyboardOpen: true,
+      visualViewportHeight: 600
+    };
     const mode: ComposerHeightMode = { type: 'fraction', fraction: 0.3 };
     const { container } = render(<LayoutFrame {...baseProps(mode)} />);
     const region = container.querySelector('[data-role="bottom-region"]') as HTMLElement;
@@ -120,7 +147,6 @@ describe('Overlay behavior for composer BottomRegion', () => {
   test('lockComposerPosition keeps bottom-region fixed without keyboard overlay', () => {
     Object.defineProperty(window, 'innerWidth', { value: 500, configurable: true });
     Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true });
-    (window as any).visualViewport = undefined;
     const mode: ComposerHeightMode = { type: 'fraction', fraction: 0.3 };
     const { container } = render(
       <LayoutFrame {...baseProps(mode)} lockComposerPosition />
@@ -135,8 +161,11 @@ describe('Footer visibility recovery on keyboard close', () => {
   test('shows footer after keyboard closes even if hideComposerFooter stays true', async () => {
     Object.defineProperty(window, 'innerWidth', { value: 500, configurable: true });
     Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true });
-    (window as any).visualViewport = undefined;
-    mockKeyboardOpen = true;
+    mockKeyboardState = {
+      ...mockKeyboardState,
+      keyboardActive: true,
+      keyboardOpen: true
+    };
     const mode: ComposerHeightMode = { type: 'fraction', fraction: 0.3 };
     const { container, rerender } = render(
       <LayoutFrame {...baseProps(mode)} hideComposerFooter />
@@ -145,7 +174,11 @@ describe('Footer visibility recovery on keyboard close', () => {
     expect(container.querySelector('[data-role="footer"]')).toBeNull();
 
     await act(async () => {
-      mockKeyboardOpen = false;
+      mockKeyboardState = {
+        ...mockKeyboardState,
+        keyboardActive: false,
+        keyboardOpen: false
+      };
       rerender(<LayoutFrame {...baseProps(mode)} hideComposerFooter />);
     });
 
@@ -154,30 +187,29 @@ describe('Footer visibility recovery on keyboard close', () => {
 });
 
 describe('Overlay padding for content panel', () => {
-  const originalVV = (window as any).visualViewport;
-  afterEach(() => { (window as any).visualViewport = originalVV; });
-
-  function mockVisualViewport(height: number) {
-    (window as any).visualViewport = { height, addEventListener: () => {}, removeEventListener: () => {} };
-  }
-
-  test('applies bottom padding equal to composer height in overlay', () => {
+  test('applies bottom padding equal to composer height plus inset in overlay', () => {
     Object.defineProperty(window, 'innerWidth', { value: 500, configurable: true });
     Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true });
-    mockVisualViewport(600);
-    mockKeyboardOpen = true;
+    mockKeyboardState = {
+      ...mockKeyboardState,
+      effectiveBottomInset: 48,
+      keyboardActive: true,
+      keyboardOpen: true,
+      visualViewportHeight: 600
+    };
     const mode: ComposerHeightMode = { type: 'fraction', fraction: 0.25 };
 
     const { container } = render(<LayoutFrame {...baseProps(mode)} />);
     const content = container.querySelector('[data-role="content-panel"]') as HTMLElement;
-    expect(content.dataset.contentOverlayPad).toBe('150');
-    expect(content.style.paddingBottom).toBe('150px');
+    const region = container.querySelector('[data-role="bottom-region"]') as HTMLElement;
+    expect(region.style.bottom).toBe('48px');
+    expect(content.dataset.contentOverlayPad).toBe('198');
+    expect(content.style.paddingBottom).toBe('198px');
   });
 
   test('omits bottom padding when overlay is inactive', () => {
     Object.defineProperty(window, 'innerWidth', { value: 1200, configurable: true });
     Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true });
-    (window as any).visualViewport = undefined;
     const mode: ComposerHeightMode = { type: 'fraction', fraction: 0.25 };
 
     const { container } = render(<LayoutFrame {...baseProps(mode)} />);

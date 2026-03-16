@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useLayoutEffect, useState, useEffect } from 'react';
 import { LayoutFrameProps, ComposerHeightMode, DEFAULT_OVERLAY_CONTENT_MAX_FRACTION } from '../types/layout';
 import { useViewportCategory } from '../hooks/useViewportCategory';
-import { useKeyboardOpen } from '../hooks/useKeyboardOpen';
+import { useViewportKeyboardState } from '../hooks/useViewportKeyboardState';
 
 // Clamp a fraction into [0,1]
 function clampFraction(value: number | undefined): number | undefined {
@@ -80,19 +80,20 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
   headerBehavior
 }) => {
   const { isMobile } = useViewportCategory();
-  const keyboardOpen = useKeyboardOpen(keyboardThreshold);
-  const [viewportHeight, setViewportHeight] = useState(() => {
-    if (typeof window === 'undefined') return 0;
-    return window.visualViewport?.height || window.innerHeight;
-  });
+  const keyboardState = useViewportKeyboardState(keyboardThreshold);
+  const keyboardOpen = keyboardState.keyboardOpen;
+  const keyboardActive = keyboardState.keyboardActive;
+  const viewportHeight =
+    keyboardState.visualViewportHeight || keyboardState.layoutViewportHeight || (typeof window === 'undefined' ? 0 : window.innerHeight);
 
   const hasComposerPanel = !!composerPanel && showComposerPanel;
   const hasFooter = !!footer;
   const hasHeader = !!header;
-  const overlayActive = isMobile && keyboardOpen && hasComposerPanel;
+  const overlayActive = isMobile && keyboardActive && hasComposerPanel;
   const chatMessageMode = contentPanelMode === 'chat-message';
   const lockPositionActive = lockComposerPosition && isMobile && hasComposerPanel;
   const shouldFixComposer = overlayActive || lockPositionActive;
+  const mobileBottomInset = isMobile ? keyboardState.effectiveBottomInset : 0;
   const resolvedHeaderBehavior = useMemo(() => {
     const pinned = headerBehavior?.pinned ?? chatMessageMode;
     const floating = Boolean(headerBehavior?.floating);
@@ -141,7 +142,7 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
         position: 'fixed',
         left: 0,
         right: 0,
-        bottom: 0,
+        bottom: `${mobileBottomInset}px`,
         zIndex: 20,
         boxSizing: 'border-box',
         ...overlayComposerStyle
@@ -151,42 +152,19 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
       return {
         ...inlineComposerStyle,
         position: 'sticky',
-        bottom: 0,
+        bottom: `${mobileBottomInset}px`,
         zIndex: 20,
         boxSizing: 'border-box'
       };
     }
     return { ...inlineComposerStyle, boxSizing: 'border-box' };
-  }, [chatMessageMode, hasComposerPanel, shouldFixComposer, inlineComposerStyle, overlayComposerStyle]);
+  }, [chatMessageMode, hasComposerPanel, shouldFixComposer, inlineComposerStyle, mobileBottomInset, overlayComposerStyle]);
 
   const bottomRef = useRef<HTMLElement | null>(null);
   const [measuredBottomHeight, setMeasuredBottomHeight] = useState<number | undefined>();
   const composerPanelRef = useRef<HTMLDivElement | null>(null);
   const composerContentRef = useRef<HTMLDivElement | null>(null);
   const footerRef = useRef<HTMLDivElement | null>(null);
-
-  useLayoutEffect(() => {
-    if (typeof window === 'undefined') return;
-    const vv = window.visualViewport;
-    const onResize = () => {
-      setViewportHeight(vv?.height || window.innerHeight);
-    };
-    if (vv) {
-      vv.addEventListener('resize', onResize);
-      vv.addEventListener('scroll', onResize);
-    }
-    window.addEventListener('resize', onResize);
-    window.addEventListener('orientationchange', onResize);
-    onResize();
-    return () => {
-      if (vv) {
-        vv.removeEventListener('resize', onResize);
-        vv.removeEventListener('scroll', onResize);
-      }
-      window.removeEventListener('resize', onResize);
-      window.removeEventListener('orientationchange', onResize);
-    };
-  }, []);
 
   useLayoutEffect(() => {
     if (typeof window === 'undefined' || !chatMessageMode || !hasHeader) return;
@@ -318,7 +296,10 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
   const computedHeightForPadding = hasComposerPanel
     ? (baseComposerHeight ?? measuredBottomHeight)
     : undefined;
-  const contentExtraPadding = overlayPadContentPanel && (shouldFixComposer || chatMessageMode) && computedHeightForPadding ? computedHeightForPadding : 0;
+  const contentExtraPadding =
+    overlayPadContentPanel && (shouldFixComposer || chatMessageMode) && computedHeightForPadding
+      ? computedHeightForPadding + mobileBottomInset
+      : 0;
   const layoutFrameStyle: React.CSSProperties = chatMessageMode
     ? { minHeight: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'visible' }
     : { height: '100dvh', maxHeight: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' };
@@ -388,7 +369,14 @@ export const LayoutFrame: React.FC<LayoutFrameProps> = ({
     : 'inline';
 
   return (
-    <div style={layoutFrameStyle} data-role="layout-frame" data-overlay={overlayActive ? 'true' : 'false'} data-content-mode={contentPanelMode}>
+    <div
+      style={layoutFrameStyle}
+      data-role="layout-frame"
+      data-content-mode={contentPanelMode}
+      data-keyboard-active={keyboardActive ? 'true' : 'false'}
+      data-overlay={overlayActive ? 'true' : 'false'}
+      data-viewport-settling={keyboardState.settling ? 'true' : 'false'}
+    >
       {hasHeader ? (
         <header
           style={headerStyle}

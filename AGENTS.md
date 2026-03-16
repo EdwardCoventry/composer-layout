@@ -21,5 +21,6 @@ Conventions
 - Prefer targeted fixes over disabling rules globally.
 - For tests/examples, local rule exceptions are acceptable with justification.
 - When shipping a package release, update `CHANGELOG.md`, `README.md`, `packages/composer-layout/README.md`, and version strings together.
+- When viewport or keyboard behavior changes, keep `packages/composer-layout/docs/viewport-keyboard-model.md` aligned with the released behavior.
 - The `apps/chat-messages-example` workspace is the source-of-truth demo for `contentPanelMode="chat-message"` and its `/embed` variant.
 

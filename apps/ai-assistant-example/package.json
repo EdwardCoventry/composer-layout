@@ -9,7 +9,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "composer-layout": "0.0.13",
+    "composer-layout": "0.0.14",
     "example-styles": "*",
     "framer-motion": "^11.11.17",
     "lucide-react": "^0.556.0",
