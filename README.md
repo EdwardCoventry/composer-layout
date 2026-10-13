@@ -5,19 +5,23 @@ Responsive two-panel layout primitives for chat-style UIs. It keeps a content pa
 Repository: https://github.com/EdwardCoventry/composer-layout
 
 Live examples:
+
 - Chat messages: https://edwardcoventry.com/apps/composer-layout/chat-messages/
 - AI assistant: https://edwardcoventry.com/apps/composer-layout/ai-assistant/
 - Quiz: https://edwardcoventry.com/apps/composer-layout/quiz/
 
 ## Install
+
 ```
 npm install composer-layout
 ```
+
 Current package version: 0.0.14 (see CHANGELOG).
 Peer deps: `react` and `react-dom` (React 19).
 Viewport model details: `packages/composer-layout/docs/viewport-keyboard-model.md`.
 
 ## Core ideas
+
 - Two panels by default: content (the scrollable transcript or main surface) and composer (input + actions).
 - Mobile: composer hugs the bottom, growing only as its content needs while avoiding keyboard overlap.
 - Desktop: composer reserves a configurable fraction of the viewport so long content remains visible.
@@ -28,10 +32,15 @@ Viewport model details: `packages/composer-layout/docs/viewport-keyboard-model.m
 - Responsive helpers: hooks to detect mobile/desktop, viewport changes, and on-screen keyboard height.
 
 ## Usage
-```tsx
-import { LayoutFrame, type ComposerHeightMode } from 'composer-layout';
 
-const composerHeight: ComposerHeightMode = { type: 'fraction', fraction: 0.4, minPx: 200 };
+```tsx
+import { LayoutFrame, type ComposerHeightMode } from "composer-layout";
+
+const composerHeight: ComposerHeightMode = {
+  type: "fraction",
+  fraction: 0.4,
+  minPx: 200,
+};
 
 export function ChatScreen() {
   return (
@@ -50,17 +59,20 @@ export function ChatScreen() {
 ```
 
 Header behavior options in `contentPanelMode="chat-message"`:
+
 - `pinned`: keep the header sticky at the top. Defaults to `true`.
 - `floating`: hide the header while scrolling down and reveal it on reverse scroll.
 - `snap`: when used with `floating`, fully reopen the header as soon as reverse scroll is detected.
 - `collapsedHeight`: keep a sliver pinned at the top after the header collapses.
 
 Composer sizing modes:
+
 - `fraction`: lock to a viewport percentage (`fraction`, optional `minPx`).
 - `content`: auto height based on content; cap with `maxFraction` (default 60% when overlaying).
 - `calculated`: provide `getHeight()`; optionally cap with `maxFraction`.
 
 Helpful hooks:
+
 - `useViewportCategory`: gives `isMobile`, `isDesktop`, and breakpoint info.
 - `useViewportKeyboardState`: exposes live/stable/effective bottom insets plus keyboard-open and settling state from `VisualViewport`.
 - `useKeyboardOpen`: boolean convenience wrapper over `useViewportKeyboardState`.
@@ -68,17 +80,20 @@ Helpful hooks:
 - `useKeyboardOptionsSync`: keep option trays aligned with keyboard visibility and focus.
 
 ## Example apps (in this repo)
+
 - Chat messages (`apps/chat-messages-example`): static transcript demo for the `contentPanelMode="chat-message"` path with switchable sticky/floating/snap/sliver headers, a sticky composer, history panel, release-style footer, and a compact `/embed` variant. Dev: `npm run dev:chat-messages`.
 - AI assistant (`apps/ai-assistant-example`): hero + quick-start chips, preferences/upload, hamburger/share controls, mocked thinking delay. Dev: `npm run dev:assistant`.
 - Quiz (`apps/quiz-app-example`): desktop/mobile layout demo with header/content/composer/footer widgets. Dev: `npm run dev:quiz`.
 
 ## Entry points (published package)
+
 - `main`: `dist/index.cjs`
 - `module`: `dist/index.mjs`
 - `types`: `dist/index.d.ts`
 - Published files: `dist/**` only (example apps are not in the tarball)
 
 ## Build and test
+
 - Install deps: `npm install`
 - Build everything: `npm run build`
 - Test all workspaces: `npm test`
@@ -87,8 +102,9 @@ Helpful hooks:
 - Dev (chat messages) app: `npm run dev:chat-messages` (http://localhost:5173, embed at `/embed`)
 
 ## Publish and releases
+
 - Manual publish (from `packages/composer-layout`): `npm publish --access public` (requires login and `npm run build` first).
-- Automated releases: push a tag like `v0.0.14` to trigger `.github/workflows/release.yml`. The workflow uses npm trusted publishing with GitHub OIDC, so it no longer needs an `NPM_TOKEN`.
+- Explicit hosted releases: push a version tag, then request `.github/workflows/release.yml` with `gh workflow run release.yml --ref main -f release_tag=v0.0.14`. The workflow uses npm trusted publishing with GitHub OIDC, so it no longer needs an `NPM_TOKEN`.
 - GitHub Actions billing: on GitHub's current billing rules, standard GitHub-hosted runners are free for public repositories. Private repositories consume your account's Actions quota and can be blocked by billing limits.
-- Versioning flow: `npm version patch|minor|major --workspaces --no-git-tag-version`, update `CHANGELOG.md`, both READMEs, and `AGENTS.md`, then commit and push with a git tag for the release workflow.
+- Versioning flow: `npm version patch|minor|major --workspaces --no-git-tag-version`, update `CHANGELOG.md`, both READMEs, and `AGENTS.md`, then commit and push the matching tag. Run the local checks first and explicitly dispatch the release workflow to publish.
 - License: MIT. See [LICENSE](C:/Users/Edward/Code/js-packages/composer-layout/LICENSE).

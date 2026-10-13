@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "tasks": {
+    "check": [
+      {
+        "name": "check",
+        "command": ["npm", "run", "check"],
+        "cwd": "."
+      },
+      {
+        "name": "Composer contracts",
+        "command": ["npm", "run", "test", "--workspace", "composer-layout"],
+        "cwd": "."
+      },
+      {
+        "name": "build",
+        "command": ["npm", "run", "build"],
+        "cwd": "."
+      }
+    ],
+    "release-check": [
+      {
+        "name": "npm package validation",
+        "command": [
+          "npm",
+          "pack",
+          "--workspace",
+          "composer-layout",
+          "--dry-run"
+        ],
+        "cwd": "."
+      }
+    ]
+  }
+}
